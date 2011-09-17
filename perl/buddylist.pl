@@ -16,10 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# 1.3.1 : fixed: perl error: Use of uninitialized value in string comparison
+# 1.3.1 : fixed: perl error: Use of uninitialized value in string comparison (reported by ArcAngel)
 # 1.3   : added: mouse support (weechat >= v0.3.6)
 #       : added: nick completion for add/del
-#       : improved: hide_bar function (for example after /upgrad).
+#       : improved: hide_bar function (for example after /upgrade).
 #       : fixed: did action on bar in the build callback => crashed latest git
 #       : fixed: typo with option "hide.bar" and "social.net.color" removed.
 # 1.2.1 : fixed: bitlbee_service was not set, for new added buddy
