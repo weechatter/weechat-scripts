@@ -29,6 +29,8 @@
 # /set plugins.var.python.purgelogs.blacklist "#weechat,#weechat-fr,nils_2"
 #
 # History:
+# 2011-09-18: nils_2 (freenode.#weechat)
+#     0.3.1 : code optimization
 # 2011-09-17: nils_2 (freenode.#weechat)
 #       0.3 : added: search for log-files smaller than age/size (new functions: age_ls and size_ls)
 # 2011-03-11: nils_2 (freenode.#weechat)
@@ -53,7 +55,7 @@ except Exception:
 
 SCRIPT_NAME    = "purgelogs"
 SCRIPT_AUTHOR  = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION = "0.3"
+SCRIPT_VERSION = "0.3.1"
 SCRIPT_LICENSE = "GPL"
 SCRIPT_DESC    = "delete weechatlog-files by age or size (YOU ARE USING THIS SCRIPT AT YOUR OWN RISK!)"
 
@@ -104,39 +106,19 @@ def purgelogs_cb(data, buffer, args):
 
   if argv[0] in ["", "age_ls"]:
     i = 0
-    dellog_by_date_less(argv[1])
+    getdirs(basedir,int(argv[1]),"ls_age")
   if argv[0] in ["", "size_ls"]:
     i = 0
-    dellog_by_size_less(argv[1])
+    getdirs(basedir,int(argv[1]),"ls_size")
   if argv[0] in ["", "age"]:
     i = 0
-    dellog_by_date(argv[1])
+    getdirs(basedir,int(argv[1]),"by_age")
   if argv[0] in ["", "size"]:
     i = 0
-    dellog_by_size(argv[1])
+    getdirs(basedir,int(argv[1]),"by_size")
   if check_only is False:
     w.command("","/mute /plugin load logger")
   return w.WEECHAT_RC_OK
-
-def dellog_by_date(age):
-  global basedir
-  getdirs(basedir, int(age), "by_age")
-  return
-
-def dellog_by_size(size):
-  global basedir
-  getdirs(basedir, int(size), "by_size")
-  return
-
-def dellog_by_date_less(age):
-  global basedir
-  getdirs(basedir, int(age), "ls_age")
-  return
-
-def dellog_by_size_less(size):
-  global basedir
-  getdirs(basedir, int(size), "ls_size")
-  return
 
 def get_path():
     """ get logger path """
