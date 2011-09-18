@@ -19,7 +19,8 @@
 # History:
 #  2011-09-08: Banton <fbesser@gmail.com> & nils_2:
 # version 0.4: auto(un)load added (by Banton)
-#            : Options autload_load and autounload_unload added
+#            : Options autoload_load and autounload_unload added
+#            : plugin description added
 #            : WeeChat error message occurs when a script was loaded twice
 #  2011-09-08: nils_2 <weechatter@arcor.de>:
 # version 0.3: force_reload option added (idea by FiXato)
@@ -101,10 +102,16 @@ my $color_reset = weechat::color("reset");
 return weechat::WEECHAT_RC_OK;
 }
 
+if ( not defined $args[1] ){
+  weechat::print("",weechat::prefix("error")."$PRGNAME: \"$args[0]\" error. Obi-Wan says: You did not specified a script my young padawn...");
+  return weechat::WEECHAT_RC_OK;
+}
+
   my $args_m = "";
   my $args_a = "";
   $args_m = "-mute"  if ( grep /^-mute$/i, @args );
   $args_a = "-all"  if ( grep /^-all$/i, @args );
+
 
   if ($args[0] eq "autoload" or $args[0] eq "autounload"){
       autoload_script($args[0],$args[1],$args_m,$args_a);                       # command, scriptname, mute, all
@@ -283,12 +290,12 @@ $home_dir = weechat::info_get ("weechat_dir", "");
 
 weechat::hook_command($PRGNAME, $DESCR,
                 "load <script> || reload <script> || unload <script> || force_reload <script> || list || -all || -mute\n",
-                "                  list : list all installed scripts (by plugin)\n".
+                "         list          : list all installed scripts (by plugin)\n".
                 "         load <script> : load <script> (no suffix needed)\n".
                 "       reload <script> : reload <script>\n".
                 " force_reload <script> : first try to reload a script and load a script if not loaded (mainly for programmers)\n".
                 "       unload <script> : unload <script>\n".
-                "     autoload <script> : creates a symlink to autoload script at startup\n".
+                "     autoload <script> : creates a symlink to autoload script at weechat startup\n".
                 "   autounload <script> : remove symlink from autoload\n".
                 "                  -all : unload/reload *all* scripts\n".
                 "                 -mute : execute command silently\n".
