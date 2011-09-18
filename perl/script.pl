@@ -98,7 +98,9 @@ my $color_reset = weechat::color("reset");
 return weechat::WEECHAT_RC_OK;
 }
 
-
+  if ($args[0] eq "autoload" or $args[0] eq "unautoload"){
+      autoload_script($args[0],$args[1]);
+  }
   if ( $args[0] eq "load" or $args[0] eq "reload" or $args[0] eq "unload" ){
       my $args_m = "";
       my $args_a = "";
@@ -182,7 +184,25 @@ my $execute_command = "";
 return ($execute_command,$hit);  
 }
 
+sub autoload_script{
+    my($command, $script) = ($_[0],$_[1]);
+    my @files;
 
+    while (my ($plugin,$suffix) = each (%script_suffix)){
+      my ($plugin,undef) = split(/_/,$plugin);
+      @files = glob($home_dir . "/" . $plugin . "/*" .$suffix);
+      foreach my $file (@files) {
+          if (index($file,$script . $suffix) ne "-1" ){
+              if ( $command eq "autoload" ){
+                symlink($home_dir . "/" . $plugin . "/" . $script . $suffix,$home_dir . "/" . $plugin . "/autoload/" . $script . $suffix);
+              }
+              if ( $command eq "unautoload" ){
+                  unlink $home_dir . "/" . $plugin . "/autoload/" . $script . $suffix;
+              }
+          }
+      }
+    }
+}
 sub script_completion_cb
 {
 my ($data,$completion_item,$buffer,$completion) = ($_[0],$_[1],$_[2],$_[3]);
@@ -234,9 +254,11 @@ weechat::hook_command($PRGNAME, $DESCR,
                 "       reload <script> : reload <script>\n".
                 " force_reload <script> : first try to reload a script and load a script if not loaded (mainly for programmers)\n".
                 "       unload <script> : unload <script>\n".
-                "         -all          : unload/reload *all* scripts\n".
-                "        -mute          : execute command silently\n".
-                "         list          : list all installed scripts (by plugin)\n".
+                "     autoload <script> : autoloads script at startup\n".
+                "   unautoload <script> : remove script from autoload\n".
+                "                  -all : unload/reload *all* scripts\n".
+                "                 -mute : execute command silently\n".
+                "                  list : list all installed scripts (by plugin)\n".
                 "\n".
                 "Example:\n".
                 " reload script buddylist:\n".
@@ -250,7 +272,9 @@ weechat::hook_command($PRGNAME, $DESCR,
                 "load %(all_scripts) -mute %-||".
                 "reload %(python_script)|%(perl_script)|%(ruby_script)|%(tcl_script)|%(lua_script)|-all| -mute %-||".
                 "unload %(python_script)|%(perl_script)|%(ruby_script)|%(tcl_script)|%(lua_script)|-all| -mute %-||".
-                "force_reload %(python_script)|%(perl_script)|%(ruby_script)|%(tcl_script)|%(lua_script)|%(all_scripts) %-",
+                "force_reload %(python_script)|%(perl_script)|%(ruby_script)|%(tcl_script)|%(lua_script)|%(all_scripts) %-".
+                "autoload %(all_scripts)".
+                "unautoload %(all_scripts)",
                 "my_command_cb", "");
 weechat::hook_completion("all_scripts", "all scripts in script directory", "script_completion_cb", "");
 #init_config();
