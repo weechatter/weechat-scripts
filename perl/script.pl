@@ -22,6 +22,7 @@
 #            : Options autoload_load and autounload_unload added
 #            : plugin description added
 #            : WeeChat error message occurs when a script was loaded twice
+#            : wrong arguments will be catched.
 #  2011-09-08: nils_2 <weechatter@arcor.de>:
 # version 0.3: force_reload option added (idea by FiXato)
 #            : script extension in function "list" added (idea by FlashCode)
@@ -59,6 +60,7 @@ my %script_counter= (
                     "tcl_script"       => 0,
                     "lua_script"       => 0,
 );
+my @commands = ("list","autoload","autounload","force_reload","load","reload","unload");
 
 # default values
 my %options = ("autoload_load"          => "off",
@@ -102,6 +104,12 @@ my $color_reset = weechat::color("reset");
 return weechat::WEECHAT_RC_OK;
 }
 
+my $command = (grep /^$args[0]$/ig, @commands);
+
+if  ( $command == 0 ){
+  weechat::print("",weechat::prefix("error")."$PRGNAME: Yoda says: \"$args[0]\" is not a valid command. \“Do or do not... there is no try\”...");
+  return weechat::WEECHAT_RC_OK;
+}
 if ( not defined $args[1] ){
   weechat::print("",weechat::prefix("error")."$PRGNAME: \"$args[0]\" error. Obi-Wan says: You did not specified a script my young padawn...");
   return weechat::WEECHAT_RC_OK;
