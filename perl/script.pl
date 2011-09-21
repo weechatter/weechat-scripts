@@ -22,7 +22,7 @@
 #            : Options autoload_load and autounload_unload added
 #            : plugin description added
 #            : WeeChat error message occurs when a script was loaded twice
-#            : wrong arguments will be catched.
+#            : invalid command will be catched.
 #  2011-09-08: nils_2 <weechatter@arcor.de>:
 # version 0.3: force_reload option added (idea by FiXato)
 #            : script extension in function "list" added (idea by FlashCode)
@@ -40,7 +40,7 @@ my $PRGNAME     = "script";
 my $VERSION     = "0.4";
 my $AUTHOR      = "Nils Görs <weechatter\@arcor.de>";
 my $LICENCE     = "GPL3";
-my $DESCR       = "to load/reload/unload script (language independent)";
+my $DESCR       = "to load/reload/unload script (language independent) and also to create/remove symlink";
 
 # internal values
 my $weechat_version = "";
@@ -60,7 +60,6 @@ my %script_counter= (
                     "tcl_script"       => 0,
                     "lua_script"       => 0,
 );
-my @commands = ("list","autoload","autounload","force_reload","load","reload","unload");
 
 # default values
 my %options = ("autoload_load"          => "off",
@@ -104,6 +103,7 @@ my $color_reset = weechat::color("reset");
 return weechat::WEECHAT_RC_OK;
 }
 
+my @commands = qw(list autoload autounload force_reload load reload unload);
 my $command = (grep /^$args[0]$/ig, @commands);
 
 if  ( $command == 0 ){
@@ -297,26 +297,29 @@ $weechat_version = weechat::info_get("version_number", "");
 $home_dir = weechat::info_get ("weechat_dir", "");
 
 weechat::hook_command($PRGNAME, $DESCR,
-                "load <script> || reload <script> || unload <script> || force_reload <script> || list || -all || -mute\n",
+                "load <script> || reload <script> || unload <script> || autoload <script> || autounload <script> || force_reload <script> || list || -all || -mute\n",
                 "         list          : list all installed scripts (by plugin)\n".
                 "         load <script> : load <script> (no suffix needed)\n".
                 "       reload <script> : reload <script>\n".
                 " force_reload <script> : first try to reload a script and load a script if not loaded (mainly for programmers)\n".
                 "       unload <script> : unload <script>\n".
-                "     autoload <script> : creates a symlink to autoload script at weechat startup\n".
+                "     autoload <script> : creates a symlink to start automatically a script at weechat startup\n".
                 "   autounload <script> : remove symlink from autoload\n".
                 "                  -all : unload/reload *all* scripts\n".
                 "                 -mute : execute command silently\n".
                 "\n".
-                "To remove/install scripts use \"weeget.py\" script (http://www.weechat.org/files/scripts/weeget.py)\n".
+                "$PRGNAME will only create/remove a symlink in \"~/.weechat/<language>/autoload\"\n".
+                "to remove/install scripts permanently use \"weeget.py\" script (http://www.weechat.org/files/scripts/weeget.py)\n".
                 "\n".
-                "Example:\n".
+                "Examples:\n".
                 " reload script buddylist:\n".
                 "   /$PRGNAME reload buddylist\n".
                 " load script buddylist:\n".
                 "   /$PRGNAME load buddylist\n".
                 " force to reload/load script buddylist:\n".
                 "   /$PRGNAME force_reload buddylist\n".
+                " create symlink for script weeget\n".
+                "   /$PRGNAME autoload weeget\n".
                 "",
                 "list %-||".
                 "load %(all_scripts) -mute %-||".
