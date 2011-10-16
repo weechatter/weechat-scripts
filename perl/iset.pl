@@ -19,7 +19,7 @@
 #
 # History:
 # 2011-10-16, nils_2 <weechatter@arcor.de>:
-#     version 2.0: add mouse support for left-mouse-button
+#     version 2.0: add mouse support for left-mouse-button and right-mouse-button gesture-left/right-long
 #                : add help text for mouse support
 # 2011-09-20, Sebastien Helleu <flashcode@flashtux.org>:
 #     version 1.9: add mouse support, fix iset buffer, fix errors on first load under FreeBSD
@@ -972,6 +972,28 @@ sub iset_hsignal_mouse_cb
                 weechat::command("", "/$PRGNAME **incr");
             }
         }
+        elsif ($hash{"_key"} eq "button2-gesture-left-long")
+        {
+            if ($options_types[$hash{"_chat_line_y"}] eq "integer" or ($options_types[$hash{"_chat_line_y"}] eq "color"))
+            {
+                $current_line = $hash{"_chat_line_y"};
+                iset_refresh_line($current_line);
+                iset_refresh();
+weechat::print("","test");
+                weechat::command("", "/repeat 5 /$PRGNAME **decr");
+            }
+        }
+        elsif ($hash{"_key"} eq "button2-gesture-right-long")
+        {
+            if ($options_types[$hash{"_chat_line_y"}] eq "integer"  or ($options_types[$hash{"_chat_line_y"}] eq "color"))
+            {
+                $current_line = $hash{"_chat_line_y"};
+                iset_refresh_line($current_line);
+                iset_refresh();
+                weechat::command("", "/repeat 5 /$PRGNAME **incr");
+            }
+        }
+
     }
 }
 # -----------------------------------[ main ]-----------------------------------------
@@ -1004,9 +1026,8 @@ weechat::hook_command($PRGNAME, "Interactive set", "f <file> || s <section> || [
                       "standard mouse actions:\n".
                       "wheel up / wheel down                  : move option up/down\n".
                       "left-mouse-button                      : select an option from list\n".
-                      "right-mouse-button                     : toggle boolen on/off or set a new value for option (edit it with command line)\n".
+                      "right-mouse-button                     : toggle boolean (on/off) or set a new value for option (edit it with command line)\n".
                       "right-mouse-button + gesture left/right: increase/decrease value (for integer or color)\n".
-
                       "\n".
                       "Examples:\n".
                       "  show options for file 'weechat'\n".
