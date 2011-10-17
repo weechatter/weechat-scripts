@@ -926,7 +926,7 @@ sub hook_focus_iset_cb
 sub iset_hsignal_mouse_cb
 {
     my ($data, $signal, %hash) = ($_[0], $_[1], %{$_[2]});
- 
+
     if ($hash{"_buffer_name"} eq $PRGNAME && ($hash{"_buffer_plugin"} eq "perl"))
     {
         if ($hash{"_key"} eq "button1")
@@ -952,50 +952,45 @@ sub iset_hsignal_mouse_cb
                 weechat::command("", "/$PRGNAME **set");
             }
         }
-        elsif ($hash{"_key"} eq "button2-gesture-left")
+        elsif ($hash{"_key"} eq "button2-gesture-left" or $hash{"_key"} eq "button2-gesture-left-long")
         {
             if ($options_types[$hash{"_chat_line_y"}] eq "integer" or ($options_types[$hash{"_chat_line_y"}] eq "color"))
             {
                 $current_line = $hash{"_chat_line_y"};
                 iset_refresh_line($current_line);
                 iset_refresh();
-                weechat::command("", "/$PRGNAME **decr");
+                my $distance = distance($hash{"_chat_line_x"},$hash{"_chat_line_x2"});
+                weechat::command("", "/repeat $distance /$PRGNAME **decr");
             }
         }
-        elsif ($hash{"_key"} eq "button2-gesture-right")
+        elsif ($hash{"_key"} eq "button2-gesture-right" or $hash{"_key"} eq "button2-gesture-right-long")
         {
             if ($options_types[$hash{"_chat_line_y"}] eq "integer"  or ($options_types[$hash{"_chat_line_y"}] eq "color"))
             {
                 $current_line = $hash{"_chat_line_y"};
                 iset_refresh_line($current_line);
                 iset_refresh();
-                weechat::command("", "/$PRGNAME **incr");
+                my $distance = distance($hash{"_chat_line_x"},$hash{"_chat_line_x2"});
+                weechat::command("", "/repeat $distance /$PRGNAME **incr");
             }
         }
-        elsif ($hash{"_key"} eq "button2-gesture-left-long")
-        {
-            if ($options_types[$hash{"_chat_line_y"}] eq "integer" or ($options_types[$hash{"_chat_line_y"}] eq "color"))
-            {
-                $current_line = $hash{"_chat_line_y"};
-                iset_refresh_line($current_line);
-                iset_refresh();
-weechat::print("","test");
-                weechat::command("", "/repeat 5 /$PRGNAME **decr");
-            }
-        }
-        elsif ($hash{"_key"} eq "button2-gesture-right-long")
-        {
-            if ($options_types[$hash{"_chat_line_y"}] eq "integer"  or ($options_types[$hash{"_chat_line_y"}] eq "color"))
-            {
-                $current_line = $hash{"_chat_line_y"};
-                iset_refresh_line($current_line);
-                iset_refresh();
-                weechat::command("", "/repeat 5 /$PRGNAME **incr");
-            }
-        }
-
     }
 }
+sub distance{
+  my ($x1,$x2) = ($_[0], $_[1]);
+    my $distance;
+    $distance = $x1 - $x2;
+    $distance = abs($distance);
+    if ( $distance > 0 ){
+      use integer;
+      $distance  =  $distance / 3;
+      $distance = 1 if ( $distance == 0 );
+    }elsif ( $distance == 0 ){
+      $distance = 1;
+    }
+ return $distance;
+}
+
 # -----------------------------------[ main ]-----------------------------------------
 weechat::register($PRGNAME, $AUTHOR, $VERSION, $LICENSE,
                   $DESCR, "iset_end", "");
