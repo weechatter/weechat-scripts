@@ -19,8 +19,7 @@
 #
 # History:
 # 2011-11-05, nils_2 <weechatter@arcor.de>:
-#     version 2.1: iset is now using a config file
-#                : fixed: own help color will be used immediately
+#     version 2.1: use own config file (iset.conf), fix own help color (used immediately)
 # 2011-10-16, nils_2 <weechatter@arcor.de>:
 #     version 2.0: add support for left-mouse-button and more sensitive mouse gesture (for integer/color options)
 #                : add help text for mouse support
@@ -148,19 +147,22 @@ sub iset_buffer_input
 {
     my ($data, $buffer, $string) = ($_[0], $_[1], $_[2]);
 
-    my $string2 = substr( $string,0,1 );
-    if ( $string2 eq weechat::config_string($options_iset{"value_search_char"}) ){
-      $filter = substr( $string, 1 );
-      iset_get_values($filter);
-      $iset_filter_title = "Filter (by value): ";
-      if ($iset_buffer ne "")
-      {
-          weechat::buffer_set($iset_buffer, "localvar_set_iset_filter", $filter);
-      }
-    }else{
-      $iset_filter_title = "";
-      iset_filter($string);
-      iset_get_options();
+    my $string2 = substr($string, 0, 1);
+    if ($string2 eq weechat::config_string($options_iset{"value_search_char"}))
+    {
+        $filter = substr($string, 1);
+        iset_get_values($filter);
+        $iset_filter_title = "Filter (by value): ";
+        if ($iset_buffer ne "")
+        {
+            weechat::buffer_set($iset_buffer, "localvar_set_iset_filter", $filter);
+        }
+    }
+    else
+    {
+        $iset_filter_title = "";
+        iset_filter($string);
+        iset_get_options();
     }
     weechat::buffer_clear($buffer);
     iset_title($iset_filter_title);
@@ -172,7 +174,7 @@ sub iset_buffer_input
 sub iset_buffer_close
 {
     $iset_buffer = "";
-    
+
     return weechat::WEECHAT_RC_OK;
 }
 
@@ -233,7 +235,7 @@ sub iset_get_options
     {
         $key = sprintf("%08d", $i);
         my $name = weechat::infolist_string($infolist, "full_name");
-          next if ( weechat::config_boolean($options_iset{"show_plugin_description"}) == 0 and index ($name, "plugins.desc.") != -1 );
+        next if (weechat::config_boolean($options_iset{"show_plugin_description"}) == 0 and index ($name, "plugins.desc.") != -1);
         my $type = weechat::infolist_string($infolist, "type");
         my $value = weechat::infolist_string($infolist, "value");
         my $is_null = weechat::infolist_integer($infolist, "value_is_null");
@@ -248,7 +250,6 @@ sub iset_get_options
         $i++;
     }
     weechat::infolist_free($infolist);
-
 
     foreach my $name (sort keys %options_internal)
     {
@@ -275,12 +276,12 @@ sub iset_get_values
     while (weechat::infolist_next($infolist))
     {
         my $name = weechat::infolist_string($infolist, "full_name");
-          next if ( weechat::config_boolean($options_iset{"show_plugin_description"}) == 0 and index ($name, "plugins.desc.") != -1 );
+        next if (weechat::config_boolean($options_iset{"show_plugin_description"}) == 0 and index ($name, "plugins.desc.") != -1);
         my $type = weechat::infolist_string($infolist, "type");
         my $value = weechat::infolist_string($infolist, "value");
         my $is_null = weechat::infolist_integer($infolist, "value_is_null");
         if (lc($value) =~ m/$var_value/)
-        { 
+        {
             $options_internal{$name}{"type"} = $type;
             $options_internal{$name}{"value"} = $value;
             $options_internal{$name}{"is_null"} = $is_null;
@@ -296,7 +297,7 @@ sub iset_get_values
         push(@options_values, $options_internal{$name}{"value"});
         push(@options_is_null, $options_internal{$name}{"is_null"});
     }
-        weechat::buffer_set($iset_buffer, "localvar_set_iset_filter", $var_value);
+    weechat::buffer_set($iset_buffer, "localvar_set_iset_filter", $var_value);
 }
 
 sub iset_refresh_line
@@ -324,15 +325,15 @@ sub iset_refresh_line
             }
             if ($y == $current_line)
             {
-                $color1 = weechat::color( weechat::config_color($options_iset{"color_option_selected"}).",".weechat::config_color($options_iset{"color_bg_selected"}) );
-                $color2 = weechat::color( weechat::config_color($options_iset{"color_type_selected"}).",".weechat::config_color($options_iset{"color_bg_selected"}) );
+                $color1 = weechat::color(weechat::config_color($options_iset{"color_option_selected"}).",".weechat::config_color($options_iset{"color_bg_selected"}));
+                $color2 = weechat::color(weechat::config_color($options_iset{"color_type_selected"}).",".weechat::config_color($options_iset{"color_bg_selected"}));
                 if ($options_is_null[$y])
                 {
-                    $color3 = weechat::color( weechat::config_color($options_iset{"color_value_undef_selected"}).",".weechat::config_color($options_iset{"color_bg_selected"}) );
+                    $color3 = weechat::color(weechat::config_color($options_iset{"color_value_undef_selected"}).",".weechat::config_color($options_iset{"color_bg_selected"}));
                 }
                 else
                 {
-                    $color3 = weechat::color( weechat::config_color($options_iset{"color_value_selected"}).",".weechat::config_color($options_iset{"color_bg_selected"}) );
+                    $color3 = weechat::color(weechat::config_color($options_iset{"color_value_selected"}).",".weechat::config_color($options_iset{"color_bg_selected"}));
                 }
             }
             my $value = $options_values[$y];
@@ -418,7 +419,7 @@ sub iset_signal_window_scrolled_cb
         }
         weechat::infolist_free($infolist);
     }
-    
+
     return weechat::WEECHAT_RC_OK;
 }
 
@@ -490,11 +491,11 @@ sub iset_get_option_name_index
 sub iset_config_cb
 {
     my ($data, $option_name, $value) = ($_[0], $_[1], $_[2]);
-    
+
     if ($iset_buffer ne "")
     {
         return weechat::WEECHAT_RC_OK if (weechat::info_get("weechat_upgrading", "") eq "1");
-        
+
         my $index = iset_get_option_name_index($option_name);
         if ($index >= 0)
         {
@@ -522,7 +523,7 @@ sub iset_config_cb
             iset_full_refresh() if ($option_name ne "weechat.bar.isetbar.hidden");
         }
     }
-    
+
     return weechat::WEECHAT_RC_OK;
 }
 
@@ -553,9 +554,9 @@ sub iset_cmd_cb
     my $filter_set = 0;
     if (($args ne "") && (substr($args, 0, 2) ne "**"))
     {
-        if ( substr( $args,0,1 ) eq weechat::config_string($options_iset{"value_search_char"}) )
+        if (substr($args, 0, 1) eq weechat::config_string($options_iset{"value_search_char"}))
         {
-            my $var_value = substr( $args, 1 );  # cut value_search_char
+            my $var_value = substr($args, 1);  # cut value_search_char
             if ($iset_buffer ne "")
             {
                 weechat::buffer_clear($iset_buffer);
@@ -585,7 +586,7 @@ sub iset_cmd_cb
             }
         }
     }
-    
+
     if ($iset_buffer eq "")
     {
         iset_init();
@@ -596,7 +597,7 @@ sub iset_cmd_cb
     {
         iset_full_refresh() if ($filter_set);
     }
-    
+
     if ($args eq "")
     {
         weechat::buffer_set($iset_buffer, "display", "1");
@@ -684,7 +685,7 @@ sub iset_cmd_cb
         }
         if ($args eq "**toggle_help")
         {
-            if ( weechat::config_boolean($options_iset{"show_help_bar"})  == 1)
+            if (weechat::config_boolean($options_iset{"show_help_bar"})  == 1)
             {
                 weechat::config_option_set($options_iset{"show_help_bar"},0,1);
                 iset_show_bar(0);
@@ -697,7 +698,7 @@ sub iset_cmd_cb
         }
         if ($args eq "**toggle_show_plugin_desc")
         {
-            if ( weechat::config_boolean($options_iset{"show_plugin_description"}) == 1)
+            if (weechat::config_boolean($options_iset{"show_plugin_description"}) == 1)
             {
                 weechat::config_option_set($options_iset{"show_plugin_description"},0,1);
                 iset_full_refresh();
@@ -728,7 +729,7 @@ sub iset_cmd_cb
             weechat::command($iset_buffer, "/input move_next_char") if ($quote ne "");
         }
     }
-    weechat::bar_item_update("isetbar_help") if ( weechat::config_boolean($options_iset{"show_help_bar"}) == 1 );
+    weechat::bar_item_update("isetbar_help") if (weechat::config_boolean($options_iset{"show_help_bar"}) == 1);
     return weechat::WEECHAT_RC_OK;
 }
 
@@ -762,7 +763,7 @@ sub iset_get_help
         $option_desc = weechat::infolist_string($optionlist, "description") if ($option_desc eq "");
         $option_desc = "No help found" if ($option_desc eq "");
         $option_default_value = weechat::infolist_string($optionlist, "default_value");
-        $possible_values = weechat::infolist_string($optionlist, "string_values") if (weechat::infolist_string($optionlist, "string_values") ne "" );
+        $possible_values = weechat::infolist_string($optionlist, "string_values") if (weechat::infolist_string($optionlist, "string_values") ne "");
         if ((weechat::infolist_string($optionlist, "type") eq "integer") && ($possible_values eq ""))
         {
             $option_range = weechat::infolist_integer($optionlist, "min")
@@ -771,11 +772,11 @@ sub iset_get_help
     }
     weechat::infolist_free($optionlist);
     iset_title();
-    
+
     $description = weechat::color(weechat::config_color($options_iset{"color_help_option_name"})).$options_names[$current_line]
         .weechat::color("bar_fg").": "
         .weechat::color(weechat::config_color($options_iset{"color_help_text"})).$option_desc;
-    
+
     # show additional infos like default value and possible values
 
     if (weechat::config_boolean($options_iset{"show_help_extra_info"}) == 1)
@@ -867,7 +868,9 @@ sub iset_end
     # when script is unloaded, we hide bar
     iset_show_bar(0);
 }
+
 # -------------------------------[ mouse support ]-------------------------------------
+
 sub hook_focus_iset_cb
 {
     my %info = %{$_[1]};
@@ -898,9 +901,9 @@ sub iset_hsignal_mouse_cb
     {
         if ($hash{"_key"} eq "button1")
         {
-                $current_line = $hash{"_chat_line_y"};
-                iset_refresh_line($current_line);
-                iset_refresh();
+            $current_line = $hash{"_chat_line_y"};
+            iset_refresh_line($current_line);
+            iset_refresh();
         }
         elsif ($hash{"_key"} eq "button2")
         {
@@ -943,32 +946,39 @@ sub iset_hsignal_mouse_cb
         }
     }
 }
-sub distance{
-  my ($x1,$x2) = ($_[0], $_[1]);
+sub distance
+{
+    my ($x1,$x2) = ($_[0], $_[1]);
     my $distance;
     $distance = $x1 - $x2;
     $distance = abs($distance);
-    if ( $distance > 0 ){
-      use integer;
-      $distance  =  $distance / 3;
-      $distance = 1 if ( $distance == 0 );
-    }elsif ( $distance == 0 ){
-      $distance = 1;
+    if ($distance > 0)
+    {
+        use integer;
+        $distance  =  $distance / 3;
+        $distance = 1 if ($distance == 0);
     }
- return $distance;
+    elsif ($distance == 0)
+    {
+        $distance = 1;
+    }
+    return $distance;
 }
 
 # -----------------------------------[ config ]---------------------------------------
-sub iset_config_init{
-  $iset_config_file = weechat::config_new($ISET_CONFIG_FILE_NAME,"iset_config_reload_cb","");
-  return if ($iset_config_file eq "");
 
-  # section "color"
-  my $section_color = weechat::config_new_section($iset_config_file,"color", 0, 0, "", "", "", "", "", "", "", "", "", "");
-  if ($section_color eq ""){
-    weechat::config_free($iset_config_file);
-    return;
-  }
+sub iset_config_init
+{
+    $iset_config_file = weechat::config_new($ISET_CONFIG_FILE_NAME,"iset_config_reload_cb","");
+    return if ($iset_config_file eq "");
+
+    # section "color"
+    my $section_color = weechat::config_new_section($iset_config_file,"color", 0, 0, "", "", "", "", "", "", "", "", "", "");
+    if ($section_color eq "")
+    {
+        weechat::config_free($iset_config_file);
+        return;
+    }
     $options_iset{"color_option"} = weechat::config_new_option(
         $iset_config_file, $section_color,
         "option", "color", "Color for option name in iset buffer", "", 0, 0,
@@ -1003,7 +1013,7 @@ sub iset_config_init{
         "lightgreen", "lightgreen", 0, "", "", "full_refresh_cb", "", "", "");
     $options_iset{"color_bg_selected"} = weechat::config_new_option(
         $iset_config_file, $section_color,
-        "bg_selected", "color", "background color for current selected option", "", 0, 0,
+        "bg_selected", "color", "Background color for current selected option", "", 0, 0,
         "red", "red", 0, "", "", "full_refresh_cb", "", "", "");
     $options_iset{"color_help_option_name"} = weechat::config_new_option(
         $iset_config_file, $section_color,
@@ -1018,12 +1028,13 @@ sub iset_config_init{
         "help_default_value", "color", "Color for default option value in help-bar", "", 0, 0,
         "green", "green", 0, "", "", "bar_refresh", "", "", "");
 
-  # section "help"
-  my $section_help = weechat::config_new_section($iset_config_file,"help", 0, 0, "", "", "", "", "", "", "", "", "", "");
-  if ($section_color eq ""){
-    weechat::config_free($iset_config_file);
-    return;
-  }
+    # section "help"
+    my $section_help = weechat::config_new_section($iset_config_file,"help", 0, 0, "", "", "", "", "", "", "", "", "", "");
+    if ($section_color eq "")
+    {
+        weechat::config_free($iset_config_file);
+        return;
+    }
     $options_iset{"show_help_bar"} = weechat::config_new_option(
         $iset_config_file, $section_help,
         "show_help_bar", "boolean", "Show help bar", "", 0, 0,
@@ -1037,48 +1048,61 @@ sub iset_config_init{
         "show_plugin_description", "boolean", "Show plugin description in iset buffer", "", 0, 0,
         "on", "on", 0, "", "", "full_refresh_cb", "", "", "");
 
-  # section "misc"
-  my $section_misc = weechat::config_new_section($iset_config_file,"misc", 0, 0, "", "", "", "", "", "", "", "", "", "");
-  if ($section_color eq ""){
-    weechat::config_free($iset_config_file);
-    return;
-  }
+    # section "look"
+    my $section_look = weechat::config_new_section($iset_config_file, "look", 0, 0, "", "", "", "", "", "", "", "", "", "");
+    if ($section_color eq "")
+    {
+        weechat::config_free($iset_config_file);
+        return;
+    }
     $options_iset{"value_search_char"} = weechat::config_new_option(
-        $iset_config_file, $section_misc,
+        $iset_config_file, $section_look,
         "value_search_char", "string", "Trigger char to tell iset to search for value instead of option (for example: =red)", "", 0, 0,
         "=", "=", 0, "", "", "", "", "", "");
     $options_iset{"scroll_horiz"} = weechat::config_new_option(
-        $iset_config_file, $section_misc,
+        $iset_config_file, $section_look,
         "scroll_horiz", "integer", "scroll content of iset buffer n%", "", 1, 100,
         "10", "10", 0, "", "", "", "", "", "");
 }
 
-sub iset_config_reload_cb{
-  my ($data,$config_file) = ($_[0], $_[1]);
-  return weechat::config_read($config_file)
-}
-sub iset_config_read{
-  return weechat::config_read($iset_config_file) if ($iset_config_file ne "");
-}
-sub iset_config_write{
-  return weechat::config_write($iset_config_file) if ($iset_config_file ne "");
+sub iset_config_reload_cb
+{
+    my ($data,$config_file) = ($_[0], $_[1]);
+    return weechat::config_read($config_file)
 }
 
-sub full_refresh_cb{
-  iset_full_refresh();
-  return weechat::WEECHAT_RC_OK;
+sub iset_config_read
+{
+    return weechat::config_read($iset_config_file) if ($iset_config_file ne "");
 }
-sub bar_refresh{
-  iset_get_help(1);
-  weechat::bar_item_update("isetbar_help") if ( weechat::config_boolean($options_iset{"show_help_bar"}) == 1 );
-  return weechat::WEECHAT_RC_OK;
+
+sub iset_config_write
+{
+    return weechat::config_write($iset_config_file) if ($iset_config_file ne "");
 }
-sub toggle_help_cb{
-  my $value = weechat::config_boolean($options_iset{"show_help_bar"});
-  iset_show_bar($value);
-  return weechat::WEECHAT_RC_OK;
+
+sub full_refresh_cb
+{
+    iset_full_refresh();
+    return weechat::WEECHAT_RC_OK;
 }
+
+sub bar_refresh
+{
+    iset_get_help(1);
+    weechat::bar_item_update("isetbar_help") if (weechat::config_boolean($options_iset{"show_help_bar"}) == 1);
+    return weechat::WEECHAT_RC_OK;
+}
+
+sub toggle_help_cb
+{
+    my $value = weechat::config_boolean($options_iset{"show_help_bar"});
+    iset_show_bar($value);
+    return weechat::WEECHAT_RC_OK;
+}
+
 # -----------------------------------[ main ]-----------------------------------------
+
 weechat::register($PRGNAME, $AUTHOR, $VERSION, $LICENSE,
                   $DESCR, "iset_end", "");
 
