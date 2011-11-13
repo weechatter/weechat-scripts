@@ -468,7 +468,7 @@ Als erstes sollte man die Mausunterstützung einschalten:
 ----------------------------------------
 
 Falls die Maus von WeeChat nicht erkannt werden sollte muss die TERM Variable
-der Konsole überprüft werden (die geschieht im Terminal mittels `echo $TERM`).
+der Konsole überprüft werden (dies geschieht im Terminal mittels `echo $TERM`).
 Entsprechend der ausgegebenen Information, wird ggf. eine Maus nicht unterstützt.
 
 Um zu testen ob eine Mausunterstützung vom Terminal bereitgestellt wird, sollte
