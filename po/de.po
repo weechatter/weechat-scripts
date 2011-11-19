@@ -22,8 +22,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WeeChat 0.3.7-dev\n"
 "Report-Msgid-Bugs-To: flashcode@flashtux.org\n"
-"POT-Creation-Date: 2011-11-12 16:06+0100\n"
-"PO-Revision-Date: 2011-11-13 11:29+0100\n"
+"POT-Creation-Date: 2011-11-19 11:35+0100\n"
+"PO-Revision-Date: 2011-11-19 11:47+0100\n"
 "Last-Translator: Nils Görs\n"
 "Language-Team: weechat-dev <weechat-dev@nongnu.org>\n"
 "Language: \n"
@@ -1985,6 +1985,9 @@ msgstr "Bereiche  (\"chat\" oder Name einer Bar) in denen der Cursor frei bewegt
 msgid "Warning: you should now issue /save to write \"save_config_on_exit\" option in configuration file"
 msgstr "Warnung: Sie sollten jetzt /save ausführen, um die Option \"save_config_on_exit\" in die Konfigurationsdatei zu übernehmen."
 
+msgid "WARNING: this option can cause serious display bugs, if you have such problems, you must turn off this option."
+msgstr "WARNUNG: Diese Option kann schwerwiegende Grafikfehler verursachen. Sollten Grafikfehler auftreten dann ist es ratsam diese Option zu deaktivieren."
+
 #, c-format
 msgid "\t\tDay changed to %s"
 msgstr "\t\tEin neuer Tag bricht an. Heute ist %s"
@@ -2453,8 +2456,8 @@ msgstr "Eine durch Kommata getrennte Liste der Erweiterungen die beim Programmst
 msgid "enable debug messages by default in all plugins (option disabled by default, which is highly recommended)"
 msgstr "aktiviere Debug-Nachrichten für alle Erweiterungen (diese Option ist standardmäßig deaktiviert und das ist auch gut so)"
 
-msgid "standard plugins extension in filename (for example \".so\" under Linux or \".dll\" under Microsoft Windows)"
-msgstr "Standard Dateinamenserweiterung (Beispiel: \".so\" unter Linux oder \".dll\" unter Microsoft Windows)"
+msgid "comma separated list of file name extensions for plugins"
+msgstr "Durch Kommata getrennte Liste von Dateinamenerweiterungen welche für die Erweiterungen genutzt werden sollen"
 
 msgid "path for searching plugins (\"%h\" will be replaced by WeeChat home, \"~/.weechat\" by default)"
 msgstr "Suchpfad für Erweiterungen (\"%h\"' wird durch das WeeChat-Basisverzeichnis ersetzt, voreingestellt ist \"~/.weechat\")"
@@ -6799,20 +6802,20 @@ msgid "%s%s: not enough memory for new xfer"
 msgstr "%s%s: Für einen neuen Transfer steht nicht ausreichend Speicher zur Verfügung"
 
 #, c-format
-msgid "%s: incoming file from %s (%d.%d.%d.%d): %s, %llu bytes (protocol: %s)"
-msgstr "%s: eingehende Datei von %s (%d.%d.%d.%d): %s, %llu Bytes (Protokoll: %s)"
+msgid "%s: incoming file from %s (%s.%s), ip: %d.%d.%d.%d, name: %s, %llu bytes (protocol: %s)"
+msgstr "%s: eingehende Datei von %s (%s.%s), IP: %d.%d.%d.%d, Name: %s, %llu Bytes (Protokoll: %s)"
 
 #, c-format
-msgid "%s: sending file to %s: %s (local filename: %s), %llu bytes (protocol: %s)"
-msgstr "%s: Sende Datei an %s: %s (lokaler Dateiname: %s), %llu Bytes (Protokoll: %s)"
+msgid "%s: sending file to %s (%s.%s): %s (local filename: %s), %llu bytes (protocol: %s)"
+msgstr "%s: Sende Datei an  %s (%s.%s): %s (lokaler Dateiname: %s), %llu Bytes (Protokoll: %s)"
 
 #, c-format
-msgid "%s: incoming chat request from %s (%d.%d.%d.%d)"
-msgstr "%s: eingehende Chatanforderung von %s (%d.%d.%d.%d)"
+msgid "%s: incoming chat request from %s (%s.%s), ip: %d.%d.%d.%d"
+msgstr "%s: eingehende Chatanforderung von %s (%s.%s), ip: %d.%d.%d.%d"
 
 #, c-format
-msgid "%s: sending chat request to %s"
-msgstr "%s: Sende Chatanforderung an: %s"
+msgid "%s: sending chat request to %s (%s.%s)"
+msgstr "%s: Sende Chatanforderung an: %s (%s.%s)"
 
 #, c-format
 msgid "%s: file %s (local filename: %s) will be resumed at position %llu"
@@ -7070,6 +7073,13 @@ msgstr "Variablen"
 
 msgid "Lists"
 msgstr "Listen"
+
+#~ msgid ""
+#~ "standard plugins extension in filename (for example \".so\" under Linux "
+#~ "or \".dll\" under Microsoft Windows)"
+#~ msgstr ""
+#~ "Standard Dateinamenserweiterung (Beispiel: \".so\" unter Linux oder \".dll"
+#~ "\" unter Microsoft Windows)"
 
 #~ msgid "condition(s) for displaying bar (for bars of type \"window\")"
 #~ msgstr ""
