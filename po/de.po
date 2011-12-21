@@ -22,9 +22,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WeeChat 0.3.7-dev\n"
 "Report-Msgid-Bugs-To: flashcode@flashtux.org\n"
-"POT-Creation-Date: 2011-11-19 11:35+0100\n"
-"PO-Revision-Date: 2011-11-20 15:31+0100\n"
-"Last-Translator: Nils Görs\n"
+"POT-Creation-Date: 2011-12-17 18:39+0100\n"
+"PO-Revision-Date: 2011-12-18 14:57+0100\n"
+"Last-Translator: Nils Görs <weechatter@arcor.de>\n"
 "Language-Team: weechat-dev <weechat-dev@nongnu.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -691,6 +691,10 @@ msgid "Option changed"
 msgstr "Option geändert"
 
 #, c-format
+msgid "%sReset of all options is not allowed"
+msgstr "%sDas Zurücksetzen aller Optionen ist nicht zulässig"
+
+#, c-format
 msgid "%sFailed to unset option \"%s\""
 msgstr "%sOption \"%s\" konnte nicht zurück gesetzt werden"
 
@@ -1051,6 +1055,7 @@ msgid ""
 "    color: display infos about current color pairs\n"
 "   cursor: toggle debug for cursor mode\n"
 "    hdata: display infos about hdata (with free: remove all hdata in memory)\n"
+"    hooks: display infos about hooks\n"
 "infolists: display infos about infolists\n"
 "   memory: display infos about memory usage\n"
 "    mouse: toggle debug for mouse\n"
@@ -1067,6 +1072,7 @@ msgstr ""
 "    color: zeigt Informationen über die aktuellen Farbpaarungen an\n"
 "   cursor: schaltet den debug-Modus für den Cursor-Modus ein/aus\n"
 "    hdata: zeigt Informationen zu hdata an (mittels free werden alle hdata Informationen aus dem Speicher entfernt)\n"
+"    hooks: zeigt die aktiven Hooks an\n"
 "infolists: zeigt Information über die Infolists an\n"
 "   memory: gibt Informationen über den genutzten Speicher aus\n"
 "    mouse: schaltet den debug-Modus für den Maus-Modus ein/aus\n"
@@ -2218,6 +2224,9 @@ msgstr "Beim Beenden wird das Layout gespeichert (Buffer, Fenster oder beides)"
 msgid "how many lines to scroll by with scroll_up and scroll_down"
 msgstr "Anzahl der zu scrollenden Zeilen wenn Seitenweise geblättert wird (Bild hoch/runter)"
 
+msgid "scroll to bottom of window after switch to another buffer (do not remember scroll position in windows); the scroll is done only for buffers with formatted content (not free content)"
+msgstr "scrollt zum unteren Ende des Fensters nachdem zu einem anderen Buffer gewechselt wurde (die aktuelle Position wird dabei nicht gesichert); diese Funktion hat nur einen Einfluss auf Buffer mit einem formatierten Inhalt (und nicht auf Buffer mit einem freien Inhalt)"
+
 msgid "percent of screen to scroll when scrolling one page up or down (for example 100 means one page, 50 half-page)"
 msgstr "Angabe in Prozent, die die Seite hoch oder runter gescrollt werden soll (Beispiel: 100 für eine ganze Seite, 50 für eine halbe Seite)"
 
@@ -2820,8 +2829,8 @@ msgid "Act: "
 msgstr "Aktiv: "
 
 #, c-format
-msgid "Notify changed for \"%s%s.%s%s\": \"%s%s%s\" to \"%s%s%s\""
-msgstr "Benachrichtigung wurde von \"%s%s.%s%s\": \"%s%s%s\" auf \"%s%s%s\" geändert"
+msgid "Notify changed for \"%s%s%s\": \"%s%s%s\" to \"%s%s%s\""
+msgstr "Benachrichtigung wurde von \"%s%s%s\": \"%s%s%s\" zu \"%s%s%s\" geändert"
 
 #, c-format
 msgid "%sError: a buffer with same name (%s) already exists"
@@ -2925,6 +2934,7 @@ msgstr "[-completion <completion>] <alias> [<command> [;<command>...]]"
 #, c-format
 msgid ""
 "completion: completion for alias (optional, by default completion is done with target command)\n"
+"            note: you can use %%command to use completion of an existing command\n"
 "     alias: name of alias (can start or end with \"*\" for alias listing)\n"
 "   command: command name with arguments (many commands can be separated by semicolons)\n"
 "\n"
@@ -2952,6 +2962,7 @@ msgid ""
 "    /alias -completion %%sajoin forcejoin /quote forcejoin"
 msgstr ""
 "completion: optionale Vervollständigung für einen Alias-Befehl (Standardverhalten: Vervollständigung wird auf den Zielbefehl angewendet)\n"
+"            Hinweis: Mit der Variablen \"%%command\" kann eine Vervollständigung eines vorhandenen Befehls durchgeführt werden\n"
 "     alias: Name des Alias (kann mit Joker \"*\" beginnen oder enden um Aliase aufzulisten)\n"
 "   command: Name des zuzuordnenden Befehls (WeeChat- oder IRC-Befehl ohne führenden '/', mehrere Befehle müssen durch Semikolon getrennt werden)\n"
 "\n"
@@ -2968,7 +2979,7 @@ msgstr ""
 "  $channel: aktueller Channel\n"
 "   $server: aktueller Server\n"
 "\n"
-"Um ein Alias zu löschen, nutze \"/unalias\".\n"
+"Um ein Alias zu löschen wird der Befehl \"/unalias\" genutzt.\n"
 "\n"
 "Beispiele:\n"
 "  Alias \"/split\" wird anlegt um damit ein Fenster horizontal zu teilen:\n"
@@ -6214,18 +6225,6 @@ msgstr "%s%s: Authentifizierung mit Client %s%s%s (%s.%s) fehlgeschlagen"
 msgid "%s: disconnected from client %s%s%s (%s.%s)"
 msgstr "%s: Trennung vom Client %s%s%s (%s.%s)"
 
-#, c-format
-msgid "%s%s: not enough memory for parsing message"
-msgstr "%s%s: Nicht genug Speicher vorhanden um Nachricht zu parsen"
-
-#, c-format
-msgid "%s%s: error sending data to client: %s"
-msgstr "%s%s: Fehler beim Senden von Daten an den Client: %s"
-
-#, c-format
-msgid "%s%s: error sending data to client %s"
-msgstr "%s%s: Fehler beim Senden von Daten an den Client %s"
-
 msgid "Clients for relay:"
 msgstr "Clients für Relay:"
 
@@ -6351,8 +6350,14 @@ msgstr "Textfarbe für Status: \"Authentifizierung gescheitert\""
 msgid "text color for \"disconnected\" status"
 msgstr "Textfarbe für Status: \"Verbindung getrennt\""
 
+msgid "regular expression with IPs allowed to use relay, example: \"^(123.45.67.89|192.160.*)$\""
+msgstr "regulärer Ausdruck für IP Adressen die auf das Relay zugreifen dürfen, Beispiel:  \"^(123.45.67.89|192.160.*)$\""
+
 msgid "address for bind (if empty, connection is possible on all interfaces, use \"127.0.0.1\" to allow connections from local machine only)"
 msgstr "Adresse für Bind (falls nicht gesetzt ist eine Verbindung zu allen Interfaces möglich. Wird die Adresse \"127.0.0.1\" genutzt kann nur eine Verbindung mit dem lokalen Rechner hergestellt werden)"
+
+msgid "compression level for packets sent to client with WeeChat protocol (0 = disable compression, 1 = low compression ... 9 = best compression)"
+msgstr "Kompressionsstärke der Pakete die durch das WeeChat Protokoll an den Client gesendet werden sollen (0 = Kompression deaktiviert, 1 = niedrige Kompression ... 9 = stärkste Kompression)"
 
 msgid "maximum number of clients connecting to a port"
 msgstr "Maximale Anzahl an Clients die mit einem Port verbunden sein dürfen"
@@ -6378,6 +6383,10 @@ msgid "%s%s: cannot accept client on port %d (%s.%s)"
 msgstr "%s%s: Kann den Client am Port %d (%s.%s) nicht akzeptieren"
 
 #, c-format
+msgid "%s%s: IP address \"%s\" not allowed for relay"
+msgstr "%s%s: IP Adresse \"%s\" für Relay nicht gültig"
+
+#, c-format
 msgid "%s%s: error with \"bind\" on port %d (%s.%s)"
 msgstr "%s%s: Fehler mit \"bind\" auf Port %d (%s.%s)"
 
@@ -6388,6 +6397,26 @@ msgstr "%s: Lausche am Port %d (Relay: %s.%s, Max. %d Clients)"
 #, c-format
 msgid "%s%s: not enough memory for listening on new port"
 msgstr "%s%s: Nicht genug Speicher um an einem neuen Port zu lauschen"
+
+#, c-format
+msgid "%s%s: not enough memory for parsing message"
+msgstr "%s%s: Nicht genug Speicher vorhanden um Nachricht zu parsen"
+
+#, c-format
+msgid "%s%s: error sending data to client: %s"
+msgstr "%s%s: Fehler beim Senden von Daten an den Client: %s"
+
+#, c-format
+msgid "%s%s: error sending data to client %d (%s)"
+msgstr "%s%s: Fehler beim Senden von Daten an den Client %d (%s)"
+
+#, c-format
+msgid "%s%s: failed to execute command \"%s\" for client %d"
+msgstr "%s%s: Der Befehl \"%s\" kann für den Client %d nicht ausgeführt werden"
+
+#, c-format
+msgid "%s%s: too few arguments received from client %d for command \"%s\" (received: %d arguments, expected: at least %d)"
+msgstr "%s%s: Zu wenige Argumente von Client %d für den Befehl \"%s\" erhalten (Empfangen: %d Argumente, mindestens Erwartet: %d)"
 
 #, c-format
 msgid "%s%s: error compiling regular expression \"%s\""
