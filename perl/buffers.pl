@@ -21,6 +21,7 @@
 # 2011-12-08, Nils G <weechatter@arcor.de>:
 #     2.7: fix indenting for option "show_number off"
 #       add buffer with free content and core buffer sorted first (suggested  by nyuszika7h)
+#       add options queries_default_fg/bg and queries_message_fg/bg (suggested by FiXato)
 #       add clicking on current buffer will do a jump_previously_visited_buffer (suggested by FiXato)
 #       add clicking with right button on current buffer will do a jump_next_visited_buffer
 # 2011-12-04, Nils G <weechatter@arcor.de>:
@@ -259,6 +260,30 @@ sub buffers_config_init
         $buffers_config_file, $section_color,
         "none_channel_bg", "color", "background color for none channel buffer (e.g.: core/server/plugin buffer)", "", 0, 0,
         "default", "default", 0, "", "", "buffers_signal_config", "", "", "");
+    $options{"queries_default_fg"} = weechat::config_new_option(
+        $buffers_config_file, $section_color,
+        "queries_default_fg", "color", "foreground color for query buffer without message", "", 0, 0,
+        "default", "default", 0, "", "", "buffers_signal_config", "", "", "");
+    $options{"queries_default_bg"} = weechat::config_new_option(
+        $buffers_config_file, $section_color,
+        "queries_default_bg", "color", "background color for query buffer without message", "", 0, 0,
+        "default", "default", 0, "", "", "buffers_signal_config", "", "", "");
+    $options{"queries_message_fg"} = weechat::config_new_option(
+        $buffers_config_file, $section_color,
+        "queries_message_fg", "color", "foreground color for query buffer with unread message", "", 0, 0,
+        "default", "default", 0, "", "", "buffers_signal_config", "", "", "");
+    $options{"queries_message_bg"} = weechat::config_new_option(
+        $buffers_config_file, $section_color,
+        "queries_message_bg", "color", "background color for query buffer with unread message", "", 0, 0,
+        "default", "default", 0, "", "", "buffers_signal_config", "", "", "");
+    $options{"queries_highlight_fg"} = weechat::config_new_option(
+        $buffers_config_file, $section_color,
+        "queries_highlight_fg", "color", "foreground color for query buffer with unread highlight", "", 0, 0,
+        "default", "default", 0, "", "", "buffers_signal_config", "", "", "");
+    $options{"queries_highlight_bg"} = weechat::config_new_option(
+        $buffers_config_file, $section_color,
+        "queries_highlight_bg", "color", "background color for query buffer with unread highlight", "", 0, 0,
+        "default", "default", 0, "", "", "buffers_signal_config", "", "", "");
 
     # section "look"
     my $section_look = weechat::config_new_section($buffers_config_file,"look", 0, 0, "", "", "", "", "", "", "", "", "", "");
@@ -447,7 +472,16 @@ sub build_buffers
 
         $color = weechat::config_color( $options{"color_default_fg"} );
         $bg = weechat::config_color( $options{"color_default_bg"} );
-        # check for none channel and private buffer
+
+        if ( weechat::buffer_get_string($buffer->{"pointer"}, "localvar_type") eq "private" )
+        {
+            if ( (weechat::config_color($options{"queries_default_bg"})) ne "default" || (weechat::config_color($options{"queries_default_fg"})) ne "default" )
+            {
+              $bg = weechat::config_color( $options{"queries_default_bg"} );
+              $color = weechat::config_color( $options{"queries_default_fg"} );
+            }
+        }
+        # check for core and buffer with free content
         if ( (weechat::buffer_get_string($buffer->{"pointer"}, "localvar_type") ne "channel" ) and ( weechat::buffer_get_string($buffer->{"pointer"}, "localvar_type") ne "private") )
         {
             $color = weechat::config_color( $options{"color_none_channel_fg"} );
@@ -461,17 +495,43 @@ sub build_buffers
 
         $color = "default" if ($color eq "");
 
+        # color for channel and query buffer
         if (exists $hotlist{$buffer->{"pointer"}})
         {
+            # check if buffer is in whitelist buffer
             if (grep /^$buffer->{"name"}$/, @whitelist_buffers)
             {
                 $bg = weechat::config_color( $options{"color_whitelist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_bg"} );
                 $color = weechat::config_color( $options{"color_whitelist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_fg"}  );
             }
-            else
+            elsif ( weechat::buffer_get_string($buffer->{"pointer"}, "localvar_type") eq "private" )
             {
-                $bg = weechat::config_color( $options{"color_hotlist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_bg"} );
-                $color = weechat::config_color( $options{"color_hotlist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_fg"}  );
+                # queries_default_fg/bg and buffers.color.queries_message_fg/bg
+                if ( (weechat::config_color($options{"queries_highlight_fg"})) ne "default" ||
+                      (weechat::config_color($options{"queries_highlight_bg"})) ne "default" ||
+                       (weechat::config_color($options{"queries_message_fg"})) ne "default" ||
+                        (weechat::config_color($options{"queries_message_bg"})) ne "default" )
+                {
+                  if ( ($hotlist{$buffer->{"pointer"}}) == 2 )
+                  {
+                      $bg = weechat::config_color( $options{"queries_message_bg"} );
+                      $color = weechat::config_color( $options{"queries_message_fg"} );
+                  }
+
+                  elsif ( ($hotlist{$buffer->{"pointer"}}) == 3 )
+                  {
+                      $bg = weechat::config_color( $options{"queries_highlight_bg"} );
+                      $color = weechat::config_color( $options{"queries_highlight_fg"} );
+                  }
+              }else
+              {
+                      $bg = weechat::config_color( $options{"color_hotlist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_bg"} );
+                      $color = weechat::config_color( $options{"color_hotlist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_fg"}  );
+              }
+            }else
+            {
+                      $bg = weechat::config_color( $options{"color_hotlist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_bg"} );
+                      $color = weechat::config_color( $options{"color_hotlist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_fg"}  );
             }
         }
 
@@ -680,7 +740,7 @@ sub buffers_hsignal_mouse
             weechat::buffer_set($ptrbuf, "display", "1");
         }
     }
-    elsif ( ($hash{"_key"} eq "button2") and (weechat::config_integer($options{"jump_prev_next_visited_buffer"}) eq 1) )# right mouse button
+    elsif ( ($hash{"_key"} eq "button2") && (weechat::config_integer($options{"jump_prev_next_visited_buffer"}) eq 1) )# right mouse button
     {
         if ( $current_buffer eq $hash{"number2"} )
         {
