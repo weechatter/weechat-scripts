@@ -389,8 +389,8 @@ if($linux) {
 					$realdistro	=~ s/"$//;
 					$distro		= $realdistro;
 					$distrov	= $realdistro;
-					$distro		=~ s/ [0-9.]*$//;
-					$distrov	=~ s/.* ([0-9.]*)/$1/;
+					$distro		=~ s/ [0-9.]+.*$//;
+					$distrov	=~ s/.* ([0-9.]+.*)/$1/;
 				}
 			}
 		}
