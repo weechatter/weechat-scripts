@@ -36,8 +36,11 @@
 # http://imbezol.org/sysinfo/
 #
 # ported to weechat (http://www.weechat.org/) by Nils Görs. Copyright
-# (c) 2011 Nils Görs
+# (c) 2011-2012 Nils Görs
 #
+# 2012-01-07: 0.4 welwood08
+#	    : Fix distro+version for Ubuntu LTS
+#	    : version bumped to 0.4 and copyright status changed
 # 2011-10-01: 0.3 nils_2 <weechatter@arcor.de>
 #           : bar_item added (idea by Banton)
 # 2011-09-27: 0.2 nils_2 <weechatter@arcor.de>
@@ -54,7 +57,7 @@ use POSIX qw(floor);
 use strict;
 
 my $PRGNAME     = "sysinfo";
-my $VERSION     = "0.3";
+my $VERSION     = "0.4";
 my $DESCR       = "provides a system info command";
 
 # Set up the arrays and variables first.
