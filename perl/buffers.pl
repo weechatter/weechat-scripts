@@ -18,8 +18,8 @@
 # Display sidebar with list of buffers.
 #
 # History:
-# 2011-12-08, Nils G <weechatter@arcor.de>:
-#     2.7: fix indenting for option "show_number off"
+# 2011-01-08, Nils G <weechatter@arcor.de>:
+#     2.8: fix indenting for option "show_number off"
 #          fix unset of buffer activity in hotlist when buffer was moved with mouse
 #          add buffer with free content and core buffer sorted first (suggested  by nyuszika7h)
 #          add options queries_default_fg/bg and queries_message_fg/bg (suggested by FiXato)
@@ -28,6 +28,8 @@
 #          add additional informations in help texts
 #          add default_fg and default_bg for whitelist channels
 #          internal changes  (script is now 3Kb smaller)
+# 2012-01-04, Sébastien Helleu <flashcode@flashtux.org>:
+#     2.7: fix regex lookup in whitelist buffers listed
 # 2011-12-04, Nils G <weechatter@arcor.de>:
 #     2.6: add own config file (buffers.conf)
 #          add new behavior for indenting (under_name)
@@ -104,7 +106,7 @@
 
 use strict;
 # -------------------------------[ internal ]-------------------------------------
-my $version = "2.7";
+my $version = "2.8";
 
 my $BUFFERS_CONFIG_FILE_NAME = "buffers";
 my $buffers_config_file;
@@ -391,7 +393,7 @@ sub build_buffers
             $bg = weechat::config_color( $options{"color_none_channel_bg"} );
         }
         # default whitelist buffer?
-        if (grep /^$buffer->{"name"}$/, @whitelist_buffers)
+        if (grep {$_ eq $buffer->{"name"}} @whitelist_buffers)
         {
                 $color = weechat::config_color( $options{"color_whitelist_default_fg"} );
                 $bg = weechat::config_color( $options{"color_whitelist_default_bg"} );
@@ -403,10 +405,10 @@ sub build_buffers
         if (exists $hotlist{$buffer->{"pointer"}})
         {
             # check if buffer is in whitelist buffer
-            if (grep /^$buffer->{"name"}$/, @whitelist_buffers)
+            if (grep {$_ eq $buffer->{"name"}} @whitelist_buffers)
             {
                 $bg = weechat::config_color( $options{"color_whitelist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_bg"} );
-                $color = weechat::config_color( $options{"color_whitelist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_fg"}  );
+                $color = weechat::config_color( $options{"color_whitelist_".$hotlist_level{$hotlist{$buffer->{"pointer"}}}."_fg"} );
             }
             elsif ( weechat::buffer_get_string($buffer->{"pointer"}, "localvar_type") eq "private" )
             {
