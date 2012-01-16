@@ -90,6 +90,7 @@ welche Pakete optional genutzt werden können.
 | Paket ^(1)^            | Version   | benötigt | Funktion
 | cmake                  |           | *ja*     | zum kompilieren (autotools ist möglich. cmake wird aber empfohlen)
 | libncursesw5-dev ^(2)^ |           | *ja*     | ncurses Oberfläche
+| libcurl4-xxxxx-dev     |           | *ja*     | URL Transfer
 | gettext                |           |          | Internationalisierung (Übersetzung der Mitteilungen; Hauptsprache ist englisch)
 | libgcrypt11-dev        |           |          | SASL Authentifikation am IRC Server mittels DH-BLOWFISH Methode
 | libgnutls-dev          | ≥ 2.2.0   |          | SSL Verbindung zu einem IRC Server
@@ -812,10 +813,9 @@ und "an alle" rot und unterstrichen dargestellt.
 ^Cc12^CbHallo ^Cb^Cc04^Cuan alle^Cu^Cc!
 ----------------------------------------
 
-// TRANSLATION MISSING
 [NOTE]
-In irc plugin, you can remap these colors using option
-<<option_irc.color.mirc_remap,irc.color.mirc_remap>>.
+Die Farben können in der IRC Erweiterung neu belegt werden,
+mittels der Option <<option_irc.color.mirc_remap,irc.color.mirc_remap>>.
 
 [[colors]]
 Farben
@@ -1844,9 +1844,12 @@ Relay Erweiterung
 ~~~~~~~~~~~~~~~~~
 
 Die Relay-Erweiterung wird genutzt um Daten, mittels unterschiedlicher Protokolle,
-über ein Netzwerk zu übermitteln.
+über ein Netzwerk zu übermitteln:
 
-Zur Zeit wird ausschließlich das "IRC" Protokoll unterstützt (IRC Proxy).
+* 'irc': IRC Proxy: um mittels einem oder mehreren IRC-Clients eine Verbindung zu
+  IRC Servern zu unterhalten.
+* 'weechat': Protokoll welches es erlaubt die Daten mit einer externen Oberfläche 
+  zu teilen (zum Beispiel QWeeChat)
 
 [[relay_options]]
 Optionen (relay.conf)
@@ -1882,6 +1885,23 @@ Die Anzahl an erlaubten Clients kann limitiert werden:
 ----------------------------------------
 /set relay.network.max_clients 1
 ----------------------------------------
+
+[[relay_weechat_protocol]]
+WeeChat Protokoll
+^^^^^^^^^^^^^^^^^
+
+Die Relay-Erweiterung kann Daten, mittels dem WeeChat Protokoll, an eine
+externe Oberfläche senden.
+
+Zum Beispiel:
+
+----------------------------------------
+/set relay.network.password "meinPasswort"
+/relay add weechat.* 9000
+----------------------------------------
+
+Nun kann man über den Port 9000 mittels einer Oberfläche (wie QWeeChat)
+und dem Passwort "meinPasswort" eine Verbindung zu WeeChat herstellen.
 
 [[rmodifier_plugin]]
 Rmodifier Erweiterung
