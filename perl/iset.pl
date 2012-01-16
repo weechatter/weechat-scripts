@@ -19,6 +19,8 @@
 #
 # History:
 # 2011-11-05, nils_2 <weechatter@arcor.de>:
+#     version 2.2: fixed: refresh error when toggle plugins description
+# 2011-11-05, nils_2 <weechatter@arcor.de>:
 #     version 2.1: use own config file (iset.conf), fix own help color (used immediately)
 # 2011-10-16, nils_2 <weechatter@arcor.de>:
 #     version 2.0: add support for left-mouse-button and more sensitive mouse gesture (for integer/color options)
@@ -80,10 +82,11 @@
 use strict;
 
 my $PRGNAME = "iset";
-my $VERSION = "2.1";
+my $VERSION = "2.2";
 my $DESCR   = "Interactive Set for configuration options";
 my $AUTHOR  = "Sebastien Helleu <flashcode\@flashtux.org>";
 my $LICENSE = "GPL3";
+my $LANG    = "perl";
 my $ISET_CONFIG_FILE_NAME = "iset";
 
 my $iset_config_file;
@@ -363,6 +366,7 @@ sub iset_refresh
 
 sub iset_full_refresh
 {
+    $iset_buffer = weechat::buffer_search($LANG,$PRGNAME);
     if ($iset_buffer ne "")
     {
         weechat::buffer_clear($iset_buffer);
@@ -376,7 +380,10 @@ sub iset_full_refresh
             iset_get_values($filter);
             $iset_filter_title = "Filter (by value): ";
         }
-        iset_set_current_line($current_line);
+        if (weechat::config_boolean($options_iset{"show_plugin_description"}) == 1)
+        {
+            iset_set_current_line($current_line);
+        }
         iset_refresh();
         weechat::command($iset_buffer, "/window refresh");
     }
