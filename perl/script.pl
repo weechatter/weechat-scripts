@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011 by Nils Görs <weechatter@arcor.de>
+# Copyright (c) 2011/12 by Nils Görs <weechatter@arcor.de>
 #
 # will load/reload/unload script (language independent)
 #
@@ -17,6 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # History:
+#  2012-01-17: nils_2 <weechatter@arcor.de>:
+# version 0.6: fix: a error message appeared when "autoload" was used with already installed script
 #  2011-11-05: nils_2 <weechatter@arcor.de>:
 # version 0.5: added: support for guile script
 #            : added: option "force_reload" (default: off)
@@ -40,7 +42,7 @@
 use strict;
 use File::Basename;
 my $PRGNAME     = "script";
-my $VERSION     = "0.5";
+my $VERSION     = "0.6";
 my $AUTHOR      = "Nils Görs <weechatter\@arcor.de>";
 my $LICENCE     = "GPL3";
 my $DESCR       = "to load/reload/unload script (language independent) and also to create/remove symlink";
@@ -148,6 +150,9 @@ my ($command,$script,$mute,$all) = ($_[0],$_[1],$_[2],$_[3]);
 my $hit = 0;
 my $execute_command = "";
   return "" if ( not defined $script or $script eq "" );
+  my $command2 = $command;
+  $command = "load" if ($command2 eq "autoload");
+  $command = "unload" if ($command2 eq "autounload");
 
   $script =~ s/\.[^.]+$//;                                                      # delete suffix if given
 
@@ -169,7 +174,10 @@ my $execute_command = "";
     }
   }
 
-weechat::print("",weechat::prefix("error")."$PRGNAME: \"$command\" error. script with name \"$script\" already installed") if ( $hit == 3 );
+  unless (("autoload" or "autounload") eq $command2){
+        weechat::print("",weechat::prefix("error")."$PRGNAME: \"$command\" error. script with name \"$script\" already installed") if ( $hit == 3 );
+  }
+
 
 if ( $hit == 0){
   if ( $options{force_reload}[0] eq "off" ){
@@ -250,11 +258,11 @@ sub autoload_script{
       }
     }
   my $execute_command = "";
-  if ( $options{autoload_load}[0] eq "on" and $command eq "autoload" ){
-    $execute_command = load_reload_script("load",$script,$mute,$all);
+  if ( $options{autoload_load}[0] eq "on" and $command eq "autoload" ){                 # option = on and command "autoload"?
+    $execute_command = load_reload_script("autoload",$script,$mute,$all);               # load script
   }
-  if ( $options{autounload_unload}[0] eq "on" and $command eq "autounload" ){
-    $execute_command = load_reload_script("unload",$script,$mute,$all);
+  if ( $options{autounload_unload}[0] eq "on" and $command eq "autounload" ){           # option = on and command "autounload"?
+    $execute_command = load_reload_script("autounload",$script,$mute,$all);             # unload script
   }
 weechat::command("","/wait 1ms $execute_command") if ( $execute_command ne "")
 }
@@ -272,7 +280,6 @@ my @files;
       }
     }
     return weechat::WEECHAT_RC_OK
-
 }
 # -----------------------------[ config ]-----------------------------------
 sub init_config{
