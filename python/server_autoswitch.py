@@ -39,7 +39,7 @@ except Exception:
 
 SCRIPT_NAME     = "server_autoswitch"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.2"
+SCRIPT_VERSION  = "0.3"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "cycle to currently used server if you are using merged server buffer"
 
