@@ -1,5 +1,6 @@
 #
-# Copyright (c) 2008-2011 by Sébastien Helleu <flashcode@flashtux.org>
+# Copyright (C) 2008-2012 Sebastien Helleu <flashcode@flashtux.org>
+# Copyright (C) 2011-2012 Nils G <weechatter@arcor.de>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +19,7 @@
 # Display sidebar with list of buffers.
 #
 # History:
-# 2011-01-08, Nils G <weechatter@arcor.de>:
+# 2012-01-08, Nils G <weechatter@arcor.de>:
 #     2.8: fix indenting for option "show_number off"
 #          fix unset of buffer activity in hotlist when buffer was moved with mouse
 #          add buffer with free content and core buffer sorted first (suggested  by nyuszika7h)
@@ -28,64 +29,64 @@
 #          add additional informations in help texts
 #          add default_fg and default_bg for whitelist channels
 #          internal changes  (script is now 3Kb smaller)
-# 2012-01-04, Sébastien Helleu <flashcode@flashtux.org>:
-#     2.7: fix regex lookup in whitelist buffers listed
+# 2012-01-04, Sebastien Helleu <flashcode@flashtux.org>:
+#     2.7: fix regex lookup in whitelist buffers list
 # 2011-12-04, Nils G <weechatter@arcor.de>:
 #     2.6: add own config file (buffers.conf)
 #          add new behavior for indenting (under_name)
-#          add new option to set different color for serverbuffer and buffer with free content
+#          add new option to set different color for server buffers and buffers with free content
 # 2011-10-30, Nils G <weechatter@arcor.de>:
 #     2.5: add new options "show_number_char" and "color_number_char",
 #          add help-description for options
-# 2011-08-24, Sébastien Helleu <flashcode@flashtux.org>:
+# 2011-08-24, Sebastien Helleu <flashcode@flashtux.org>:
 #     v2.4: add mouse support
 # 2011-06-06, Nils G <weechatter@arcor.de>:
 #     v2.3: added: missed option "color_whitelist_default"
-# 2011-03-23, Sébastien Helleu <flashcode@flashtux.org>:
+# 2011-03-23, Sebastien Helleu <flashcode@flashtux.org>:
 #     v2.2: fix color of nick prefix with WeeChat >= 0.3.5
 # 2011-02-13, Nils G <weechatter@arcor.de>:
 #     v2.1: add options "color_whitelist_*"
-# 2010-10-05, Sébastien Helleu <flashcode@flashtux.org>:
+# 2010-10-05, Sebastien Helleu <flashcode@flashtux.org>:
 #     v2.0: add options "sort" and "show_number"
-# 2010-04-12, Sébastien Helleu <flashcode@flashtux.org>:
+# 2010-04-12, Sebastien Helleu <flashcode@flashtux.org>:
 #     v1.9: replace call to log() by length() to align buffer numbers
-# 2010-04-02, Sébastien Helleu <flashcode@flashtux.org>:
+# 2010-04-02, Sebastien Helleu <flashcode@flashtux.org>:
 #     v1.8: fix bug with background color and option indenting_number
 # 2010-04-02, Helios <helios@efemes.de>:
 #     v1.7: add indenting_number option
 # 2010-02-25, m4v <lambdae2@gmail.com>:
 #     v1.6: add option to hide empty prefixes
-# 2010-02-12, Sébastien Helleu <flashcode@flashtux.org>:
+# 2010-02-12, Sebastien Helleu <flashcode@flashtux.org>:
 #     v1.5: add optional nick prefix for buffers like IRC channels
-# 2009-09-30, Sébastien Helleu <flashcode@flashtux.org>:
+# 2009-09-30, Sebastien Helleu <flashcode@flashtux.org>:
 #     v1.4: remove spaces for indenting when bar position is top/bottom
-# 2009-06-14, Sébastien Helleu <flashcode@flashtux.org>:
+# 2009-06-14, Sebastien Helleu <flashcode@flashtux.org>:
 #     v1.3: add option "hide_merged_buffers"
-# 2009-06-14, Sébastien Helleu <flashcode@flashtux.org>:
+# 2009-06-14, Sebastien Helleu <flashcode@flashtux.org>:
 #     v1.2: improve display with merged buffers
-# 2009-05-02, Sébastien Helleu <flashcode@flashtux.org>:
+# 2009-05-02, Sebastien Helleu <flashcode@flashtux.org>:
 #     v1.1: sync with last API changes
-# 2009-02-21, Sébastien Helleu <flashcode@flashtux.org>:
+# 2009-02-21, Sebastien Helleu <flashcode@flashtux.org>:
 #     v1.0: remove timer used to update bar item first time (not needed any more)
-# 2009-02-17, Sébastien Helleu <flashcode@flashtux.org>:
+# 2009-02-17, Sebastien Helleu <flashcode@flashtux.org>:
 #     v0.9: fix bug with indenting of private buffers
-# 2009-01-04, Sébastien Helleu <flashcode@flashtux.org>:
+# 2009-01-04, Sebastien Helleu <flashcode@flashtux.org>:
 #     v0.8: update syntax for command /set (comments)
 # 2008-10-20, Jiri Golembiovsky <golemj@gmail.com>:
 #     v0.7: add indenting option
-# 2008-10-01, Sébastien Helleu <flashcode@flashtux.org>:
+# 2008-10-01, Sebastien Helleu <flashcode@flashtux.org>:
 #     v0.6: add default color for buffers, and color for current active buffer
-# 2008-09-18, Sébastien Helleu <flashcode@flashtux.org>:
+# 2008-09-18, Sebastien Helleu <flashcode@flashtux.org>:
 #     v0.5: fix color for "low" level entry in hotlist
-# 2008-09-18, Sébastien Helleu <flashcode@flashtux.org>:
+# 2008-09-18, Sebastien Helleu <flashcode@flashtux.org>:
 #     v0.4: rename option "show_category" to "short_names",
 #           remove option "color_slash"
-# 2008-09-15, Sébastien Helleu <flashcode@flashtux.org>:
+# 2008-09-15, Sebastien Helleu <flashcode@flashtux.org>:
 #     v0.3: fix bug with priority in hotlist (var not defined)
-# 2008-09-02, Sébastien Helleu <flashcode@flashtux.org>:
+# 2008-09-02, Sebastien Helleu <flashcode@flashtux.org>:
 #     v0.2: add color for buffers with activity and config options for
 #           colors, add config option to display/hide categories
-# 2008-03-15, Sébastien Helleu <flashcode@flashtux.org>:
+# 2008-03-15, Sebastien Helleu <flashcode@flashtux.org>:
 #     v0.1: script creation
 #
 # Help about settings:
@@ -119,7 +120,7 @@ my @whitelist_buffers = "";
 my @buffers_focus = ();
 
 # --------------------------------[ init ]--------------------------------------
-weechat::register("buffers", "Sébastien Helleu <flashcode\@flashtux.org>", $version,
+weechat::register("buffers", "Sebastien Helleu <flashcode\@flashtux.org>", $version,
                   "GPL3", "Sidebar with list of buffers", "", "");
 my $weechat_version = weechat::info_get("version_number", "") || 0;
 
