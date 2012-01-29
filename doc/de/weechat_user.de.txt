@@ -87,30 +87,32 @@ welche Pakete optional genutzt werden können.
 
 [width="100%",cols="5,^3,^3,13",options="header"]
 |========================================
-| Paket ^(1)^            | Version   | benötigt | Funktion
-| cmake                  |           | *ja*     | zum kompilieren (autotools ist möglich. cmake wird aber empfohlen)
-| libncursesw5-dev ^(2)^ |           | *ja*     | ncurses Oberfläche
-| libcurl4-xxxxx-dev     |           | *ja*     | URL Transfer
-| gettext                |           |          | Internationalisierung (Übersetzung der Mitteilungen; Hauptsprache ist englisch)
-| libgcrypt11-dev        |           |          | SASL Authentifikation am IRC Server mittels DH-BLOWFISH Methode
-| libgnutls-dev          | ≥ 2.2.0   |          | SSL Verbindung zu einem IRC Server
-| ca-certificates        |           |          | Zertifikate für SSL Verbindungen
-| libaspell-dev          |           |          | aspell Erweiterung
-| python-dev             | 2.5 → 2.7 |          | python Erweiterung
-| libperl-dev            |           |          | perl Erweiterung
-| ruby1.8-dev            |           |          | ruby Erweiterung
-| liblua5.1-0-dev        |           |          | lua Erweiterung
-| tcl-dev                | ≥ 8.5     |          | tcl Erweiterung
-| guile-1.8-dev          |           |          | guile (scheme) Erweiterung
-| asciidoc               | ≥ 8.5.0   |          | erstellt Dokumentation (HTML Dateien)
-| source-highlight       |           |          | Syntax highlight für Quelltext in HTML Dokumentation
+| Paket ^(1)^            | Version     | benötigt | Funktion
+| cmake                  |             | *ja*     | zum kompilieren (autotools ist möglich. cmake wird aber empfohlen)
+| libncursesw5-dev ^(2)^ |             | *ja*     | ncurses Oberfläche
+| libcurl4-xxxxx-dev     |             | *ja*     | URL Transfer
+| gettext                |             |          | Internationalisierung (Übersetzung der Mitteilungen; Hauptsprache ist englisch)
+| libgcrypt11-dev        |             |          | SASL Authentifikation am IRC Server mittels DH-BLOWFISH Methode
+| libgnutls-dev          | ≥ 2.2.0     |          | SSL Verbindung zu einem IRC Server
+| ca-certificates        |             |          | Zertifikate für SSL Verbindungen
+| libaspell-dev          |             |          | aspell Erweiterung
+| python-dev             | ≥ 2.5 ^(3)^ |          | python Erweiterung
+| libperl-dev            |             |          | perl Erweiterung
+| ruby1.8-dev            |             |          | ruby Erweiterung
+| liblua5.1-0-dev        |             |          | lua Erweiterung
+| tcl-dev                | ≥ 8.5       |          | tcl Erweiterung
+| guile-1.8-dev          |             |          | guile (scheme) Erweiterung
+| asciidoc               | ≥ 8.5.0     |          | erstellt Dokumentation (HTML Dateien)
+| source-highlight       |             |          | Syntax highlight für Quelltext in HTML Dokumentation
 |========================================
 
 [NOTE]
 ^(1)^ Paketnamen wurden von der Debian GNU/Linux Distribution übernommen. Versionen und Paketnamen
 können für andere Distributionen abweichend sein. +
 ^(2)^ WeeChat kann auch mit libncurses5-dev kompiliert werden. Dies wird aber *NICHT* empfohlen (es
-treten dabei Darstellungsfehler mit breiten Zeichen auf).
+treten dabei Darstellungsfehler mit breiten Zeichen auf). +
+^(3)^ WeeChat kann mit Python 3.x kompiliert werden. Es wird aber empfohlen die Python Version
+2.7 zu nutzen (alle Skripten sind funktionstüchtig unter Version 2.x, aber nicht unter Version 3.x).
 
 [[compile_with_cmake]]
 Kompilieren mit cmake
@@ -519,7 +521,7 @@ Tastenbefehle für Buffer / Fenster
 | @k(A-)@k(m)               | schaltet Mausfunktion ein/aus | /mouse toggle
 | @k(A-)@k(n)               | springt zur nächsten Highlight Nachricht | /window scroll_next_highlight
 | @k(A-)@k(p)               | springt zur vorherigen Highlight Nachricht | /window scroll_previous_highlight
-| @k(A-)@k(u)               | springt zur ersten ungelesenen Zeile im Buffer | /input scroll_unread
+| @k(A-)@k(u)               | springt zur ersten ungelesenen Zeile im Buffer | /window scroll_unread
 | @k(A-)@k(w) , @k(A-)@k(↑) | wechselt zum oberen Fenster | /window up
 | @k(A-)@k(w) , @k(A-)@k(↓) | wechselt zum unteren Fenster | /window down
 | @k(A-)@k(w) , @k(A-)@k(←) | wechselt zum linken Fenster | /window left
@@ -1605,6 +1607,7 @@ Unvollständige Liste der IRC Nachrichten bzw. Alias die angepasst werden könne
 | quit      |               | quit
 | topic     |               | topic
 | wallops   |               | wallops
+|           | ctcp          | ctcp (gesendet oder empfangen, in einer privmsg oder notice Nachricht)
 | 221       |               | User mode string
 | 275       | whois         | whois (sichere Verbindung)
 | 301       | whois         | whois (abwesend)
@@ -1848,7 +1851,7 @@ Die Relay-Erweiterung wird genutzt um Daten, mittels unterschiedlicher Protokoll
 
 * 'irc': IRC Proxy: um mittels einem oder mehreren IRC-Clients eine Verbindung zu
   IRC Servern zu unterhalten.
-* 'weechat': Protokoll welches es erlaubt die Daten mit einer externen Oberfläche 
+* 'weechat': Protokoll welches es erlaubt die Daten mit einer externen Oberfläche
   zu teilen (zum Beispiel QWeeChat)
 
 [[relay_options]]
@@ -1897,7 +1900,7 @@ Zum Beispiel:
 
 ----------------------------------------
 /set relay.network.password "meinPasswort"
-/relay add weechat.* 9000
+/relay add weechat 9000
 ----------------------------------------
 
 Nun kann man über den Port 9000 mittels einer Oberfläche (wie QWeeChat)
@@ -2058,7 +2061,7 @@ Paket Ersteller::
 Übersetzungen::
     Jiri Golembiovsky, soltys, Nils Görs, rettub, Frank Zacharias,
     Pavel Shevchuk, Elián Hanisch (m4v), Voroskoi, Marco Paolone,
-    Ivan Sichmann Freitas
+    Ivan Sichmann Freitas, Lázaro A.
 
 Patches::
     Dmitry Kobylin, Rudolf Polzer, Jim Ramsay, Pistos, Gwenn, Dominik Honnef,
