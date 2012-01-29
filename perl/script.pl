@@ -17,6 +17,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # History:
+#  2012-01-29: nils_2 <weechatter@arcor.de>:
+# version 0.7: add; confirmation for auto(un)load option
+#            : fix: unloaded script was loaded using option "unload"
+#            : fix: script with full pathname wasn't loaded from a different path than homepath
 #  2012-01-17: nils_2 <weechatter@arcor.de>:
 # version 0.6: fix: a error message appeared when "autoload" was used with already installed script
 #  2011-11-05: nils_2 <weechatter@arcor.de>:
@@ -42,7 +46,7 @@
 use strict;
 use File::Basename;
 my $PRGNAME     = "script";
-my $VERSION     = "0.6";
+my $VERSION     = "0.7";
 my $AUTHOR      = "Nils Görs <weechatter\@arcor.de>";
 my $LICENCE     = "GPL3";
 my $DESCR       = "to load/reload/unload script (language independent) and also to create/remove symlink";
@@ -139,7 +143,6 @@ if ( not defined $args[1] ){
     ($execute_command,$hit) = load_script_cb($args[0],$args[1],"","") if ( $execute_command eq "" );
     $execute_command =~ s/$args[0]/load/ if ( $execute_command ne "" );         # load script
   }
-
 weechat::command("","/wait 1ms $execute_command") if ( $execute_command ne "");
 
 return weechat::WEECHAT_RC_OK;
@@ -154,10 +157,12 @@ my $execute_command = "";
   $command = "load" if ($command2 eq "autoload");
   $command = "unload" if ($command2 eq "autounload");
 
-  $script =~ s/\.[^.]+$//;                                                      # delete suffix if given
+  $script =~ s/\.[^.]+$// unless (index($script,"/") <= 0);                         # delete suffix if given and no "/" in name
+
 
   if ( $command eq "reload" or $command eq "unload"){
     ($execute_command,$hit) = reunload_script_cb($command,$script,$mute,$all);
+    return "" if ($execute_command eq "" and $command eq "unload");
   }elsif ( $command eq "load"){
     foreach my $plugin (keys %script_suffix){                                 # check if script is already installed.
         my $infolist = weechat::infolist_get( $plugin, "name", $script );
@@ -178,7 +183,6 @@ my $execute_command = "";
         weechat::print("",weechat::prefix("error")."$PRGNAME: \"$command\" error. script with name \"$script\" already installed") if ( $hit == 3 );
   }
 
-
 if ( $hit == 0){
   if ( $options{force_reload}[0] eq "off" ){
       weechat::print("",weechat::prefix("error")."$PRGNAME: \"$command\" error. script with name \"$script\" not found");
@@ -197,18 +201,32 @@ sub load_script_cb{
 my ($command,$script,$mute,$all) = ($_[0],$_[1],$_[2],$_[3]);
 my $hit = 0;
 my $execute_command = "";
-    my @files;
-    while (my ($plugin,$suffix) = each (%script_suffix)){
-      my ($plugin,undef) = split(/_/,$plugin);
-      @files = glob($home_dir . "/" . $plugin . "/*" .$suffix);
-      foreach my $file (@files) {
-          if ( index($file,$script . $suffix) ne "-1" ){
-            $hit = 1;
-            $execute_command = "/$plugin $command $script"."$suffix" if ($mute eq "");
-            $execute_command = "/mute $plugin $command $script"."$suffix" if ($mute eq "-mute");
-          }
-      }
-    }
+    # full script path given by user
+    if (index($script,"/") >= 0){
+        while (my ($plugin,$suffix) = each (%script_suffix)){
+            my ($plugin,undef) = split(/_/,$plugin);
+            if ( index($script,$suffix) >= 0 ){
+                weechat::print("","/$plugin $command $script");
+                $execute_command = "/$plugin $command $script" if ($mute eq "");
+                $execute_command = "/mute $plugin $command $script" if ($mute eq "-mute");
+                $hit = 1;
+                return ($execute_command,$hit);  
+            }
+        }
+    }else{
+        my @files;
+        while (my ($plugin,$suffix) = each (%script_suffix)){
+            my ($plugin,undef) = split(/_/,$plugin);
+            @files = glob($home_dir . "/" . $plugin . "/*" .$suffix);
+            foreach my $file (@files) {
+                if ( index($file,$script . $suffix) ne "-1" ){
+                    $hit = 1;
+                    $execute_command = "/$plugin $command $script"."$suffix" if ($mute eq "");
+                    $execute_command = "/mute $plugin $command $script"."$suffix" if ($mute eq "-mute");
+                }
+            }
+        }
+     }
 return ($execute_command,$hit);  
 }
 
@@ -250,9 +268,15 @@ sub autoload_script{
           if (index($file,$script . $suffix) ne "-1" ){
               if ( $command eq "autoload" ){
                   symlink($home_dir . "/" . $plugin . "/" . $script . $suffix,$home_dir . "/" . $plugin . "/autoload/" . $script . $suffix);
+                  if ($mute ne "-mute"){
+                      weechat::print("",weechat::prefix("error") . $plugin . ": script " . $script . $suffix . " will be auto loaded...");
+                  }
               }
               if ( $command eq "autounload" ){
                   unlink $home_dir . "/" . $plugin . "/autoload/" . $script . $suffix;
+                  if ($mute ne "-mute"){
+                    weechat::print("",weechat::prefix("error") . $plugin . ": script " . $script . $suffix . " will no longer be auto loaded...");
+                  }
               }
           }
       }
