@@ -1,6 +1,6 @@
 #
-# Copyright (C) 2008-2011 Sebastien Helleu <flashcode@flashtux.org>
-# Copyright (C) 2010-2011 Nils Görs <weechatter@arcor.de>
+# Copyright (C) 2008-2012 Sebastien Helleu <flashcode@flashtux.org>
+# Copyright (C) 2010-2012 Nils Görs <weechatter@arcor.de>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,13 +18,15 @@
 # Set WeeChat and plugins options interactively.
 #
 # History:
-# 2011-11-05, nils_2 <weechatter@arcor.de>:
-#     version 2.2: fixed: refresh error when toggle plugins description
+# 2012-02-02, nils_2 <weechatter@arcor.de>:
+#     version 2.3: fixed: refresh problem with new search results and cursor was outside window.
+#                : add: new option "current_line" in title bar
+#     version 2.2: fixed: refresh error when toggling plugins description
 # 2011-11-05, nils_2 <weechatter@arcor.de>:
 #     version 2.1: use own config file (iset.conf), fix own help color (used immediately)
 # 2011-10-16, nils_2 <weechatter@arcor.de>:
 #     version 2.0: add support for left-mouse-button and more sensitive mouse gesture (for integer/color options)
-#                : add help text for mouse support
+#                  add help text for mouse support
 # 2011-09-20, Sebastien Helleu <flashcode@flashtux.org>:
 #     version 1.9: add mouse support, fix iset buffer, fix errors on first load under FreeBSD
 # 2011-07-21, nils_2 <weechatter@arcor.de>:
@@ -82,7 +84,7 @@
 use strict;
 
 my $PRGNAME = "iset";
-my $VERSION = "2.2";
+my $VERSION = "2.3";
 my $DESCR   = "Interactive Set for configuration options";
 my $AUTHOR  = "Sebastien Helleu <flashcode\@flashtux.org>";
 my $LICENSE = "GPL3";
@@ -116,6 +118,8 @@ sub iset_title
 {
     if ($iset_buffer ne "")
     {
+        my $current_line_text = "";
+        $current_line_text = ($current_line + 1) . "/" if (weechat::config_boolean($options_iset{"show_current_line"}) == 1);
         $iset_filter_title = "Filter: " if ($iset_filter_title eq "");
         $filter = "*" if ($filter eq "");
         my $postfix = "s";
@@ -127,7 +131,7 @@ sub iset_title
         weechat::buffer_set($iset_buffer, "title",
                             "Interactive set (iset.pl v$VERSION)  |  "
                             .$iset_filter_title.weechat::color("yellow").$filter.weechat::color("default")."  |  "
-                            .@options_names.$opt_txt . $show_plugin_descr_txt);
+                            .$current_line_text.@options_names.$opt_txt . $show_plugin_descr_txt);
     }
 }
 
@@ -184,7 +188,7 @@ sub iset_buffer_close
 sub iset_init
 {
     $current_line = 0;
-    $iset_buffer = weechat::buffer_search("perl", $PRGNAME);
+    $iset_buffer = weechat::buffer_search($LANG, $PRGNAME);
     if ($iset_buffer eq "")
     {
         $iset_buffer = weechat::buffer_new($PRGNAME, "iset_buffer_input", "", "iset_buffer_close", "");
@@ -366,7 +370,7 @@ sub iset_refresh
 
 sub iset_full_refresh
 {
-    $iset_buffer = weechat::buffer_search($LANG,$PRGNAME);
+    $iset_buffer = weechat::buffer_search($LANG, $PRGNAME);
     if ($iset_buffer ne "")
     {
         weechat::buffer_clear($iset_buffer);
@@ -383,6 +387,9 @@ sub iset_full_refresh
         if (weechat::config_boolean($options_iset{"show_plugin_description"}) == 1)
         {
             iset_set_current_line($current_line);
+        }else
+        {
+            $current_line = $#options_names if ($current_line > $#options_names);
         }
         iset_refresh();
         weechat::command($iset_buffer, "/window refresh");
@@ -517,6 +524,7 @@ sub iset_config_cb
                     $options_values[$index] = weechat::infolist_string($infolist, "value");
                     $options_is_null[$index] = weechat::infolist_integer($infolist, "value_is_null");
                     iset_refresh_line($index);
+                    iset_title($iset_filter_title) if ($option_name eq "iset.look.show_current_line");
                 }
                 else
                 {
@@ -582,13 +590,13 @@ sub iset_cmd_cb
         {
             iset_filter($args);
             $filter_set = 1;
-            my $ptrbuf = weechat::buffer_search("perl",$PRGNAME);
+            my $ptrbuf = weechat::buffer_search($LANG, $PRGNAME);
             if ($ptrbuf eq "")
             {
                 iset_init();
                 iset_get_options();
                 iset_full_refresh();
-                weechat::buffer_set(weechat::buffer_search("perl",$PRGNAME), "display", "1");
+                weechat::buffer_set(weechat::buffer_search($LANG, $PRGNAME), "display", "1");
                 return weechat::WEECHAT_RC_OK;
             }
         }
@@ -709,11 +717,13 @@ sub iset_cmd_cb
             {
                 weechat::config_option_set($options_iset{"show_plugin_description"},0,1);
                 iset_full_refresh();
+                iset_check_line_outside_window();
             }
             else
             {
                 weechat::config_option_set($options_iset{"show_plugin_description"},1,1);
                 iset_full_refresh();
+                iset_check_line_outside_window();
             }
         }
         if ($args eq "**set")
@@ -815,7 +825,7 @@ sub iset_check_condition_isetbar_cb
     my $buffer = weechat::window_get_pointer($modifier_data, "buffer");
     if ($buffer ne "")
     {
-        if ((weechat::buffer_get_string($buffer, "plugin") eq "perl")
+        if ((weechat::buffer_get_string($buffer, "plugin") eq $LANG)
             && (weechat::buffer_get_string($buffer, "name") eq $PRGNAME))
         {
             return "1";
@@ -883,7 +893,7 @@ sub hook_focus_iset_cb
     my %info = %{$_[1]};
     my $bar_item_line = int($info{"_bar_item_line"});
     undef my $hash;
-    if (($info{"_buffer_name"} eq $PRGNAME) && $info{"_buffer_plugin"} eq "perl" && ($bar_item_line >= 0) && ($bar_item_line <= $#iset_focus))
+    if (($info{"_buffer_name"} eq $PRGNAME) && $info{"_buffer_plugin"} eq $LANG && ($bar_item_line >= 0) && ($bar_item_line <= $#iset_focus))
     {
         $hash = $iset_focus[$bar_item_line];
     }
@@ -904,7 +914,7 @@ sub iset_hsignal_mouse_cb
 {
     my ($data, $signal, %hash) = ($_[0], $_[1], %{$_[2]});
 
-    if ($hash{"_buffer_name"} eq $PRGNAME && ($hash{"_buffer_plugin"} eq "perl"))
+    if ($hash{"_buffer_name"} eq $PRGNAME && ($hash{"_buffer_plugin"} eq $LANG))
     {
         if ($hash{"_key"} eq "button1")
         {
@@ -1070,6 +1080,10 @@ sub iset_config_init
         $iset_config_file, $section_look,
         "scroll_horiz", "integer", "scroll content of iset buffer n%", "", 1, 100,
         "10", "10", 0, "", "", "", "", "", "");
+    $options_iset{"show_current_line"} = weechat::config_new_option(
+        $iset_config_file, $section_look,
+        "show_current_line", "boolean", "show current line in title bar.", "", 0, 0,
+        "on", "on", 0, "", "", "", "", "", "");
 }
 
 sub iset_config_reload_cb
@@ -1166,7 +1180,7 @@ weechat::bar_new("isetbar", "on", "0", "window", "", "top", "horizontal",
                  "isetbar_help");
 weechat::hook_modifier("bar_condition_isetbar", "iset_check_condition_isetbar_cb", "");
 weechat::hook_config("*", "iset_config_cb", "");
-$iset_buffer = weechat::buffer_search("perl", $PRGNAME);
+$iset_buffer = weechat::buffer_search($LANG, $PRGNAME);
 iset_init() if ($iset_buffer ne "");
 
 if ($wee_version_number >= 0x00030600)
