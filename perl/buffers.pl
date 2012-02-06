@@ -20,6 +20,8 @@
 #
 # History:
 # 2012-01-29, Nils G <weechatter@arcor.de>:
+#     3.0: fix: buffers did not update directly during window_switch (reported by FiXato)
+# 2012-01-29, Nils G <weechatter@arcor.de>:
 #     2.9: add options "name_size_max" and "name_crop_suffix"
 # 2012-01-08, Nils G <weechatter@arcor.de>:
 #     2.8: fix indenting for option "show_number off"
