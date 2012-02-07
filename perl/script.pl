@@ -327,6 +327,8 @@ sub check_if_script_is_installed
 
 sub script_loader{
     my ($command,$script,$mute,$all) = ($_[0],$_[1],$_[2],$_[3]);
+##################################################################################
+    weechat::print("","script_loader: $script");
     my $execute_command = "";
     my %script_suffix_bak = %script_suffix;
     # full script path given by user
@@ -345,6 +347,7 @@ sub script_loader{
     }else
     {
         my @files;
+        $script =~ s/\.[^.]+$//;                    # delete suffix
         while (my ($plugin,$suffix) = each (%script_suffix_bak)){
             my ($plugin,undef) = split(/_/,$plugin);
             @files = glob($home_dir . "/" . $plugin . "/*" .$suffix);
@@ -359,7 +362,7 @@ sub script_loader{
             }
         }
      }
-return ($execute_command);
+return $execute_command;
 }
 
 sub script_re_unload_cb
