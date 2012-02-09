@@ -327,8 +327,6 @@ sub check_if_script_is_installed
 
 sub script_loader{
     my ($command,$script,$mute,$all) = ($_[0],$_[1],$_[2],$_[3]);
-##################################################################################
-    weechat::print("","script_loader: $script");
     my $execute_command = "";
     my %script_suffix_bak = %script_suffix;
     # full script path given by user
