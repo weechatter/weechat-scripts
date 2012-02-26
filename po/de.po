@@ -23,8 +23,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WeeChat 0.3.7-dev\n"
 "Report-Msgid-Bugs-To: flashcode@flashtux.org\n"
-"POT-Creation-Date: 2012-02-19 20:19+0100\n"
-"PO-Revision-Date: 2012-02-19 20:32+0100\n"
+"POT-Creation-Date: 2012-02-26 08:00+0100\n"
+"PO-Revision-Date: 2012-02-26 14:32+0100\n"
 "Last-Translator: Nils Görs <weechatter@arcor.de>\n"
 "Language-Team: German <weechatter@arcor.de>\n"
 "Language: \n"
@@ -212,7 +212,7 @@ msgstr "  %s[%s%d%s]%s (%s) %s%s%s (Benachrichtigung: %s)"
 
 #, c-format
 msgid "%sError: incorrect buffer number"
-msgstr "%sFehler: falsche Buffer-Nummer"
+msgstr "%sFehler: falsche Nummer für Buffer"
 
 #, c-format
 msgid "%sError: WeeChat main buffer can't be closed"
@@ -224,7 +224,7 @@ msgstr "Lokale Variablen für Buffer \"%s\":"
 
 #, c-format
 msgid "No local variable defined for buffer \"%s\""
-msgstr "Keine lokale Variable definiert für Buffer \"%s\""
+msgstr "Keine lokale Variable für Buffer \"%s\" definiert"
 
 #, c-format
 msgid "%sInvalid color number \"%s\" (must be between %d and %d)"
@@ -232,7 +232,7 @@ msgstr "%sungültige Farbnummer \"%s\" (der Wert muss zwischen %d und %d liegen)
 
 #, c-format
 msgid "%sColor \"%s\" is not defined in palette"
-msgstr "%sFarbe \"%s\" ist in der Farbpalette nicht definiert"
+msgstr "%sIn der Farbpalette ist die Farbe \"%s\" nicht definiert"
 
 #, c-format
 msgid "%sPlugin \"%s\" not found"
@@ -243,7 +243,7 @@ msgstr "Der Inhalt des Buffers wurde im Rohformat in die Protokolldatei geschrie
 
 #, c-format
 msgid "Debug disabled for \"%s\""
-msgstr "Debug deaktiviert für \"%s\""
+msgstr "Debug-Modus für \"%s\" deaktiviert"
 
 #, c-format
 msgid "  %s[%s%s%s]%s buffer: %s%s%s / tags: %s / regex: %s %s"
@@ -351,7 +351,7 @@ msgid "color"
 msgstr "Farbe"
 
 msgid "a WeeChat color name (default, black, (dark)gray, white, (light)red, (light)green, brown, yellow, (light)blue, (light)magenta, (light)cyan), a terminal color number or an alias; attributes are allowed before color (for text color only, not background): \"*\" for bold, \"!\" for reverse, \"_\" for underline"
-msgstr "ein Farbname für WeeChat (default, black, (dark)gray, white, (light)red, (light)green, brown, yellow, (light)blue, (light)magenta, (light)cyan), eine Terminal-Farbnummer oder ein Alias; Attribute werden vor einer Farbe gesetzt (ausschließlich für die Textfarbe und nicht für den Hintergrund): \"*\" für fett, \"!\" für invertiert, \"_\" für unterstrichen"
+msgstr "ein Farbname für WeeChat (default, black, (dark)gray, white, (light)red, (light)green, brown, yellow, (light)blue, (light)magenta, (light)cyan), eine Terminal-Farbnummer oder ein Alias; Attribute können vor eine Farbe gesetzt werden (gilt ausschließlich für die Textfarbe und nicht für den Hintergrund): \"*\" für fett, \"!\" für invertiert, \"_\" für unterstrichen"
 
 #. TRANSLATORS: please do not translate "(null)"
 msgid "undefined value allowed (null)"
@@ -427,11 +427,11 @@ msgstr "%sFehler: Kontext\"%s\" nicht gefunden"
 
 #, c-format
 msgid "Default key bindings restored for context \"%s\""
-msgstr "Standardtastenbelegungen wiederhergestellt für Kontext \"%s\""
+msgstr "Standardtastenbelegungen für Kontext \"%s\" wiederhergestellt"
 
 #, c-format
 msgid "%sError: \"-yes\" argument is required for keys reset (security reason)"
-msgstr "%sFehler: \"-yes\" Argument ist aus Sicherheitsgründen für den Reset der Tastenbelegung notwendig"
+msgstr "%sFehler: Das Argument \"-yes\" ist, aus Sicherheitsgründen, zum zurücksetzen der Tastenbelegung notwendig"
 
 #, c-format
 msgid "%d new key added"
@@ -454,7 +454,7 @@ msgid "vertical split"
 msgstr "vertikale Aufteilung"
 
 msgid "Saved layout for buffers:"
-msgstr "Layout gespeichert für die Buffer:"
+msgstr "gespeicherte Layouts für Buffer:"
 
 msgid "Saved layout for windows:"
 msgstr "gespeicherte Layouts für Fenster:"
@@ -469,7 +469,7 @@ msgid "Layout saved for windows (buffer displayed by each window)"
 msgstr "Layout der Fenster gesichert (Buffer werden durch jedes Fenster dargestellt)"
 
 msgid "Layout reset for buffers"
-msgstr "Layout für Buffer zurücksetzen"
+msgstr "Zurücksetzen des Bufferlayouts"
 
 msgid "Layout reset for windows"
 msgstr "Zurücksetzen des Fensterlayouts"
@@ -488,10 +488,10 @@ msgid "  written by \"%s\", license: %s"
 msgstr "  geschrieben von \"%s\", Lizenz: %s"
 
 msgid "    commands hooked:"
-msgstr "    eingehangene (hooked) Befehle:"
+msgstr "    eingehängte (hooked) Befehle:"
 
 msgid "    command_run hooked:"
-msgstr "    Befehl_läuft ge-hooked:"
+msgstr "    command_run eingehangen:"
 
 msgid "    timers hooked:"
 msgstr "    eingehangene (hooked) Timer:"
@@ -515,7 +515,7 @@ msgid "      %d %s (no call limit)"
 msgstr "      %d %s (keine Begrenzung für Aufruf)"
 
 msgid "    fd hooked:"
-msgstr "    fd ge-hooked:"
+msgstr "    fd eingehangen:"
 
 #, c-format
 msgid "      %d (flags: 0x%x:%s%s%s)"
@@ -538,7 +538,7 @@ msgid "      command: '%s', child pid: %d"
 msgstr "      Befehl: '%s', Kind pid: %d"
 
 msgid "    connect hooked:"
-msgstr "    eingehangener (hooked) Connect:"
+msgstr "    eingehangene (hooked) Verbindung:"
 
 #, c-format
 msgid "      socket: %d, address: %s, port: %d, child pid: %d"
@@ -569,13 +569,13 @@ msgid "(all)"
 msgstr "(alle(s))"
 
 msgid "    configuration options hooked:"
-msgstr "    eingehangene (hooked) Konfiguration-Optionen:"
+msgstr "    eingehangene (hooked) Konfigurationsoptionen:"
 
 msgid "    completions hooked:"
 msgstr "    eingehangene (hooked) Vervollständigungen:"
 
 msgid "    modifiers hooked:"
-msgstr "    modifiers ge-hooked:"
+msgstr "    eingehangene modifiers:"
 
 msgid "No plugin found"
 msgstr "Keine Erweiterung gefunden"
@@ -588,7 +588,7 @@ msgid "%sError: wrong argument count for \"%s\" command"
 msgstr "%sFehler: fehlerhafte Anzahl von Argumenten für den Befehl \"%s\""
 
 msgid "List of proxies:"
-msgstr "Liste der Proxys:"
+msgstr "Auflistung der Proxys:"
 
 #, c-format
 msgid "  %s%s%s: %s, %s/%d (%s), username: %s, password: %s"
@@ -920,27 +920,27 @@ msgid ""
 "  jump to next buffer:\n"
 "    /buffer +1"
 msgstr ""
-"    list: alle geöffneten Buffer werden aufgelistet (Standardvorgabe)\n"
-"   clear: leert den Bufferinhalt. Entweder durch Angabe der Buffer-Nummer, -merged für zusammengefügte Buffer, -all für alle Buffer. Ohne Angabe eines Arguments wird der aktuelle Buffer gelöscht\n"
+"    list: alle geöffneten Buffer werden aufgelistet (ohne Angabe von Argumente wird diese Liste standardmäßig ausgegeben)\n"
+"   clear: leert den Inhalt des Buffers (entweder durch Angabe der entsprechenden Nummer des Buffers oder \"-merged \" für zusammengefügte Buffer oder \"-all\" für alle Buffer. Ohne Angabe eines Arguments wird der aktuelle Buffer gelöscht)\n"
 "    move: Buffer in der Liste verschieben (kann auch relativ sein, z.B. -1)\n"
 "   merge: fügt den aktuellen Buffer mit einem anderen Buffer zusammen (bei einem Chat-Buffer entsteht ein Mix aus beiden Buffern\n"
 "         (Bei der Standardtastenbelegung kann mittels \"CTRL-x\" zwischen zusammengefügten Buffern umgeschaltet werden)\n"
 " unmerge: trennt Buffer wieder voneinander, falls zwei Buffer die selbe Nummer teilen\n"
 "   close: Buffer schließen (Nummer oder Bereich ist optional)\n"
-"  notify: setzt Benachrichtigung-Status für aktuellen Buffer. Folgende Möglichkeiten bestimmen den Grad der Benachrichtigung:\n"
+"  notify: setzt den Status der Benachrichtigung für den aktuellen Buffer. Folgende Möglichkeiten bestimmen den Grad der Benachrichtigung:\n"
 "            none: keine Benachrichtigung\n"
 "       highlight: Benachrichtigung bei hervorgehobenen Nachrichten (Highlights)\n"
 "         message: Benachrichtigung bei Nachrichten von Usern + Highlights\n"
 "             all: Benachrichtigung bei allen Nachrichten\n"
-"           reset: auf Standardwert zurück setzen (all)\n"
+"           reset: Benachrichtigung auf Standardwert zurück setzen (all)\n"
 "localvar: zeigt die lokalen Variablen für den aktuellen Buffer an\n"
-"     set: setzt eine Eigenschaft für aktuellen Buffer\n"
+"     set: setzt eine Eigenschaft für den aktuellen Buffer\n"
 "     get: zeigt eine Eigenschaft für den aktuellen Buffer an\n"
-"  number: Sprung von einem Buffer zu einem anderen, mögliche Optionen:\n"
+"  number: wechselt von einem Buffer zu einem anderen, mögliche Optionen:\n"
 "          '+': relativer Sprung um 'n'-Buffer\n"
 "          '-': relativer Sprung, um 'n'-Buffer\n"
-"          '*': springt zum Buffer mit der Nummer 'n', nutzt die interne Option \"weechat.look.jump_current_to_previous_buffer\"\n"
-"    name: springt zum Buffer mit dem Namen 'xyz'\n"
+"          '*': wechselt zum Buffer mit der Nummer 'n'; nutzt die interne Option \"weechat.look.jump_current_to_previous_buffer\"\n"
+"    name: wechselt zum Buffer mit dem angegebenen Namen\n"
 "\n"
 "Beispiele:\n"
 "  leert den aktuellen Buffer:\n"
@@ -1006,7 +1006,7 @@ msgid ""
 "command: command to execute (a '/' is automatically added if not found at beginning of command)"
 msgstr ""
 "Erweiterung: Name der Erweiterung ('weechat' für interne WeeChat Befehle)\n"
-"    Befehl: auszuführender Befehl (es wird automatisch ein '/' vorangestellt, falls dieser nicht angegeben wurde)"
+"     Befehl: auszuführender Befehl (es wird automatisch ein '/' vorangestellt, falls dieser nicht angegeben wurde)"
 
 msgid "free movement of cursor on screen to execute actions on specific areas of screen"
 msgstr "Cursor kann frei auf dem Bildschirm bewegt werden um Aktionen in bestimmten Arealen auszuführen"
@@ -1192,7 +1192,7 @@ msgid ""
 "  command: a command name\n"
 "   option: an option name (use /set to see list)"
 msgstr ""
-"    -list: zeigt alle Befehle, nach Erweiterungen sortiert (ohne Angabe von Argumente wird diese Liste ausgegeben)\n"
+"    -list: zeigt alle Befehle, nach Erweiterungen sortiert (ohne Angabe von Argumente wird diese Liste standardmäßig ausgegeben)\n"
 "-listfull: zeigt alle Befehle mit Beschreibung, nach Erweiterung\n"
 "   plugin: zeigt Befehle explizit für diese Erweiterung an\n"
 "  command: Name eines Befehls\n"
@@ -1360,7 +1360,7 @@ msgid ""
 "  middle button of mouse on a nick to retrieve info on nick:\n"
 "    /key bindctxt mouse @item(buffer_nicklist):button3 /msg nickserv info ${nick}"
 msgstr ""
-"       list: zeigt die aktuelle Tastenbelegungen an (Standardaufruf)\n"
+"       list: zeigt die aktuelle Tastenbelegungen an (ohne Angabe von Argumente wird diese Liste standardmäßig ausgegeben)\n"
 "listdefault: zeigt die Standardeinstellung der Tastenbelegung an\n"
 "   listdiff: zeigt die Unterschiede zwischen der aktuell genutzten Tastaturbelegung und der Standardbelegung an (hinzugefügte/verändert/gelöschte Tastenbelegungen)\n"
 "    context: Name des Kontextes (\"default\" oder \"search\")\n"
@@ -1417,8 +1417,8 @@ msgstr ""
 "   save: speichert das aktuelle Layout\n"
 "  apply: das gespeicherte Layout anwenden\n"
 "  reset: das gespeicherte Layout entfernen\n"
-"buffers: speichert/verwendet nur Buffer (Reihenfolge der Buffer)\n"
-"windows: speichert/verwendet nur Fenster (Buffer welche im jeweiligen Fenster dargestellt werden)\n"
+"buffers: speichert bzw. verwendet nur Buffer (Reihenfolge der Buffer)\n"
+"windows: speichert bzw. verwendet nur Fenster (Buffer welche im jeweiligen Fenster dargestellt werden)\n"
 "\n"
 "Wird der Befehl ohne Argumente aufgerufen wird das gespeicherte Layout dargestellt."
 
@@ -1861,7 +1861,7 @@ msgid ""
 "  zoom on window #2:\n"
 "    /window zoom -window 2"
 msgstr ""
-"         list: listet die geöffneten Fenster (ohne Angabe von Parametern wird diese Funktion aufgerufen)\n"
+"         list: listet die geöffneten Fenster (ohne Angabe von Argumente wird diese Liste standardmäßig ausgegeben)\n"
 "           -1: springt zum vorherigen Fenster\n"
 "           +1: springt zum nächsten Fenster\n"
 "           b#: springt zum nächsten Fenster, welches die Buffer Nummer # besitzt\n"
@@ -1948,7 +1948,7 @@ msgid "names of infolists hooked"
 msgstr "Namem der ge-hook-ten Infolisten"
 
 msgid "nicks in nicklist of current buffer"
-msgstr "Nicks in Nickliste des aktuellen Buffers"
+msgstr "Nicks in Nickliste für aktuellen Buffer"
 
 msgid "configuration options"
 msgstr "Konfigurationsoptionen"
@@ -2028,7 +2028,7 @@ msgid "display WeeChat version at startup"
 msgstr "WeeChat-Version beim Start anzeigen"
 
 msgid "alignment for end of lines (all lines after the first): they are starting under this data (time, buffer, prefix, suffix, message (default))"
-msgstr "Einstellung bei einem Zeilenumbruch (betrifft alle Zeilen, außer der ersten Zeile). Die Darstellung der nachfolgenden Zeile beginnt unter: (Zeit = time, Buffer = buffer, Präfix = prefix, Suffix = suffix, Nachricht = message (Standardwert))"
+msgstr "Einstellung für einen Zeilenumbruch (betrifft alle Zeilen, außer der ersten Zeile). Die Darstellung der nachfolgenden Zeile beginnt unter: (Zeit = time, Buffer = buffer, Präfix = prefix, Suffix = suffix, Nachricht = message (Standardwert))"
 
 msgid "string displayed when bar can be scrolled to the left (for bars with filling \"horizontal\")"
 msgstr "Zeichen welches anzeigt, dass die Bar nach links gescrollt werden kann (dies trifft nur auf Bars zu bei denen die Option \"/set *.filling_*\" nicht auf \"horizontal\" eingestellt ist)."
@@ -2049,13 +2049,13 @@ msgid "time format for each line displayed in buffers (see man strftime for date
 msgstr "Format für die Zeitanzeige welche in jeder Zeile eines Buffers dargestellt wird (siehe man strftime für Datum/Zeit Platzhalter). Durch das Format \"${Farbe}\" ist es möglich eine Farbauswahl zu treffen, zum Beispiel eine französische Uhr: \"${lightblue}%H${white}%M${lightred}%S\""
 
 msgid "force \"bold\" attribute for light colors and \"darkgray\" in basic colors (this option is disabled by default: bold is used only if terminal has less than 16 colors)"
-msgstr "erzwingt das Textattribut \"fett\" für helle Farben und \"darkgray\" um diese Farben stärker hervorzuheben (diese Option ist standardmäßig deaktiviert: \"fett\" findet ausschließlich dann Verwendung falls das Terminal weniger als 16 Farben zur Verfügung stellt)"
+msgstr "erzwingt das Textattribut \"fett\" für helle Farben und \"darkgray\", um diese Farben stärker hervorzuheben (diese Option ist standardmäßig deaktiviert: \"fett\" findet ausschließlich dann Verwendung falls das Terminal weniger als 16 Farben zur Verfügung stellt)"
 
 msgid "use a different color for lines in inactive window (when window is not current window)"
-msgstr "Textfarbe der Zeilen in einem inaktiven Fenster (betrifft das Fenster, welches nicht aktiv ist)"
+msgstr "Textfarbe für Zeilen in einem inaktiven Fenster (betrifft das Fenster, welches nicht aktiv ist)"
 
 msgid "use a different color for lines in inactive buffer (when line is from a merged buffer not selected)"
-msgstr "Textfarbe der Zeilen in einem inaktiven Buffer (betrifft Zeilen in einem zusammengefügt Buffer, welcher nicht aktiv ist)"
+msgstr "Textfarbe für Zeilen in einem inaktiven Buffer (betrifft Zeilen in einem zusammengefügt Buffer, welcher nicht aktiv ist)"
 
 msgid "use a different color for inactive time (when window is not current window, or if line is from a merged buffer not selected)"
 msgstr "nutzt eine andere Farbe um die inaktive Zeitangabe darzustellen (Fenster ist nicht das aktuelle Fenster oder die Zeile des zusammengefügten Buffers ist nicht aktiv)"
@@ -2073,13 +2073,13 @@ msgid "automatically reset table of color pairs when number of available pairs i
 msgstr "automatischer Reset der Farbpaarungen sobald die verfügbare Anzahl an Paaren kleiner oder gleich der hier angegebenen Anzahl ist (-1 = deaktiviert den automatischen Reset, dann ist ein manueller Reset mittels \"/color reset\" notwendig falls alle Farbpaarungen belegt sind)"
 
 msgid "if set, uses real white color, disabled by default for terms with white background (if you never use white background, you should turn on this option to see real white instead of default term foreground color)"
-msgstr "Falls diese Option aktiviert ist, wird echtes weiß als Farbe genutzt. In der Standardeinstellung ist diese Option allerdings deaktiviert damit es zu keinen Problemen mit Terminals kommt die einen weißen Hintergrund nutzen (falls man keinen weißen Hintergrund nutzt dann ist es ratsam diese Option zu aktivieren, andernfalls wird die voreingestellte Vordergrundfarbe des Terminals verwendet)"
+msgstr "Falls diese Option aktiviert ist, wird echtes weiß als Farbe genutzt. Standardmäßig ist diese Option deaktiviert, damit keine Probleme mit Terminals auftreten, die einen weißen Hintergrund nutzen (falls man keinen weißen Hintergrund nutzt, dann ist es ratsam diese Option zu aktivieren. Andernfalls wird die voreingestellte Vordergrundfarbe des Terminals verwendet)"
 
 msgid "chars used to determine if input string is a command or not: input must start with one of these chars; the slash (\"/\") is always considered as command prefix (example: \".$\")"
 msgstr "Bestimmt ein- oder mehrere Zeichen mit denen man ebenfalls einen Befehl ausführen kann. Zum Beispiel mittels \".$\". Der Schrägstrich (slash: \"/\") ist ein reserviertes Zeichen und kann immer genutzt werden."
 
 msgid "if set, /quit command must be confirmed with extra argument \"-yes\" (see /help quit)"
-msgstr "Falls diese Option aktiviert ist muss der \"/quit\" Befehl mit der Option \"-yes\" ausgeführt werden (siehe /help quit)"
+msgstr "ist diese Option aktiviert,  muss der \"/quit\" Befehl mit der Option \"-yes\" ausgeführt werden (siehe /help quit)"
 
 msgid "display special message when day changes"
 msgstr "Wenn ein neuer Tag beginnt wird eine entsprechende Nachricht angezeigt"
@@ -2410,7 +2410,7 @@ msgid "text color for offline nicknames"
 msgstr "Textfarbe von Nicknamen die Offline sind"
 
 msgid "if enabled, the base word to complete ends at char before cursor; otherwise the base word ends at first space after cursor"
-msgstr "Ist diese Option aktiviert beginnt eine Vervollständigung an der aktuellen Position des Cursors; andernfalls beginnt eine Vervollständigung erst wenn ein Leerzeichen als Trennung zum nächsten Wort vorhanden ist"
+msgstr "Ist diese Option aktiviert beginnt eine Vervollständigung an der aktuellen Position des Cursors; andernfalls beginnt eine Vervollständigung erst sobald ein Leerzeichen als Trennung zum nächsten Wort vorhanden ist"
 
 msgid "default completion template (please see documentation for template codes and values)"
 msgstr "Standardvorlage für die automatische Vervollständigung (in der Dokumentation finden Sie die vorgegebenen Codes und Werte)"
@@ -2446,13 +2446,13 @@ msgid "maximum number of lines in history per buffer (0 = unlimited)"
 msgstr "maximale Anzahl an Zeilen im Verlaufsspeicher. Dies gilt pro Buffer (0: keine Zeilenbegrenzung)"
 
 msgid "maximum number of minutes in history per buffer (0 = unlimited, examples: 1440 = one day, 10080 = one week, 43200 = one month, 525600 = one year)"
-msgstr "maximale Anzahl in Minuten wie Lange die Zeilen m Verlaufspeicher pro Buffer gehalten werden sollen (0 = unbegrenzt, Beispiele: 1440 = einen Tag, 10080 = eine Woche, 43200 = einen Monat, 525600 = ein Jahr)"
+msgstr "maximale Anzahl, in Minuten, wie Lange die Zeilen im Verlaufspeicher, pro Buffer, gehalten werden sollen (0 = unbegrenzt, Beispiele: 1440 = einen Tag, 10080 = eine Woche, 43200 = einen Monat, 525600 = ein Jahr)"
 
 msgid "maximum number of user commands in history (0 = unlimited)"
 msgstr "maximale Anzahl an Befehlen im Verlauf (0: kein Begrenzung)"
 
 msgid "maximum number of visited buffers to keep in memory"
-msgstr "maximale Anzahl an besuchten Buffern welche im Speicher gehalten werden sollen"
+msgstr "maximale Anzahl an besuchten Buffern, welche im Speicher gehalten werden sollen"
 
 msgid "maximum number of commands to display by default in history listing (0 = unlimited)"
 msgstr "Wert für die maximale Anzahl der angezeigten Befehle im Verlaufsspeicher, die mittels /history angezeigt werden (0: unbegrenzt)"
@@ -2464,26 +2464,26 @@ msgid "timeout (in seconds) for gnutls handshake"
 msgstr "Zeitüberschreitung (in Sekunden) für gnutls handshake"
 
 msgid "comma separated list of plugins to load automatically at startup, \"*\" means all plugins found, a name beginning with \"!\" is a negative value to prevent a plugin from being loaded, names can start or end with \"*\" to match several plugins (examples: \"*\" or \"*,!lua,!tcl\")"
-msgstr "Eine durch Kommata getrennte Liste der Erweiterungen die beim Programmstart automatisch geladen werden sollen, \"*\" lädt alle gefundenen Erweiterungen. Beginnt der Name hingegen mit \"!\" wird die Erweiterung nicht geladen. Suchmuster können mit einem Joker (\"*\") beginnen oder enden um mehrere Erweiterungen zu laden (Beispiele: \"*\" oder \"*,!lua,!tcl\")"
+msgstr "Eine durch Kommata getrennte Liste der Erweiterungen, die beim Programmstart automatisch geladen werden sollen; \"*\" lädt alle vorhandenen Erweiterungen. Beginnt der Name hingegen mit \"!\" wird die Erweiterung nicht geladen. Suchmuster können mit einem Joker (\"*\") beginnen oder enden, um mehrere Erweiterungen zu laden (Beispiele: \"*\" oder \"*,!lua,!tcl\")"
 
 msgid "enable debug messages by default in all plugins (option disabled by default, which is highly recommended)"
 msgstr "aktiviere Debug-Nachrichten für alle Erweiterungen (diese Option ist standardmäßig deaktiviert und das ist auch gut so)"
 
 msgid "comma separated list of file name extensions for plugins"
-msgstr "Durch Kommata getrennte Liste von Dateinamenerweiterungen welche für die Erweiterungen genutzt werden sollen"
+msgstr "Durch Kommata getrennte Liste von Dateinamenserweiterungen, welche für die Erweiterungen genutzt werden sollen"
 
 msgid "path for searching plugins (\"%h\" will be replaced by WeeChat home, \"~/.weechat\" by default)"
 msgstr "Suchpfad für Erweiterungen (\"%h\"' wird durch das WeeChat-Basisverzeichnis ersetzt, voreingestellt ist \"~/.weechat\")"
 
 msgid "save configuration files when unloading plugins"
-msgstr "Speichere Konfiguration falls Erweiterungen deinstalliert werden"
+msgstr "speichert Konfigurationen, falls Erweiterungen deinstalliert werden"
 
 msgid "FATAL: error initializing configuration options"
 msgstr "FATAL: Fehler bei der Initialisierung der Konfiguration-Optionen"
 
 #, c-format
 msgid "%sError reading configuration"
-msgstr "%sFehler beim lesen der Konfiguration"
+msgstr "%sFehler beim Lesen der Konfiguration"
 
 #, c-format
 msgid "Writing configuration file %s %s"
@@ -2543,7 +2543,7 @@ msgstr "Speicheranzeige nicht verfügbar (Funktion \"mallinfo\" nicht gefunden)"
 
 #, c-format
 msgid "%sError: another command \"%s\" already exists for plugin \"%s\""
-msgstr "%sFehler: ein anderer Befehl \"%s\" existiert bereits für Erweiterung \"%s\""
+msgstr "%sFehler: ein anderer Befehl \"%s\" existiert bereits für die Erweiterung \"%s\""
 
 #, c-format
 msgid "System clock skew detected (%+ld seconds), reinitializing all timers"
@@ -2582,8 +2582,8 @@ msgid ""
 "If another WeeChat process is using this file, try to run WeeChat\n"
 "with another home using \"--dir\" command line option.\n"
 msgstr ""
-"Fehler: kann Protokoll-Datei nicht erzeugen oder keine Daten anhängen (weechat.log)\n"
-"Falls ein anderer WeeChat-Prozess die Datei benutzt sollte dann können Sie versuchen, durch den\n"
+"Fehler: Protokolldatei kann nicht erstellt werden oder es können keine Daten an gehangen werden (weechat.log)\n"
+"Sofern ein anderer WeeChat-Prozess die Datei benutzt, sollten Sie versuchen, durch den\n"
 "Aufruf der \"--dir\" Kommandozeilenoption, WeeChat mit einem anderen Home-Verzeichnis zu starten.\n"
 
 msgid "invalid priorities"
@@ -2859,6 +2859,13 @@ msgstr[1] "normale"
 msgid "Debug disabled for cursor mode"
 msgstr "Debug für Cursor Modus deaktiviert"
 
+#, c-format
+msgid "Debug enabled for mouse (%s)"
+msgstr "Debug-Modus (%s) für Maus aktiviert"
+
+msgid "Debug disabled for mouse"
+msgstr "Debug für Maus deaktiviert"
+
 msgid "Error: not enough memory to add a buffer to hotlist"
 msgstr "Fehler: nicht genügend Speicher um den Buffer der Hotlist hinzu zu fügen"
 
@@ -2887,13 +2894,6 @@ msgstr "führe Befehl \"%s\" aus"
 
 msgid "Not enough memory for new line"
 msgstr "Nicht genügend Speicher für eine neue Zeile"
-
-#, c-format
-msgid "Debug enabled for mouse (%s)"
-msgstr "Debug-Modus (%s) für Maus aktiviert"
-
-msgid "Debug disabled for mouse"
-msgstr "Debug für Maus deaktiviert"
 
 #, c-format
 msgid "%s%s: error, circular reference when calling alias \"%s\""
@@ -3293,7 +3293,7 @@ msgstr "%s%s: Verbindung zum Server wird getrennt. Ein Upgrade ist über eine SS
 #. TRANSLATORS: "%s" after "%d" is "server" or "servers"
 #, c-format
 msgid "%s%s: disconnected from %d %s (SSL connection not supported with upgrade)"
-msgstr "%s%s: Verbindung mit %d %s getrennt. (Upgrade über eine SSL Verbindung nicht möglich)"
+msgstr "%s%s: Verbindung mit %d %s getrennt (Upgrade über eine SSL Verbindung nicht möglich)"
 
 #, c-format
 msgid "%s%s: error with server from URL (\"%s\"), ignored"
@@ -4022,18 +4022,18 @@ msgid ""
 msgstr ""
 "Channel-Modi:\n"
 "  channel: zu ändernder Channel (standardmäßig der erste Channel)\n"
-"  o: vergebe/nehme Operator Privilegien\n"
+"  o: vergebt oder entzieht Operator Privilegien\n"
 "  p: privater Channel\n"
 "  s: geheimer Channel\n"
 "  i: geschlossener Channel (Zutritt nur mit Einladung)\n"
 "  t: nur Operatoren dürfen das Thema setzen\n"
-"  n: keine Channeln-Nachrichten von außerhalb des Channels\n"
+"  n: keine Nachrichten von außerhalb des Channels zulassen\n"
 "  m: moderierter Channel (schreiben nur mit Voice)\n"
 "  l: maximale Anzahl an Usern im Channel festlegen\n"
 "  b: Bannmaske für zu sperrende User (in nick!ident@host-Form)\n"
-"  e: lege Ausnahmemaske fest\n"
-"  v: vergebe/nehme Voice (d.h. Schreibrechte bei moderierten Channels)\n"
-"  k: lege ein Passwort für den Channel fest\n"
+"  e: legt Ausnahmemaske fest\n"
+"  v: vergibt oder entzieht Voice (d.h. Schreibrechte bei moderierten Channels)\n"
+"  k: legt ein Passwort für den Channel fest\n"
 "User-Modi:\n"
 "  nick: zu ändernder Nickname\n"
 "  i: User als unsichtbar kennzeichnen\n"
@@ -4044,9 +4044,9 @@ msgstr ""
 "Die Liste der hier dargestellten Modi ist nicht vollständig. Es sollte die Dokumentation des jeweiligen Servers zu Rate gezogen werden um alle verfügbaren Modi zu erfahren.\n"
 "\n"
 "Beispiele:\n"
-"  Schützt das Thema des Channels #weechat:\n"
+"  schützt das Thema des Channels #weechat:\n"
 "    /mode #weechat +t\n"
-"  sich auf dem Server unsichtbar machen:\n"
+"  um sich auf dem Server unsichtbar machen:\n"
 "    /mode nick +i"
 
 msgid "get the \"Message Of The Day\""
@@ -4294,10 +4294,10 @@ msgstr ""
 "new_nick: neuer Nickname"
 
 msgid "force a user to leave channel(s)"
-msgstr "Zwingt einen User den/die Channel(s) zu verlassen"
+msgstr "Zwingt einen User den oder die Channel(s) zu verlassen"
 
 msgid "force a user to quit server with a reason"
-msgstr "Zwingt einen User den Server zu verlassen, mit Begründung"
+msgstr "Zwingt einen User den Server mit Begründung zu verlassen"
 
 msgid ""
 "  nick: nick\n"
@@ -4353,7 +4353,7 @@ msgid ""
 "  /server del freenode\n"
 "  /server deloutq"
 msgstr ""
-"    list: listet Server auf (Standardaufruf)\n"
+"    list: listet Server auf (ohne Angabe von Argumente wird diese Liste standardmäßig ausgegeben)\n"
 "listfull: listet Server mit detaillierten Informationen über jeden einzelnen Server auf\n"
 "     add: erstellt einen neuen Server\n"
 "  server: Servername, dient der internen Nutzung und zur Darstellung\n"
@@ -4670,7 +4670,7 @@ msgstr "Passwort für den Server"
 
 #. TRANSLATORS: please keep words "client capabilities" between brackets if translation is different (see fr.po)
 msgid "comma-separated list of client capabilities to enable for server if they are available (example: \"multi-prefix,extended-join\")"
-msgstr "Durch Kommata getrennte Liste von erweiterten Fähigkeiten, welche vom Server angeboten und genutzt werden sollen (Beispiel: \"multi-prefix,extended-join\")"
+msgstr "Durch Kommata getrennte Liste von erweiterten Client Fähigkeiten (\"client capabilities\"), welche vom Server angeboten und genutzt werden sollen (Beispiel: \"multi-prefix,extended-join\")"
 
 msgid "mechanism for SASL authentication"
 msgstr "Vorrichtung zur SASL Authentifizierung"
@@ -4727,7 +4727,7 @@ msgid "anti-flood for high priority queue: number of seconds between two user me
 msgstr "Anti-Flood für dringliche Inhalte: Zeit in Sekunden zwischen zwei Benutzernachrichten oder Befehlen die zum IRC Server versendet wurden (0 = Anti-Flood deaktivieren)"
 
 msgid "anti-flood for low priority queue: number of seconds between two messages sent to IRC server (messages like automatic CTCP replies) (0 = no anti-flood)"
-msgstr "Anti-Flood für weniger dringliche Inhalte: Zeit in Sekunden zwischen zwei Benutzernachrichten, die zum IRC Server versendet wurden. Beispiel: automatische CTCP Antworten. (0 = Anti-Flood deaktivieren)"
+msgstr "Anti-Flood für weniger dringliche Inhalte: Zeit in Sekunden zwischen zwei Benutzernachrichten, die zum IRC Server versendet wurden. Beispiel: automatische CTCP Antworten (0 = Anti-Flood deaktivieren)."
 
 msgid "interval between two checks for away (in minutes, 0 = never check)"
 msgstr "Überprüft die Abwesenheit (/away) der Nutzer, in dem angegebenen Intervall (in Minuten, 0 = nicht überprüfen)"
@@ -4843,16 +4843,16 @@ msgid "hide password displayed by nickserv"
 msgstr "Von NickServ angezeigte Passwörter verstecken"
 
 msgid "comma separated list of words to highlight in server buffers (case insensitive, use \"(?-i)\" at beginning of words to make them case sensitive; special variables $nick, $channel and $server are replaced by their value), these words are added to buffer local variable \"highlight_words\" only when buffer is created (it does not affect current buffers), an empty string disables default highlight on nick, examples: \"$nick\", \"(?-i)$nick\""
-msgstr "Durch Kommata getrennte Liste von Wörtern die im Serverbuffer als Highlight erscheinen sollen (zwischen Groß- und Kleinschreibung wird nicht unterschieden. Um zwischen Groß- und Kleinschreibung zu unterscheiden muss zu Beginn \"(?-i)\" genutzt werden; desweiteren können folgende Variablen genutzt werden: $nick, $channel und $server). Die angegeben Wörter werden der lokalen Variable \"highlight_words\" hinzugefügt, sobald der Buffer geöffnet wird. Dies bedeutet, daß diese Option keinen direkten Einfluß auf schon geöffnete Buffer nimmt. Eine leere Zeichenkette deaktiviert ein Highlight für den Nick. Beispiel: \"$nick\", \"(?-i)$nick\""
+msgstr "Durch Kommata getrennte Liste von Wörtern die im Serverbuffer als Highlight erscheinen sollen (zwischen Groß- und Kleinschreibung wird nicht unterschieden. Um zwischen Groß- und Kleinschreibung zu unterscheiden muss zu Beginn \"(?-i)\" genutzt werden; des weiteren können folgende Variablen genutzt werden: $nick, $channel und $server). Die angegeben Wörter werden der lokalen Variable \"highlight_words\" hinzugefügt, sobald der Buffer geöffnet wird. Dies bedeutet, dass diese Option keinen direkten Einfluss auf schon geöffnete Buffer hat. Eine leere Zeichenkette deaktiviert ein Highlight für den Nick. Beispiel: \"$nick\", \"(?-i)$nick\""
 
 msgid "comma separated list of words to highlight in channel buffers (case insensitive, use \"(?-i)\" at beginning of words to make them case sensitive; special variables $nick, $channel and $server are replaced by their value), these words are added to buffer local variable \"highlight_words\" only when buffer is created (it does not affect current buffers), an empty string disables default highlight on nick, examples: \"$nick\", \"(?-i)$nick\""
-msgstr "Durch Kommata getrennte Liste von Wörtern die im Channel-Buffer als Highlight erscheinen sollen (zwischen Groß- und Kleinschreibung wird nicht unterschieden. Um zwischen Groß- und Kleinschreibung zu unterscheiden muss zu Beginn \"(?-i)\" genutzt werden; desweiteren können folgende Variablen genutzt werden: $nick, $channel und $server). Die angegeben Wörter werden der lokalen Variable \"highlight_words\" hinzugefügt, sobald der Buffer geöffnet wird. Dies bedeutet, daß diese Option keinen direkten Einfluß auf schon geöffnete Buffer nimmt. Eine leere Zeichenkette deaktiviert ein Highlight für den Nick. Beispiel: \"$nick\", \"(?-i)$nick\""
+msgstr "Durch Kommata getrennte Liste von Wörtern die im Channel-Buffer als Highlight erscheinen sollen (zwischen Groß- und Kleinschreibung wird nicht unterschieden. Um zwischen Groß- und Kleinschreibung zu unterscheiden muss zu Beginn \"(?-i)\" genutzt werden; des weiteren können folgende Variablen genutzt werden: $nick, $channel und $server). Die angegeben Wörter werden der lokalen Variable \"highlight_words\" hinzugefügt, sobald der Buffer geöffnet wird. Dies bedeutet, dass diese Option keinen direkten Einfluss auf schon geöffnete Buffer hat. Eine leere Zeichenkette deaktiviert ein Highlight für den Nick. Beispiel: \"$nick\", \"(?-i)$nick\""
 
 msgid "comma separated list of words to highlight in private buffers (case insensitive, use \"(?-i)\" at beginning of words to make them case sensitive; special variables $nick, $channel and $server are replaced by their value), these words are added to buffer local variable \"highlight_words\" only when buffer is created (it does not affect current buffers), an empty string disables default highlight on nick, examples: \"$nick\", \"(?-i)$nick\""
-msgstr "Durch Kommata getrennte Liste von Wörtern die in einem privaten Buffer als Highlight erscheinen sollen (zwischen Groß- und Kleinschreibung wird nicht unterschieden. Um zwischen Groß- und Kleinschreibung zu unterscheiden muss zu Beginn \"(?-i)\" genutzt werden; desweiteren können folgende Variablen genutzt werden: $nick, $channel und $server). Die angegeben Wörter werden der lokalen Variable \"highlight_words\" hinzugefügt, sobald der Buffer geöffnet wird. Dies bedeutet, daß diese Option keinen direkten Einfluß auf schon geöffnete Buffer nimmt. Eine leere Zeichenkette deaktiviert ein Highlight für den Nick. Beispiel: \"$nick\", \"(?-i)$nick\""
+msgstr "Durch Kommata getrennte Liste von Wörtern die in einem privaten Buffer als Highlight erscheinen sollen (zwischen Groß- und Kleinschreibung wird nicht unterschieden. Um zwischen Groß- und Kleinschreibung zu unterscheiden muss zu Beginn \"(?-i)\" genutzt werden; des weiteren können folgende Variablen genutzt werden: $nick, $channel und $server). Die angegeben Wörter werden der lokalen Variable \"highlight_words\" hinzugefügt, sobald der Buffer geöffnet wird. Dies bedeutet, dass diese Option keinen direkten Einfluss auf schon geöffnete Buffer hat. Eine leere Zeichenkette deaktiviert ein Highlight für den Nick. Beispiel: \"$nick\", \"(?-i)$nick\""
 
 msgid "comma separated list of tags for messages that may produce highlight (usually any message from another user, not server messages,..)"
-msgstr "Eine durch Kommata getrennte Liste von Tags die bei einer Nachricht selbige hervorhebt (Highlight). (normalerweise trifft dies auf jede Nachricht eines Users zu, ausgenommen Nachrichten vom Server,..)"
+msgstr "Eine durch Kommata getrennte Liste von Tags die eine Nachricht hervorheben soll (Highlight), falls die Nachricht einen entsprechenden Tag besitzt  (normalerweise trifft dies auf jede Nachricht eines Users zu, ausgenommen Nachrichten vom Server,..)"
 
 msgid "name of bar item where IRC server is displayed (for status bar)"
 msgstr "Name der Bar-Item in dem der IRC Server angezeigt wird (für Status-Bar)"
@@ -5887,37 +5887,37 @@ msgid "logging level for this buffer (0 = logging disabled, 1 = a few messages (
 msgstr "Level der Protokollierung für diesen Buffer (0 = nichts protokollieren, 1 = nur die wichtigsten Nachrichten protokollieren .. 9 = protokolliere alle Nachrichten)"
 
 msgid "file mask for log file; local buffer variables are permitted"
-msgstr "Dateimaske für Protokoll-Datei; lokale Buffer-Variablen sind dabei erlaubt"
+msgstr "Dateimaske für Protokolldatei; lokale Buffer-Variablen sind dabei erlaubt"
 
 msgid "maximum number of lines to display from log file when creating new buffer (0 = no backlog)"
-msgstr "maximale Anzahl der Zeilen die aus der Protokoll-Datei dargestellt werden sollen, wenn ein Buffer geöffnet wird (0 = kein Darstellung)"
+msgstr "maximale Anzahl der letzten Zeilen die aus der Protokolldatei dargestellt werden sollen, sobald ein Buffer geöffnet wird (0 = kein Darstellung)"
 
 msgid "automatically save content of buffers to files (unless a buffer disables log)"
-msgstr "Speichert automatisch den Inhalt eines Buffers in eine Datei (sofern das Protokollieren für den Buffer nicht deaktiviert sein sollte)"
+msgstr "speichert automatisch den Inhalt eines Buffers in eine Datei (sofern das Protokollieren für den Buffer nicht deaktiviert sein sollte)"
 
 msgid "number of seconds between flush of log files (0 = write in log files immediately for each line printed)"
 msgstr "Zeit, in Sekunden, die verstreicht bis eine Protokolldatei gesichert werden soll (0 = Protokolldatei wird unmittelbar gesichert, nachdem eine neue Zeile dargestellt wurde)"
 
 msgid "use only lower case for log filenames"
-msgstr "Benutze ausschließlich Kleinschreibung für Protokoll-Dateien"
+msgstr "Protokolldateien werden ausschließlich in Kleinschreibung erstellt"
 
 msgid "path for WeeChat log files; \"%h\" at beginning of string is replaced by WeeChat home (\"~/.weechat\" by default); date specifiers are permitted (see man strftime)"
 msgstr "Pfad für WeeChat Protokolldateien; \"%h\" wird durch das WeeChat Verzeichnis ersetzt (Standardpfad: \"~/.weechat\"); eine Datumsspezifikation ist zulässig (siehe: man strftime)"
 
 msgid "default file name mask for log files (format is \"directory/to/file\" or \"file\", without first \"/\" because \"path\" option is used to build complete path to file); local buffer variables are permitted; date specifiers are permitted (see man strftime)"
-msgstr "Standardmaske für Protokolldateien (Format: \"Verzeichnis/zu/Datei\" oder \"Datei\", ohne ein führendes \"/\", da die \"Verzeichnis\" Option genutzt wird um vollständige Verzeichnisstrukturen zu erstellen); lokale Buffer Variablen und Datumsspezifikationen (siehe: man strftime) sind zulässig"
+msgstr "Standardmaske für Protokolldateien (Format: \"Verzeichnis/zur/Datei\" oder \"Datei\", ohne ein führendes \"/\", da die \"Verzeichnis\" Option genutzt wird um vollständige Verzeichnisstrukturen zu erstellen); lokale Buffer Variablen und Datumsspezifikationen (siehe: man strftime) sind zulässig"
 
 msgid "replacement char for special chars in filename built with mask (like directory delimiter)"
 msgstr "Ersatzzeichen für Dateinamen, falls der Dateiname Sonderzeichen beinhaltet (z.B. das Trennzeichen bei Verzeichnissen \"/\")"
 
 msgid "write information line in log file when log starts or ends for a buffer"
-msgstr "Fügt eine Information in die Protokoll-Datei ein, falls die Protokollierung gestartet oder beendet wird"
+msgstr "Fügt eine Information in die Protokoll-Datei ein, wenn die Protokollierung gestartet oder beendet wird"
 
 msgid "timestamp used in log files (see man strftime for date/time specifiers)"
 msgstr "Zeitstempel in Protokoll-Datei nutzen (bitte dazu die Anleitung zu \"strftime\" (man strftime) durchlesen)"
 
 msgid "list of logger buffers"
-msgstr "Liste der protokollierten Buffer"
+msgstr "Auflistung der protokollierten Buffer"
 
 msgid "logger pointer (optional)"
 msgstr "Logger Pointer (optional)"
@@ -5932,7 +5932,7 @@ msgid "WeeChat compilation date"
 msgstr "Datum der WeeChat Kompilierung"
 
 msgid "directory separator"
-msgstr "Verzeichnis-Trennzeichen"
+msgstr "Trennzeichen für Verzeichnis"
 
 msgid "WeeChat directory"
 msgstr "WeeChat Verzeichnis"
@@ -5980,7 +5980,7 @@ msgid "bar name (can start or end with \"*\" as wildcard) (optional)"
 msgstr "Bar Name (darf mit einem \"*\" als Platzhalter beginnen oder enden) (optional)"
 
 msgid "list of bar items"
-msgstr "Liste der Bar-Items"
+msgstr "Auflistung der Bar-Items"
 
 msgid "bar item pointer (optional)"
 msgstr "Bar Item Pointer (optional)"
@@ -5989,13 +5989,13 @@ msgid "bar item name (can start or end with \"*\" as wildcard) (optional)"
 msgstr "Bar-Item Name (darf mit einem \"*\" als Platzhalter beginnen oder enden) (optional)"
 
 msgid "list of bar windows"
-msgstr "Liste der Bar-Fenster"
+msgstr "Auflistung der Bar-Fenster"
 
 msgid "bar window pointer (optional)"
 msgstr "Bar-Fenster Pointer (optional)"
 
 msgid "list of buffers"
-msgstr "Liste der Buffer"
+msgstr "Auflistung der Buffer"
 
 msgid "buffer pointer (optional)"
 msgstr "Buffer Pointer (optional)"
@@ -6010,7 +6010,7 @@ msgid "buffer pointer"
 msgstr "Buffer Pointer"
 
 msgid "list of filters"
-msgstr "Liste der Filter"
+msgstr "Auflistung der Filter"
 
 msgid "filter name (can start or end with \"*\" as wildcard) (optional)"
 msgstr "Name des Filters (darf mit einem \"*\" als Platzhalter beginnen oder enden) (optional)"
@@ -6043,7 +6043,7 @@ msgid "nick_xxx or group_xxx to get only nick/group xxx (optional)"
 msgstr "nick_xxx oder group_xxx um nur den Nick/Group xxx abzufragen (optional)"
 
 msgid "list of options"
-msgstr "Liste der Optionen"
+msgstr "Auflistung der Optionen"
 
 msgid "option name (can start or end with \"*\" as wildcard) (optional)"
 msgstr "Name einer Option (darf mit einem \"*\" als Platzhalter beginnen oder enden) (optional)"
@@ -6061,7 +6061,7 @@ msgid "options for URL"
 msgstr "Optionen für URL"
 
 msgid "list of windows"
-msgstr "Auflistung der Windows"
+msgstr "Auflistung der Fenster"
 
 msgid "window pointer (optional)"
 msgstr "Fenster Pointer (optional)"
@@ -6141,7 +6141,7 @@ msgstr "%sFehler: Kann Erweiterung \"%s\" nicht installieren: %s"
 
 #, c-format
 msgid "%sIf you're trying to load a script and not a C plugin, try command to load scripts (/perl, /python, ...)"
-msgstr "%sFalls ein Skript installiert werden soll und keine C-Erweiterung dann muss der Befehl zum Installieren von Skripten genutzt werden (/perl, /python, ...)"
+msgstr "%sFalls ein Skript installiert werden soll und keine C-Erweiterung, dann muss der entsprechende Befehl zum Installieren von Skripten genutzt werden (/perl, /python, ...)"
 
 #, c-format
 msgid "%sError: symbol \"%s\" not found in plugin \"%s\", failed to load"
@@ -6149,15 +6149,15 @@ msgstr "%sFehler: Symbol \"%s\" in Erweiterung \"%s\" nicht gefunden, Installati
 
 #, c-format
 msgid "%sIf plugin \"%s\" is old/obsolete, you can delete this file."
-msgstr "%sFalls die Erweiterung \"%s\" alt oder obsolet ist sollte diese gelöscht werden."
+msgstr "%sFalls die Erweiterung \"%s\" veraltet oder obsolet ist sollte diese gelöscht werden."
 
 #, c-format
 msgid "%sError: API mismatch for plugin \"%s\" (current API: \"%s\", plugin API: \"%s\"), failed to load"
-msgstr "%sFehler: API Inkompatibilität mit Erweiterung \"%s\" (genutzte API: \"%s\", neue API: \"%s\"), Installation fehlgeschlagen"
+msgstr "%sFehler: Inkompatibilität mit der API Erweiterung \"%s\" (aktuelle API: \"%s\", API der Erweiterung: \"%s\"), Installation fehlgeschlagen"
 
 #, c-format
 msgid "%sError: unable to load plugin \"%s\": a plugin with same name already exists"
-msgstr "%sFehler: Kann Erweiterung \"%s\" nicht laden: eine gleichnamige Erweiterung existiert bereits"
+msgstr "%sFehler: Erweiterung \"%s\" kann nicht geladen werden: eine Erweiterung mit dem selben Namen existiert bereits"
 
 #, c-format
 msgid "%sError: function \"%s\" not found in plugin \"%s\", failed to load"
@@ -6199,10 +6199,10 @@ msgid "  [R] Remove"
 msgstr "  [R] Entfernen"
 
 msgid "  [P] Purge finished"
-msgstr "  [P] Säubern beenden"
+msgstr "  [P] fertige Downloads aufräumen"
 
 msgid "  [Q] Close this buffer"
-msgstr "  [Q] Schließe diesen Buffer"
+msgstr "  [Q] diesen Buffer schließen"
 
 #, c-format
 msgid "%s%s[%s%s%s%s] %s (started on: %s%s%s%s)"
