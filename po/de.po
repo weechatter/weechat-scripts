@@ -23,8 +23,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WeeChat 0.3.7-dev\n"
 "Report-Msgid-Bugs-To: flashcode@flashtux.org\n"
-"POT-Creation-Date: 2012-02-26 08:00+0100\n"
-"PO-Revision-Date: 2012-02-26 14:32+0100\n"
+"POT-Creation-Date: 2012-02-26 18:02+0100\n"
+"PO-Revision-Date: 2012-02-27 22:06+0100\n"
 "Last-Translator: Nils Görs <weechatter@arcor.de>\n"
 "Language-Team: German <weechatter@arcor.de>\n"
 "Language: \n"
@@ -2859,13 +2859,6 @@ msgstr[1] "normale"
 msgid "Debug disabled for cursor mode"
 msgstr "Debug für Cursor Modus deaktiviert"
 
-#, c-format
-msgid "Debug enabled for mouse (%s)"
-msgstr "Debug-Modus (%s) für Maus aktiviert"
-
-msgid "Debug disabled for mouse"
-msgstr "Debug für Maus deaktiviert"
-
 msgid "Error: not enough memory to add a buffer to hotlist"
 msgstr "Fehler: nicht genügend Speicher um den Buffer der Hotlist hinzu zu fügen"
 
@@ -2894,6 +2887,13 @@ msgstr "führe Befehl \"%s\" aus"
 
 msgid "Not enough memory for new line"
 msgstr "Nicht genügend Speicher für eine neue Zeile"
+
+#, c-format
+msgid "Debug enabled for mouse (%s)"
+msgstr "Debug-Modus (%s) für Maus aktiviert"
+
+msgid "Debug disabled for mouse"
+msgstr "Debug für Maus deaktiviert"
 
 #, c-format
 msgid "%s%s: error, circular reference when calling alias \"%s\""
@@ -4785,8 +4785,8 @@ msgstr "Text, der im Chatfenster vor dem Nickname erscheinen soll"
 msgid "text to display after nick in chat window"
 msgstr "Text, der im Chatfenster nach dem Nickname erscheinen soll"
 
-msgid "force color for some nicks: hash computed with nickname to find color will not be used for these nicks (format is: \"nick1:color1;nick2:color2\")"
-msgstr "Erzwingt für einen Nick eine spezielle Farbe. Die mittels Streuwertfunktion aus dem Nicknamen generierte Nickfarbe findet für diese Nicks keine Anwendung (Format:\"Nick1:Farbe1;Nick2:Farbe2\")"
+msgid "force color for some nicks: hash computed with nickname to find color will not be used for these nicks (format is: \"nick1:color1;nick2:color2\"); lookup for nicks is with exact case then lower case, so it's possible to use only lower case for nicks in this option"
+msgstr "Erzwingt für einen Nick eine spezielle Farbe. Die mittels Streuwertfunktion aus dem Nicknamen generierte Nickfarbe findet für diese Nicks keine Anwendung (Format:\"Nick1:Farbe1;Nick2:Farbe2\"). Bei der Schreibweise der Nicks wird sowohl nach Groß- und Kleinschreibung unterschieden und ebenso kann man die Nicks nur mit Kleinbuchstaben schreiben."
 
 msgid "chars used to stop in nick when computing color with letters of nick (at least one char outside this list must be in string before stopping) (example: nick \"|nick|away\" with \"|\" in chars will return color of nick \"|nick\")"
 msgstr "Zeichen die genutzt werden sollen damit bei der Generierung der Farbe für einen Nicknamen abgebrochen wird. Es muss mindestens ein Zeichen im Nicknamen enthalten sein der nicht in dieser Liste aufgeführt wird, damit eine Farbe für den Nicknamen erstellt werden kann (Beispiel: Der Nickname lautet \"|nick|abwesend\" wobei das Zeichen \"|\" ignoriert werden soll. Die Farbe für den Nicknamen wird nun für \"|nick\" anstelle von \"|nick|abwesend\" erstellt)."
@@ -5253,7 +5253,7 @@ msgstr "%s%s: Konnte den neuen Channel \"%s\" nicht erzeugen"
 
 #, c-format
 msgid "%s%s%s%s%s%s%s%s%s%s has joined %s%s%s"
-msgstr "%s%s%s%s%s%s%s%s%s%s ist in den Channel %s%s%s gekommen"
+msgstr "%s%s%s%s%s%s%s%s%s%s ist in den %s%s%s Channel eingetreten"
 
 #, c-format
 msgid "%s%s%s%s has kicked %s%s%s %s(%s%s%s)"
@@ -6791,7 +6791,7 @@ msgstr "%s: Skripten deinstalliert"
 
 #, c-format
 msgid "%s%s: unable to call function \"%s\", script is not initialized (script: %s)"
-msgstr "%s%s: Die Funktion \"%s\" kann nicht ausführen werden. Skript ist nicht initialisiert (Skript: %s)"
+msgstr "%s%s: Die Funktion \"%s\" kann nicht ausgeführt werden. Skript ist nicht initialisiert (Skript: %s)"
 
 #, c-format
 msgid "%s%s: wrong arguments for function \"%s\" (script: %s)"
@@ -6822,7 +6822,7 @@ msgid "ETA"
 msgstr "ETA"
 
 msgid "Xfer list"
-msgstr "Tranfer (xfer) Liste"
+msgstr "Transferliste"
 
 msgid "waiting"
 msgstr "warte"
@@ -6889,19 +6889,19 @@ msgstr "%s%s: fehlende Argumente (%s)"
 
 #, c-format
 msgid "%s%s: unknown xfer type \"%s\""
-msgstr "%s%s: Unbekannter Transfer-Typ \"%s\""
+msgstr "%s%s: Unbekannter Transfertyp \"%s\""
 
 #, c-format
 msgid "%s%s: unknown xfer protocol \"%s\""
-msgstr "%s%s: Unbekanntes Transfer-Protokoll \"%s\""
+msgstr "%s%s: Unbekanntes Transferprotokoll \"%s\""
 
 #, c-format
 msgid "%s%s: cannot access file \"%s\""
-msgstr "%s%s: Es kann nicht auf die Datei \"%s\" zugreifen werden"
+msgstr "%s%s: Auf die Datei \"%s\" kann nicht zugegriffen werden"
 
 #, c-format
 msgid "%s%s: could not find address for \"%s\", falling back to local IP"
-msgstr "%s%s: Kann die Adresse für \"%s\" nicht finden. Greife auf lokale IP zurück."
+msgstr "%s%s: Kann die Adresse für \"%s\" nicht finden. Es wird auf die lokale IP zurückgegriffen."
 
 #, c-format
 msgid "%s%s: cannot create socket for xfer"
@@ -6977,7 +6977,7 @@ msgid "send a CTCP action to remote host"
 msgstr "Sendet CTCP Aktion an entfernten Host"
 
 msgid "xfer control"
-msgstr "Transfer-Steuerung"
+msgstr "Transferkontolle"
 
 msgid ""
 "    list: list xfer\n"
@@ -6988,13 +6988,13 @@ msgstr ""
 "    list: zeigt Liste der Übertragungen\n"
 "listfull: zeigt eine ausführliche Liste der Übertragungen\n"
 "\n"
-"Ohne Angabe von Argumenten wird ein Buffer, mit Übertragungsliste, geöffnet."
+"Ohne Angabe von Argumenten wird der Buffer mit der Übertragungsliste geöffnet."
 
 msgid "nicks of DCC chat"
 msgstr "Nicks vom DCC Chat"
 
 msgid "auto open xfer buffer when a new xfer is added to list"
-msgstr "öffnet automatisch den Übertragungs-Buffer falls eine neue Übertragung hinzugefügt wird"
+msgstr "öffnet automatisch den Buffer für Übertragungen falls eine neue Übertragung hinzugefügt wird"
 
 msgid "size of progress bar, in chars (if 0, progress bar is disabled)"
 msgstr "Größe des Fortschrittsbalkens, in Zeichen (0, falls Fortschrittsbalken deaktiviert sein soll)"
@@ -7018,7 +7018,7 @@ msgid "text color for \"aborted\" status"
 msgstr "Textfarbe für Status: \"abgebrochen\""
 
 msgid "timeout for xfer request (in seconds)"
-msgstr "Zeitüberschreitung bei Transfer-Anfrage (in Sekunden)"
+msgstr "Zeitüberschreitung bei Transferanfrage (in Sekunden)"
 
 msgid "block size for sending packets, in bytes"
 msgstr "Blockgröße für versendete Pakete (in Bytes)"
@@ -7027,13 +7027,13 @@ msgid "does not wait for ACK when sending file"
 msgstr "Wartet beim Versenden von Dateien nicht auf das Bestätigungssignal (ACK)"
 
 msgid "restricts outgoing files/chats to use only ports in the given range (useful for NAT) (syntax: a single port, ie. 5000 or a port range, ie. 5000-5015, empty value means any port, it's recommended to use ports greater than 1024, because only root can use ports below 1024)"
-msgstr "Schränkt den ausgehenden Datenversand bzw. Chats auf die ausschließliche Nutzung von Ports in einem vorgegebenen Bereich ein (hilfreich bei NAT) (Syntax: ein einzelner Port, z.B. 5000 oder ein Port-Bereich, z.B. 5000-5015. Es wird empfohlen Ports zu nutzen welche Größer als 1024 sind. Denn nur der User \"root\" kann auf den Port-Bereich <1024 zugreifen)"
+msgstr "schränkt den ausgehenden Datenversand bzw. die Chats auf die ausschließliche Nutzung von Ports in einem vorgegebenen Bereich ein (hilfreich bei NAT) (Syntax: ein einzelner Port, z.B. 5000 oder ein Port-Bereich, z.B. 5000-5015. Es wird empfohlen Ports zu nutzen welche Größer als 1024 sind. Denn nur der User \"root\" kann auf den Port-Bereich <1024 zugreifen)"
 
 msgid "IP or DNS address used for sending files/chats (if empty, local interface IP is used)"
 msgstr "IP- oder DNS-Adresse für ausgehenden Datentransfer/Chat (falls kein Wert angegeben ist, wird die IP des lokalen Interfaces benutzt)"
 
 msgid "speed limit for sending files, in kilo-bytes by second (0 means no limit)"
-msgstr "Begrenzung der Übertragungsgeschwindigkeit beim Versenden, in Kilo-Bytes pro Sekunde (0 = keine Begrenzung)"
+msgstr "Begrenzung der Übertragungsgeschwindigkeit beim Versenden, in Kilobytes pro Sekunde (0 = keine Begrenzung)"
 
 msgid "path for writing incoming files (\"%h\" will be replaced by WeeChat home, \"~/.weechat\" by default)"
 msgstr "Pfad in welchem die ankommenden Dateien gespeichert werden (\"%h\" wird durch das WeeChat Verzeichnis ersetzt, Standardverzeichnis: \"~/.weechat\")"
