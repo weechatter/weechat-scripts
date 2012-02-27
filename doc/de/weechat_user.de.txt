@@ -90,7 +90,7 @@ welche Pakete optional genutzt werden können.
 | Paket ^(1)^            | Version     | benötigt | Funktion
 | cmake                  |             | *ja*     | zum kompilieren (autotools ist möglich. cmake wird aber empfohlen)
 | libncursesw5-dev ^(2)^ |             | *ja*     | ncurses Oberfläche
-| libcurl4-xxxxx-dev     |             | *ja*     | URL Transfer
+| libcurl4-gnutls-dev    |             | *ja*     | URL Transfer
 | gettext                |             |          | Internationalisierung (Übersetzung der Mitteilungen; Hauptsprache ist englisch)
 | libgcrypt11-dev        |             |          | SASL Authentifikation am IRC Server mittels DH-BLOWFISH Methode
 | libgnutls-dev          | ≥ 2.2.0     |          | SSL Verbindung zu einem IRC Server
@@ -246,6 +246,9 @@ Nun startet man 'gdb' und führt den Befehl `bt full` innerhalb gdb aus um die F
 auszugeben. Eine Fehlermeldung von gdb sieht z.B. wie folgt aus:
 
 ----------------------------------------
+(gdb) set logging file /tmp/crash.txt
+(gdb) set logging on
+Copying output to /tmp/crash.txt.
 (gdb) bt full
 #0  0x00007f9dfb04a465 in raise () from /lib/libc.so.6
 #1  0x00007f9dfb04b8e6 in abort () from /lib/libc.so.6
@@ -2059,9 +2062,9 @@ Paket Ersteller::
     Emmanuel Bouthenot (kolter), Julien Louis (ptitlouis), Odin
 
 Übersetzungen::
-    Jiri Golembiovsky, soltys, Nils Görs, rettub, Frank Zacharias,
-    Pavel Shevchuk, Elián Hanisch (m4v), Voroskoi, Marco Paolone,
-    Ivan Sichmann Freitas, Lázaro A.
+    Jiri Golembiovsky (GolemJ), soltys, Nils Görs (nils_2), rettub,
+    Frank Zacharias, Pavel Shevchuk, Elián Hanisch (m4v), Voroskoi,
+    Marco Paolone, Ivan Sichmann Freitas, Lázaro A., Ryuunosuke Ayanokouzi
 
 Patches::
     Dmitry Kobylin, Rudolf Polzer, Jim Ramsay, Pistos, Gwenn, Dominik Honnef,
