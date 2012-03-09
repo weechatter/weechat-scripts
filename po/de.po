@@ -23,8 +23,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WeeChat 0.3.7-dev\n"
 "Report-Msgid-Bugs-To: flashcode@flashtux.org\n"
-"POT-Creation-Date: 2012-03-04 19:39+0100\n"
-"PO-Revision-Date: 2012-03-08 10:59+0100\n"
+"POT-Creation-Date: 2012-03-09 10:32+0100\n"
+"PO-Revision-Date: 2012-03-09 11:07+0100\n"
 "Last-Translator: Nils Görs <weechatter@arcor.de>\n"
 "Language-Team: German <weechatter@arcor.de>\n"
 "Language: \n"
@@ -1994,7 +1994,7 @@ msgid "key codes that can be reset (keys added, redefined or removed)"
 msgstr "Tastenbelegungen die zurückgesetzt werden können (hinzugefügte/verändert/gelöschte Tastenbelegungen)"
 
 msgid "areas (\"chat\" or bar name) for free cursor movement"
-msgstr "Bereiche  (\"chat\" oder Name einer Bar) in denen der Cursor frei bewegt werden kann"
+msgstr "Bereiche in denen der Cursor frei bewegt werden kann (\"chat\" oder Name einer Bar) "
 
 msgid "Warning: you should now issue /save to write \"save_config_on_exit\" option in configuration file"
 msgstr "Warnung: Sie sollten jetzt /save ausführen, um die Option \"save_config_on_exit\" in die Konfigurationsdatei zu übernehmen."
@@ -2083,7 +2083,7 @@ msgid "chars used to determine if input string is a command or not: input must s
 msgstr "Bestimmt ein- oder mehrere Zeichen mit denen man ebenfalls einen Befehl ausführen kann. Zum Beispiel mittels \".$\". Der Schrägstrich (slash: \"/\") ist ein reserviertes Zeichen und kann immer genutzt werden."
 
 msgid "if set, /quit command must be confirmed with extra argument \"-yes\" (see /help quit)"
-msgstr "ist diese Option aktiviert,  muss der \"/quit\" Befehl mit der Option \"-yes\" ausgeführt werden (siehe /help quit)"
+msgstr "ist diese Option aktiviert, muss der \"/quit\" Befehl mit der Option \"-yes\" ausgeführt werden (siehe /help quit)"
 
 msgid "display special message when day changes"
 msgstr "Wenn ein neuer Tag beginnt wird eine entsprechende Nachricht angezeigt"
@@ -2098,7 +2098,7 @@ msgid "comma separated list of words to highlight; case insensitive comparison (
 msgstr "Durch Kommata getrennte Liste der hervorzuhebenden Wörter. Groß- und Kleinschreibung wird dabei standardmäßig nicht beachtet (um zwischen Groß-und Kleinschreibung zu unterscheiden muss am Wortanfang \"(?-i)\" genutzt werden). Schlagwörter können mit \"*\", als Joker, beginnen oder enden; Beipiel: \"test,(?-i)*toto*,flash*\""
 
 msgid "regular expression used to check if a message has highlight or not, at least one match in string must be surrounded by word chars (alphanumeric, \"-\", \"_\" or \"|\"), regular expression is case insensitive (use \"(?-i)\" at beginning to make it case sensitive), examples: \"flashcode|flashy\", \"(?-i)FlashCode|flashy\""
-msgstr "Suchmuster (regulärer Ausdrück) welches genutzt werden soll um zu überprüfen ob eine Nachricht ein Highlight enthält oder nicht. Mindestens eine Zeichenkette muss dabei auf das Suchmuster passen (alphanumerisch, \"-\", \"_\" oder \"|\"), das Suchmuster unterscheidet dabei nicht zwischen Groß-und Kleinschreibung (um zwischen Groß-und Kleinschreibung zu unterscheiden muss am Wortanfang \"(?-i)\" genutzt werden). Beispiele:  \"flashcode|flashy\", \"(?-i)FlashCode|flashy\""
+msgstr "Suchmuster (regulärer Ausdrück) welches genutzt werden soll um zu überprüfen ob eine Nachricht ein Highlight enthält oder nicht. Mindestens eine Zeichenkette muss dabei auf das Suchmuster passen (alphanumerisch, \"-\", \"_\" oder \"|\"), das Suchmuster unterscheidet dabei nicht zwischen Groß-und Kleinschreibung (um zwischen Groß-und Kleinschreibung zu unterscheiden muss am Wortanfang \"(?-i)\" genutzt werden). Beispiele: \"flashcode|flashy\", \"(?-i)FlashCode|flashy\""
 
 msgid "comma separated list of tags to highlight (case insensitive comparison, examples: \"irc_notice\" for IRC notices, \"nick_flashcode\" for messages from nick \"FlashCode\")"
 msgstr "Durch Kommata getrennte Liste der hervorzuhebenden Wörter (Groß-/Kleinschreibung wird nicht beachtet. Beispiele: \"irc_notice\" für IRC Nachrichten, \"nick_flashcode\" für Nachrichten vom Nick \"FlashCode\")"
@@ -2174,6 +2174,9 @@ msgstr "Leerzeichen anzeigen wenn Nickmode nicht (half)op/voice (@%+) ist"
 
 msgid "enable terminal \"bracketed paste mode\" (not supported in all terminals/multiplexers): in this mode, pasted text is bracketed with control sequences so that WeeChat can differentiate pasted text from typed-in text (\"ESC[200~\", followed by the pasted text, followed by \"ESC[201~\")"
 msgstr "aktiviert den \"bracketed paste mode\" des Terminals (wird nicht durch alle Terminals/Multiplexer unterstützt): Dieser Modus erlaubt das Einfügen von Steuersequenzen die in Klammern gesetzt sind.WeeChat kann dadurch ermitteln ob ein Text eingefügt oder geschrieben wurde (\"ESC[200~\", followed by the pasted text, followed by \"ESC[201~\")"
+
+msgid "force end of bracketed paste after this delay (in seconds) if the control sequence for end of bracketed paste (\"ESC[201~\") was not received in time"
+msgstr "erzwingt beim Einfügen von Steuersequenzen, nach einer vorgegeben Zeit (in Sekunden), dessen Ende sofern die Steuersequenz zum Beenden (\"ESC[201~\") nicht innerhalb dieser Zeitvorgabe empfangen wurde"
 
 msgid "max number of lines for paste without asking user (-1 = disable this feature)"
 msgstr "maximale Anzahl an Zeilen die eingefügt werden dürfen, ohne dass der Anwender gefragt wird (-1 = schaltet diese Funktion ab)"
@@ -2384,16 +2387,16 @@ msgid "text color for buffer with new data (not messages) (status bar)"
 msgstr "Farbe eines Buffers mit neuen Daten (nicht Nachrichten in der Statusbar)"
 
 msgid "text color for count of messages in hotlist (status bar)"
-msgstr "Farbe für die Anzahl der Nachrichten die in der Hotlist  (Statusbar) dargestellt werden."
+msgstr "Farbe für die Anzahl der Nachrichten die in der Hotlist (Statusbar) dargestellt werden."
 
 msgid "text color for count of private messages in hotlist (status bar)"
-msgstr "Farbe für die Anzahl der privaten Nachrichten die in der Hotlist  (Statusbar) dargestellt werden."
+msgstr "Farbe für die Anzahl der privaten Nachrichten die in der Hotlist (Statusbar) dargestellt werden."
 
 msgid "text color for count of highlight messages in hotlist (status bar)"
-msgstr "Farbe für die Anzahl der Highlight-Nachrichten die in der Hotlist  (Statusbar) dargestellt werden."
+msgstr "Farbe für die Anzahl der Highlight-Nachrichten die in der Hotlist (Statusbar) dargestellt werden."
 
 msgid "text color for count of other messages in hotlist (status bar)"
-msgstr "Farbe für die Anzahl aller anderen Nachrichten die in der Hotlist  (Statusbar) dargestellt werden."
+msgstr "Farbe für die Anzahl aller anderen Nachrichten die in der Hotlist (Statusbar) dargestellt werden."
 
 msgid "text color for buffer with new data (status bar)"
 msgstr "Farbe eines Buffers mit neuen Daten (Statusbar)"
@@ -3094,7 +3097,7 @@ msgid "%s%s: error creating aspell dictionary \"%s\" => \"%s\""
 msgstr "%s%s: Fehler beim Erstellen des Aspell-Wörterbuches \"%s\" => \"%s\""
 
 msgid "option for aspell (for list of available options and format, run command \"aspell config\" in a shell)"
-msgstr "Option für Aspell (um eine detaillierte Liste aller verfügbaren Optionen und Formate zu erhalten, muss der Befehl  \"aspell config\" in einer Shell ausgeführt werden)"
+msgstr "Option für Aspell (um eine detaillierte Liste aller verfügbaren Optionen und Formate zu erhalten, muss der Befehl \"aspell config\" in einer Shell ausgeführt werden)"
 
 #, c-format
 msgid "%s%s: error creating aspell option \"%s\" => \"%s\""
@@ -4691,7 +4694,7 @@ msgid "password for SASL authentication"
 msgstr "Passwort für SASL Authentifizierung"
 
 msgid "timeout (in seconds) before giving up SASL authentication"
-msgstr "Zeitüberschreitung bis zum Abbruch der SASL Authentifizierung  (in Sekunden)"
+msgstr "Zeitüberschreitung bis zum Abbruch der SASL Authentifizierung (in Sekunden)"
 
 msgid "automatically connect to server when WeeChat is starting"
 msgstr "Beim Programmstart von Weechat automatisch mit dem Server verbinden"
@@ -4861,7 +4864,7 @@ msgid "comma separated list of words to highlight in private buffers (case insen
 msgstr "Durch Kommata getrennte Liste von Wörtern die in einem privaten Buffer als Highlight erscheinen sollen (zwischen Groß- und Kleinschreibung wird nicht unterschieden. Um zwischen Groß- und Kleinschreibung zu unterscheiden muss zu Beginn \"(?-i)\" genutzt werden; des weiteren können folgende Variablen genutzt werden: $nick, $channel und $server). Die angegeben Wörter werden der lokalen Variable \"highlight_words\" hinzugefügt, sobald der Buffer geöffnet wird. Dies bedeutet, dass diese Option keinen direkten Einfluss auf schon geöffnete Buffer hat. Eine leere Zeichenkette deaktiviert ein Highlight für den Nick. Beispiel: \"$nick\", \"(?-i)$nick\""
 
 msgid "comma separated list of tags for messages that may produce highlight (usually any message from another user, not server messages,..)"
-msgstr "Eine durch Kommata getrennte Liste von Tags die eine Nachricht hervorheben soll (Highlight), falls die Nachricht einen entsprechenden Tag besitzt  (normalerweise trifft dies auf jede Nachricht eines Users zu, ausgenommen Nachrichten vom Server,..)"
+msgstr "Eine durch Kommata getrennte Liste von Tags die eine Nachricht hervorheben soll (Highlight), falls die Nachricht einen entsprechenden Tag besitzt (normalerweise trifft dies auf jede Nachricht eines Users zu, ausgenommen Nachrichten vom Server,..)"
 
 msgid "name of bar item where IRC server is displayed (for status bar)"
 msgstr "Name der Bar-Item in dem der IRC Server angezeigt wird (für Status-Bar)"
@@ -4916,7 +4919,7 @@ msgid "remap mirc colors in messages using a hashtable: keys are \"fg,bg\" as in
 msgstr "ersetzt mirc Farben in Nachrichten mittels einer Hashtabelle: Schlüssel sind \"fg,bg\" als Integerwerte zwischen -1 (nicht angegeben) und 15, als Werte sind die Farbnamen oder Farbnummer von WeeChat möglich (Format ist: \"1,-1:Farbe1;2,7:Farbe2\"), Beispiel: \"1,-1:darkgray;1,2:white,blue\" ersetzt Schwarz auf jedem Hintergrund durch \"darkgray\" und Schwarz auf Blau durch \"white,blue\"; Stardard-IRC-Farben Tabelle von WeeChat: 0:weiß, 1:schwarz, 2:blau, 3:grün, 4:hellrot, 5:rot, 6:violett, 7:braun, 8:gelb, 9: hellgrün, 10:türkis, 11:helltürkis, 12:hellblau, 13:hellviolett, 14:grau, 15:weiß"
 
 msgid "color for nick prefixes using mode char (o=op, h=halfop, v=voice, ..), format is: \"o:color1;h:color2;v:color3\" (if a mode is not found, WeeChat will try with next modes received from server (\"PREFIX\"); a special mode \"*\" can be used as default color if no mode has been found in list)"
-msgstr "Farben für Nick Prefix  für das Modus-Symbol (o=op, h=halfop, v=voice, ..), Format ist: \"o:color1;h:color2;v:color3\" (falls ein Modus nicht gefunden wird versucht WeeChat die nächsten Modi die der Server sendet (\"PREFIX\"); ein spezieller Modus \"*\" kann als Standardfarbe genutzt werden falls kein Modus in der Liste gefunden wurde)"
+msgstr "Farben für Nick Prefix für das Modus-Symbol (o=op, h=halfop, v=voice, ..), Format ist: \"o:color1;h:color2;v:color3\" (falls ein Modus nicht gefunden wird versucht WeeChat die nächsten Modi die der Server sendet (\"PREFIX\"); ein spezieller Modus \"*\" kann als Standardfarbe genutzt werden falls kein Modus in der Liste gefunden wurde)"
 
 msgid "color for nick prefix (prefix is custom string displayed before nick)"
 msgstr "Farbe für den Nick Präfix (Präfix ist die editierbare Zeichenkette die vor dem Nick steht)"
@@ -5962,7 +5965,7 @@ msgid "WeeChat site, download page"
 msgstr "Download-Seite von WeeChat"
 
 msgid "1 if WeeChat is upgrading (command `/upgrade`)"
-msgstr "1 falls WeeChat ein Upgrade durchführt (Befehl  `/upgrade`)"
+msgstr "1 falls WeeChat ein Upgrade durchführt (Befehl `/upgrade`)"
 
 msgid "terminal charset"
 msgstr "Terminal Zeichensatz"
@@ -6393,7 +6396,7 @@ msgid "text color for \"disconnected\" status"
 msgstr "Textfarbe für Status: \"Verbindung getrennt\""
 
 msgid "regular expression with IPs allowed to use relay (case insensitive, use \"(?-i)\" at beginning to make it case sensitive), example: \"^(123.45.67.89|192.160.*)$\""
-msgstr "regulärer Ausdruck für IP Adressen die auf das Relay zugreifen dürfen (zwischen Groß- und Kleinschreibung nicht dabei nicht unterschieden. Um zwischen Groß-und Kleinschreibung zu unterscheiden muss am Wortanfang \"(?-i)\" genutzt werden) , Beispiel:  \"^(123.45.67.89|192.160.*)$\""
+msgstr "regulärer Ausdruck für IP Adressen die auf das Relay zugreifen dürfen (zwischen Groß- und Kleinschreibung nicht dabei nicht unterschieden. Um zwischen Groß-und Kleinschreibung zu unterscheiden muss am Wortanfang \"(?-i)\" genutzt werden) , Beispiel: \"^(123.45.67.89|192.160.*)$\""
 
 msgid "address for bind (if empty, connection is possible on all interfaces, use \"127.0.0.1\" to allow connections from local machine only)"
 msgstr "Adresse für Bind (falls nicht gesetzt ist eine Verbindung zu allen Interfaces möglich. Wird die Adresse \"127.0.0.1\" genutzt kann nur eine Verbindung mit dem lokalen Rechner hergestellt werden)"
@@ -6878,7 +6881,7 @@ msgstr "%s: eingehende Datei von %s (%s.%s), IP: %d.%d.%d.%d, Name: %s, %llu Byt
 
 #, c-format
 msgid "%s: sending file to %s (%s.%s): %s (local filename: %s), %llu bytes (protocol: %s)"
-msgstr "%s: Sende Datei an  %s (%s.%s): %s (lokaler Dateiname: %s), %llu Bytes (Protokoll: %s)"
+msgstr "%s: Sende Datei an %s (%s.%s): %s (lokaler Dateiname: %s), %llu Bytes (Protokoll: %s)"
 
 #, c-format
 msgid "%s: incoming chat request from %s (%s.%s), ip: %d.%d.%d.%d"
@@ -7057,7 +7060,7 @@ msgid "convert spaces to underscores when sending files"
 msgstr "Ein Leerzeichen wird in einen Unterstrich gewandelt wenn Daten versendet werden"
 
 msgid "rename incoming files if already exists (add \".1\", \".2\", ...)"
-msgstr "Eingehende Dateien werden automatisch umbenannt um ein Überschreiben zu vermeiden (dabei wird dem Dateinamen  '.1', '.2', ... hinzugefügt)"
+msgstr "Eingehende Dateien werden automatisch umbenannt um ein Überschreiben zu vermeiden (dabei wird dem Dateinamen '.1', '.2', ... hinzugefügt)"
 
 msgid "automatically resume file transfer if connection with remote host is lost"
 msgstr "Abgebrochene Übertragungen automatisch fortsetzen, falls die Verbindung getrennt wurde"
