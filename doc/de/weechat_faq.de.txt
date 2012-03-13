@@ -468,7 +468,7 @@ Als erstes sollte man die Mausunterstützung einschalten:
 ----------------------------------------
 
 Falls die Maus von WeeChat nicht erkannt werden sollte muss die TERM Variable
-der Konsole überprüft werden (dies geschieht im Terminal mittels `echo $TERM`).
+der Konsole überprüft werden (die geschieht im Terminal mittels `echo $TERM`).
 Entsprechend der ausgegebenen Information, wird ggf. eine Maus nicht unterstützt.
 
 Um zu testen ob eine Mausunterstützung vom Terminal bereitgestellt wird, sollte
@@ -667,6 +667,18 @@ Fall weniger sicher):
 
 ----------------------------------------
 /set irc.server.freenode.ssl_verify off
+----------------------------------------
+
+
+[[irc_ssl_handshake_error]]
+Bei einem Verbindungsaufbau zum Server, via SSL, erhalte ich "TLS Handshake fehlgeschlagen". Wie kann ich das beheben?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Man sollte versuchen eine andere Priorität zu nutzen (nur WeeChat ≥ 0.3.5); Im Beispiel
+muss "xxx" durch den internen Servernamen ersetzt werden:
+
+----------------------------------------
+/set irc.server.xxx.ssl_priorities "NORMAL:-VERS-TLS-ALL:+VERS-TLS1.0:+VERS-SSL3.0:%COMPAT"
 ----------------------------------------
 
 
