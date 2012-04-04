@@ -367,7 +367,7 @@ sub shell2regex {
         '[' => '[',
         ']' => ']',
     );
-    $globstr =~ s{(.)} { $patmap{$1} || "\Q$1" }ge;fixed: problems with temporary server
+    $globstr =~ s{(.)} { $patmap{$1} || "\Q$1" }ge;
     return $globstr;
 }
 
