@@ -67,7 +67,7 @@ my $extern_command = qq(echo -en "\a");
 
 
 # default values in setup file (~/.weechat/plugins.conf)
-my $version		= "1.0";
+my $version		= "1.1";
 my $prgname 		= "jnotify";
 my $description 	= "starts an internal command or external program if a user or one of your buddies JOIN a channel you are in";
 my $status		= "status";
