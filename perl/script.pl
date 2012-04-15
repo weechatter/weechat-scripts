@@ -57,7 +57,7 @@ use strict;
 use File::Basename;
 
 my $PRGNAME     = "script";
-my $VERSION     = "1.1";
+my $VERSION     = "1.2";
 my $AUTHOR      = "Nils Görs <weechatter\@arcor.de>";
 my $LICENCE     = "GPL3";
 my $DESCR       = "to load/reload/unload script (language independent) and also to create/remove symlink";
