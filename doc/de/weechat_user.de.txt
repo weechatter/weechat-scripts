@@ -111,8 +111,8 @@ welche Pakete optional genutzt werden können.
 können für andere Distributionen abweichend sein. +
 ^(2)^ WeeChat kann auch mit libncurses5-dev kompiliert werden. Dies wird aber *NICHT* empfohlen (es
 treten dabei Darstellungsfehler mit breiten Zeichen auf). +
-^(3)^ WeeChat kann mit Python 3.x kompiliert werden. Es wird aber empfohlen die Python Version
-2.7 zu nutzen (alle Skripten sind unter Version 2.x lauffähig, aber nicht unter Version 3.x).
+^(3)^ Die empfohlene Version ist 2.7 (alle Skripten laufen mit der Version 2.7,
+aber nicht mit Version ≤ 2.6 oder ≥ 3.0).
 
 [[compile_with_cmake]]
 Kompilieren mit cmake
@@ -2066,11 +2066,13 @@ Paket Ersteller::
 Übersetzungen::
     Jiri Golembiovsky (GolemJ), soltys, Nils Görs (nils_2), rettub,
     Frank Zacharias, Pavel Shevchuk, Elián Hanisch (m4v), Voroskoi,
-    Marco Paolone, Ivan Sichmann Freitas, Lázaro A., Ryuunosuke Ayanokouzi
+    Marco Paolone, Ivan Sichmann Freitas, Lázaro A., Ryuunosuke Ayanokouzi,
+    Quico Noizeux
 
 Patches::
     Dmitry Kobylin, Rudolf Polzer, Jim Ramsay, Pistos, Gwenn, Dominik Honnef,
-    JD Horelick, Stefano Pigozzi, Gu1ll4um3r0m41n, Kyle Fuller
+    JD Horelick, Stefano Pigozzi, Gu1ll4um3r0m41n, Kyle Fuller,
+    Quentin Glidic (SardemFF7), Simon Kuhnle, Mateusz Poszwa
 
 
 [[support]]
