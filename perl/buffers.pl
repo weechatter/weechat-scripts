@@ -19,38 +19,43 @@
 # Display sidebar with list of buffers.
 #
 # History:
-# 2012-04-06, nils_2 <weechatter@arcor.de>:
-#     3.3: fix truncation of wide charaters (bug #36034)
+#
+# 2012-06-02, nils_2 <weechatter@arcor.de>:
+#     v3.5: add values "server|channel|private|all|keepserver|none" to option "hide_merged_buffers" (suggested by dominikh).
+# 2012-05-25, nils_2 <weechatter@arcor.de>:
+#     v3.4: add new option "show_lag".
+# 2012-04-07, Sebastien Helleu <flashcode@flashtux.org>:
+#     v3.3: fix truncation of wide chars in buffer name (option name_size_max) (bug #36034)
 # 2012-03-15, nils_2 <weechatter@arcor.de>:
-#     3.2: add new option "detach"(weechat >= 0.3.8)
-#          add new option "immune_detach_buffers" (requested by Mkaysi)
-#          add new function buffers_whitelist add|del|reset (suggested by FiXato)
-#          add new function buffers_detach add|del|reset
+#     v3.2: add new option "detach"(weechat >= 0.3.8)
+#           add new option "immune_detach_buffers" (requested by Mkaysi)
+#           add new function buffers_whitelist add|del|reset (suggested by FiXato)
+#           add new function buffers_detach add|del|reset
 # 2012-03-09, Sebastien Helleu <flashcode@flashtux.org>:
-#     3.1: fix reload of config file
+#     v3.1: fix reload of config file
 # 2012-01-29, nils_2 <weechatter@arcor.de>:
-#     3.0: fix: buffers did not update directly during window_switch (reported by FiXato)
+#     v3.0: fix: buffers did not update directly during window_switch (reported by FiXato)
 # 2012-01-29, nils_2 <weechatter@arcor.de>:
-#     2.9: add options "name_size_max" and "name_crop_suffix"
+#     v2.9: add options "name_size_max" and "name_crop_suffix"
 # 2012-01-08, nils_2 <weechatter@arcor.de>:
-#     2.8: fix indenting for option "show_number off"
-#          fix unset of buffer activity in hotlist when buffer was moved with mouse
-#          add buffer with free content and core buffer sorted first (suggested  by nyuszika7h)
-#          add options queries_default_fg/bg and queries_message_fg/bg (suggested by FiXato)
-#          add clicking with left button on current buffer will do a jump_previously_visited_buffer (suggested by FiXato)
-#          add clicking with right button on current buffer will do a jump_next_visited_buffer
-#          add additional informations in help texts
-#          add default_fg and default_bg for whitelist channels
-#          internal changes  (script is now 3Kb smaller)
+#     v2.8: fix indenting for option "show_number off"
+#           fix unset of buffer activity in hotlist when buffer was moved with mouse
+#           add buffer with free content and core buffer sorted first (suggested  by nyuszika7h)
+#           add options queries_default_fg/bg and queries_message_fg/bg (suggested by FiXato)
+#           add clicking with left button on current buffer will do a jump_previously_visited_buffer (suggested by FiXato)
+#           add clicking with right button on current buffer will do a jump_next_visited_buffer
+#           add additional informations in help texts
+#           add default_fg and default_bg for whitelist channels
+#           internal changes  (script is now 3Kb smaller)
 # 2012-01-04, Sebastien Helleu <flashcode@flashtux.org>:
-#     2.7: fix regex lookup in whitelist buffers list
+#     v2.7: fix regex lookup in whitelist buffers list
 # 2011-12-04, nils_2 <weechatter@arcor.de>:
-#     2.6: add own config file (buffers.conf)
-#          add new behavior for indenting (under_name)
-#          add new option to set different color for server buffers and buffers with free content
+#     v2.6: add own config file (buffers.conf)
+#           add new behavior for indenting (under_name)
+#           add new option to set different color for server buffers and buffers with free content
 # 2011-10-30, nils_2 <weechatter@arcor.de>:
-#     2.5: add new options "show_number_char" and "color_number_char",
-#          add help-description for options
+#     v2.5: add new options "show_number_char" and "color_number_char",
+#           add help-description for options
 # 2011-08-24, Sebastien Helleu <flashcode@flashtux.org>:
 #     v2.4: add mouse support
 # 2011-06-06, nils_2 <weechatter@arcor.de>:
@@ -118,12 +123,10 @@
 #       - moving buffer to the left/right will close buffer.
 #
 
-#use encoding;
 use strict;
-#use Encode::Encoder;
-use Encode qw( decode );
+use Encode qw( decode encode );
 # -------------------------------[ internal ]-------------------------------------
-my $version = "3.3";
+my $version = "3.5";
 
 my $BUFFERS_CONFIG_FILE_NAME = "buffers";
 my $buffers_config_file;
@@ -193,8 +196,11 @@ weechat::hook_command(  $cmd_buffers_detach,
 
 if ($weechat_version >= 0x00030800)
 {
-    weechat::hook_config("buffers.look.detach", "hook_config", "");
+    weechat::hook_config("buffers.look.detach", "hook_timer_detach", "");
 }
+
+    weechat::hook_config("buffers.look.show_lag", "hook_timer_lag", "");
+
 # -------------------------------- [ command ] --------------------------------
 sub buffers_cmd_whitelist
 {
@@ -285,18 +291,35 @@ sub create_whitelist
 }
 
 # -------------------------------- [ config ] --------------------------------
-sub hook_config
+sub hook_timer_detach
 {
     my $detach = $_[2];
     if ( $detach eq 0 )
     {
-        weechat::unhook($Hooks{timer}) if $Hooks{timer};
-        $Hooks{timer} = "";
+        weechat::unhook($Hooks{timer_detach}) if $Hooks{timer_detach};
+        $Hooks{timer_detach} = "";
     }
     else
     {
-        weechat::unhook($Hooks{timer}) if $Hooks{timer};
-        $Hooks{timer} = weechat::hook_timer( weechat::config_integer( $options{"detach"}) * 1000, 60, 0, "buffers_signal_buffer", "");
+        weechat::unhook($Hooks{timer_detach}) if $Hooks{timer_detach};
+        $Hooks{timer_detach} = weechat::hook_timer( weechat::config_integer( $options{"detach"}) * 1000, 60, 0, "buffers_signal_buffer", "");
+    }
+    weechat::bar_item_update("buffers");
+    return weechat::WEECHAT_RC_OK;
+}
+
+sub hook_timer_lag
+{
+    my $lag = $_[2];
+    if ( $lag eq 0 )
+    {
+        weechat::unhook($Hooks{timer_lag}) if $Hooks{timer_lag};
+        $Hooks{timer_lag} = "";
+    }
+    else
+    {
+        weechat::unhook($Hooks{timer_lag}) if $Hooks{timer_lag};
+        $Hooks{timer_lag} = weechat::hook_timer( weechat::config_integer(weechat::config_get("irc.network.lag_refresh_interval")) * 1000, 0, 0, "buffers_signal_hotlist", "");
     }
     weechat::bar_item_update("buffers");
     return weechat::WEECHAT_RC_OK;
@@ -358,8 +381,9 @@ my %default_options_color =
 
 my %default_options_look =
 (
+ "show_lag"             =>      ["show_lag","boolean","show lag behind servername. This option is using \"irc.color.item_lag_finished\", \"irc.network.lag_min_show\" and \"irc.network.lag_refresh_interval\"","",0,0,"off","off",0,"","","buffers_signal_config","","",""],
  "look_whitelist_buffers" =>    ["whitelist_buffers", "string", "comma separated list of buffers for using a differnt color scheme (for example: freenode.#weechat,freenode.#weechat-fr)", "", 0, 0,"", "", 0, "", "", "buffers_signal_config_whitelist", "", "", ""],
- "hide_merged_buffers"  =>      ["hide_merged_buffers", "boolean", "hide merged buffers", "", 0, 0,"off", "off", 0, "", "", "buffers_signal_config", "", "", ""],
+ "hide_merged_buffers"  =>      ["hide_merged_buffers", "integer", "hide merged buffers. The value determines which merged buffers should be hidden, keepserver meaning 'all except server buffers'. Other values correspondent to the buffer type.", "server|channel|private|keepserver|all|none", 0, 0,"none", "none", 0, "", "", "buffers_signal_config", "", "", ""],
  "indenting"            =>      ["indenting", "integer", "use indenting for channel and query buffers. This option only takes effect if bar is left/right positioned", "off|on|under_name", 0, 0,"off", "off", 0, "", "", "buffers_signal_config", "", "", ""],
  "indenting_number"     =>      ["indenting_number", "boolean", "use indenting for numbers. This option only takes effect if bar is left/right positioned", "", 0, 0,"on", "on", 0, "", "", "buffers_signal_config", "", "", ""],
  "short_names"          =>      ["short_names", "boolean", "display short names (remove text before first \".\" in buffer name)", "", 0, 0,"on", "on", 0, "", "", "buffers_signal_config", "", "", ""],
@@ -471,6 +495,8 @@ sub build_buffers
         $buffer->{"name"} = weechat::infolist_string($infolist, "name");
         $buffer->{"short_name"} = weechat::infolist_string($infolist, "short_name");
         $buffer->{"full_name"} = $buffer->{"plugin_name"}.".".$buffer->{"name"};
+        $buffer->{"type"} = weechat::buffer_get_string($buffer->{"pointer"},"localvar_type");
+#        weechat::print("",$buffer->{"type"});
 
         unless( grep {$_ eq $buffer->{"name"}} @immune_detach_buffers )
         {
@@ -479,14 +505,14 @@ sub build_buffers
             # set timer for buffers with no hotlist action
             $buffers_timer{$buffer->{"pointer"}} = $current_time
              if ( not exists $hotlist{$buffer->{"pointer"}}
-             and weechat::buffer_get_string($buffer->{"pointer"}, "localvar_type") eq "channel"
+             and $buffer->{"type"} eq "channel"
              and not exists $buffers_timer{$buffer->{"pointer"}}
              and $detach_time > 0);
 
             # check for detach
             unless ( $buffer->{"current_buffer"} eq 0
             and not exists $hotlist{$buffer->{"pointer"}}
-            and weechat::buffer_get_string($buffer->{"pointer"}, "localvar_type") eq "channel"
+            and $buffer->{"type"} eq "channel"
             and exists $buffers_timer{$buffer->{"pointer"}}
             and $detach_time > 0
             and $weechat_version >= 0x00030800
@@ -537,8 +563,7 @@ sub build_buffers
                 my $name = $buffer->{"name"};
                 $name = $buffer->{"short_name"} if (weechat::config_boolean( $options{"short_names"} ) eq 1);
                 if (weechat::config_integer($options{"name_size_max"}) >= 1){
-                    my ($bufname,$name_size_max) = wide_char_correction($name,weechat::config_integer($options{"name_size_max"}));
-                    $name = substr($bufname,0,$name_size_max);
+                    $name = encode("UTF-8", substr(decode("UTF-8", $name), 0, weechat::config_integer($options{"name_size_max"})));
                 }
                 if ( weechat::config_boolean($options{"core_to_front"}) eq 1)
                 {
@@ -570,10 +595,46 @@ sub build_buffers
     foreach my $key (sort keys %sorted_buffers)
     {
         my $buffer = $sorted_buffers{$key};
-        if ( (weechat::config_boolean( $options{"hide_merged_buffers"} ) eq 1) && (! $buffer->{"active"}) )
+
+        if ( weechat::config_string($options{"hide_merged_buffers"}) eq "server" )
         {
-            next;
+            # buffer type "server" or merged with core?
+            if ( ($buffer->{"type"} eq "server" or $buffer->{"plugin_name"} eq "core") && (! $buffer->{"active"}) )
+            {
+                next;
+            }
         }
+        if ( weechat::config_string($options{"hide_merged_buffers"}) eq "channel" )
+        {
+            # buffer type "channel" or merged with core?
+            if ( ($buffer->{"type"} eq "channel" or $buffer->{"plugin_name"} eq "core") && (! $buffer->{"active"}) )
+            {
+                next;
+            }
+        }
+        if ( weechat::config_string($options{"hide_merged_buffers"}) eq "private" )
+        {
+            # buffer type "private" or merged with core?
+            if ( ($buffer->{"type"} eq "private" or $buffer->{"plugin_name"} eq "core") && (! $buffer->{"active"}) )
+            {
+                next;
+            }
+        }
+        if ( weechat::config_string($options{"hide_merged_buffers"}) eq "keepserver" )
+        {
+            if ( ($buffer->{"type"} ne "server" or $buffer->{"plugin_name"} eq "core") && (! $buffer->{"active"}) )
+            {
+                next;
+            }
+        }
+        if ( weechat::config_string($options{"hide_merged_buffers"}) eq "all" )
+        {
+            if ( ! $buffer->{"active"} )
+            {
+                next;
+            }
+        }
+
         push(@buffers_focus, $buffer);                                          # buffer > buffers_focus, for mouse support
         my $color = "";
         my $bg = "";
@@ -746,13 +807,13 @@ sub build_buffers
             }
         }
         $str .= weechat::color($color) . weechat::color(",".$bg);
+
         if (weechat::config_boolean( $options{"short_names"} ) eq 1)
         {
             if (weechat::config_integer($options{"name_size_max"}) >= 1)                # check max_size of buffer name
             {
-                my ($bufname,$name_size_max) = wide_char_correction($buffer->{"short_name"},weechat::config_integer($options{"name_size_max"}));
-                $str .= substr($bufname,0,$name_size_max);
-                $str .= weechat::color(weechat::config_color( $options{"color_number_char"})).weechat::config_string($options{"name_crop_suffix"}) if (length($bufname) > $name_size_max);
+                $str .= encode("UTF-8", substr(decode("UTF-8", $buffer->{"short_name"}), 0, weechat::config_integer($options{"name_size_max"})));
+                $str .= weechat::color(weechat::config_color( $options{"color_number_char"})).weechat::config_string($options{"name_crop_suffix"}) if (length($buffer->{"short_name"}) > weechat::config_integer($options{"name_size_max"}));
             }
             else
             {
@@ -763,13 +824,26 @@ sub build_buffers
         {
             if (weechat::config_integer($options{"name_size_max"}) >= 1)                # check max_size of buffer name
             {
-                my ($bufname,$name_size_max) = wide_char_correction($buffer->{"name"},weechat::config_integer($options{"name_size_max"}));
-                $str .= substr($bufname,0,$name_size_max);
-                $str .= weechat::color(weechat::config_color( $options{"color_number_char"})).weechat::config_string($options{"name_crop_suffix"}) if (length($bufname) > $name_size_max);
+                $str .= encode("UTF-8", substr(decode("UTF-8", $buffer->{"name"},), 0, weechat::config_integer($options{"name_size_max"})));
+                $str .= weechat::color(weechat::config_color( $options{"color_number_char"})).weechat::config_string($options{"name_crop_suffix"}) if (length($buffer->{"name"}) > weechat::config_integer($options{"name_size_max"}));
             }
             else
             {
                 $str .= $buffer->{"name"};
+            }
+        }
+        if ( weechat::buffer_get_string($buffer->{"pointer"}, "localvar_type") eq "server" and weechat::config_boolean($options{"show_lag"}) eq 1)
+        {
+            my $color_lag = weechat::config_color(weechat::config_get("irc.color.item_lag_finished"));
+            my $min_lag = weechat::config_integer(weechat::config_get("irc.network.lag_min_show"));
+            my $infolist_server = weechat::infolist_get("irc_server","",$buffer->{"short_name"});
+            weechat::infolist_next($infolist_server);
+            my $lag = (weechat::infolist_integer($infolist_server, "lag"));
+            weechat::infolist_free($infolist_server);
+            if ( int($lag) > int($min_lag) )
+            {
+                $lag = $lag / 1000;
+                $str .= weechat::color("default") . " (" . weechat::color($color_lag) . $lag . weechat::color("default") . ")";
             }
         }
         $str .= "\n";
@@ -864,21 +938,6 @@ sub buffers_focus_buffers
     return $hash;
 }
 
-# wide char correction for buffer_name when buffer name will be truncated
-sub wide_char_correction
-{
-    my ($orig_buf_name,$name_size_max) = ($_[0],$_[1]);
-    my $bufname = decode('UTF-8', $orig_buf_name);
-    if ($orig_buf_name ne $bufname)
-    {
-        my $name = substr($bufname,0,$name_size_max);
-        # correction for buffer_name with mixed charset
-        my $counter = 0;
-        $counter++ while ($name =~ m/[A-Z0-9]/ig);              # count latin charset
-        $name_size_max = int(($name_size_max + $counter)/ 2)+1;
-    }
-return $bufname,$name_size_max;
-}
 # called when a mouse action is done on buffers item, to execute action
 # possible actions: jump to a buffer or move buffer in list (drag & drop of buffer)
 sub buffers_hsignal_mouse
