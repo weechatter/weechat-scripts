@@ -18,6 +18,13 @@
 # Set WeeChat and plugins options interactively.
 #
 # History:
+#
+# 2012-07-25, nils_2 <weechatter@arcor.de>:
+#     version 2.6: switch to iset buffer (if existing) when command /iset is called with arguments
+# 2012-03-17, Sebastien Helleu <flashcode@flashtux.org>:
+#     version 2.5: fix check of sections when creating config file
+# 2012-03-09, Sebastien Helleu <flashcode@flashtux.org>:
+#     version 2.4: fix reload of config file
 # 2012-02-02, nils_2 <weechatter@arcor.de>:
 #     version 2.3: fixed: refresh problem with new search results and cursor was outside window.
 #                : add: new option "current_line" in title bar
@@ -84,7 +91,7 @@
 use strict;
 
 my $PRGNAME = "iset";
-my $VERSION = "2.3";
+my $VERSION = "2.6";
 my $DESCR   = "Interactive Set for configuration options";
 my $AUTHOR  = "Sebastien Helleu <flashcode\@flashtux.org>";
 my $LICENSE = "GPL3";
@@ -599,6 +606,10 @@ sub iset_cmd_cb
                 weechat::buffer_set(weechat::buffer_search($LANG, $PRGNAME), "display", "1");
                 return weechat::WEECHAT_RC_OK;
             }
+            else
+            {
+                weechat::buffer_set($ptrbuf, "display", "1");
+            }
         }
     }
 
@@ -1047,7 +1058,7 @@ sub iset_config_init
 
     # section "help"
     my $section_help = weechat::config_new_section($iset_config_file,"help", 0, 0, "", "", "", "", "", "", "", "", "", "");
-    if ($section_color eq "")
+    if ($section_help eq "")
     {
         weechat::config_free($iset_config_file);
         return;
@@ -1067,7 +1078,7 @@ sub iset_config_init
 
     # section "look"
     my $section_look = weechat::config_new_section($iset_config_file, "look", 0, 0, "", "", "", "", "", "", "", "", "", "");
-    if ($section_color eq "")
+    if ($section_look eq "")
     {
         weechat::config_free($iset_config_file);
         return;
@@ -1089,7 +1100,7 @@ sub iset_config_init
 sub iset_config_reload_cb
 {
     my ($data,$config_file) = ($_[0], $_[1]);
-    return weechat::config_read($config_file)
+    return weechat::config_reload($config_file)
 }
 
 sub iset_config_read
