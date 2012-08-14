@@ -112,7 +112,7 @@ if (index($modifier_data,"irc_privmsg") == -1){                                 
   return $string;
 }
 
-if (index($modifier_data,"irc_ctcp") >= 1){                                                    # don't do anything with CTCP messages
+if (index($modifier_data,"irc_ctcp") >= 0){                                                    # don't do anything with CTCP messages
   return $string;
 }
 
