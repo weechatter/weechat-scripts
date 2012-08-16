@@ -33,8 +33,13 @@
 # Newest version available at:
 #   git://github.com/rettub/weechat-plugins.git
 #
+## Development is currently hosted at
+# https://github.com/weechatter/weechat-scripts
+#
 # -----------------------------------------------------------------------------
 # History:
+# 2012-08-16, nils_2:
+#     version 0.6.1: IMPROVED: help text to allow a temporary query
 # 2012-06-12, nils_2:
 #     version 0.6:
 #     FIX: allow own queries without 'mynick' in query whitelist
@@ -78,7 +83,7 @@ use strict;
 
 my $SCRIPT      = 'query_blocker';
 my $AUTHOR      = 'rettub <rettub@gmx.net>';
-my $VERSION     = '0.6';
+my $VERSION     = '0.6.1';
 my $LICENSE     = 'GPL3';
 my $DESCRIPTION = 'Simple blocker for private message (i.e. spam)';
 my $COMMAND     = "query_blocker";             # new command name
@@ -292,7 +297,13 @@ sub print_info {
                                 .weechat::color('reset')
                                 ."."
                                 .irc_nick_find_color($nick).$nick
-                                .weechat::color('reset') ) unless (weechat::config_get_plugin('show_hint') eq 'off');
+                                .weechat::color('reset')."\n"
+                                ."or to allow temporary query: /query -server "
+                                .irc_nick_find_color($server).$server
+                                .weechat::color('reset')
+                                ." "
+                                .irc_nick_find_color($nick).$nick
+                                .weechat::color('reset')) unless (weechat::config_get_plugin('show_hint') eq 'off');
     return $buf_pointer;
 }
 
