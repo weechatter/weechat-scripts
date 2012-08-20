@@ -133,7 +133,7 @@ my ($data, $command, $return_code, $out, $err) = @_;
     if (defined $expand_URI and $return_code > 0 or $out eq "" or $expand_counter > 0){
         weechat::hook_process("url:".$expand_URI.$uri, 10000 ,"hook_process_cb","$buffer $uri");
     }
-
+return weechat::WEECHAT_RC_OK;
 }
 
 # callback from URI::Find
