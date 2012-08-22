@@ -18,6 +18,7 @@
 #
 # 0.5  : fix expand_own() tag "prefix_nick_ccc" (thanks roughnecks)
 #      : add new options: "prefix" and "color_prefix"
+#      : add help text for options
 #      : improved option "expander". Now more than one expander can be used (Thanks FiXato for some information about URLs)
 # 0.4  : some code optimizations
 # 0.3  : fixed: script won't worked if more than one URL per message exists.
@@ -29,10 +30,16 @@
 # 0.2  : add "://" in call to hook_print() (thanks to xt)
 # 0.1  : internal release
 #
-# "expand" option is a space separated list.
-#
 # requirements:
 # - URI::Find
+#
+# Development is currently hosted at
+# https://github.com/weechatter/weechat-scripts
+#
+# This Script needs WeeChat 0.3.7 or higher
+#
+# You will find version 0.4:
+# http://git.savannah.gnu.org/gitweb/?p=weechat/scripts.git;a=snapshot;h=7bb8ac448c25cf50829ff88d554765a4ff9470cd;sf=tgz
 
 use strict;
 use URI::Find;
@@ -43,7 +50,7 @@ my $AUTHOR      = "Nils Görs <weechatter\@arcor.de>";
 my $LICENSE     = "GPL3";
 my $DESC	= "Get information on a short URL. Find out where it goes.";
 # default values
-my %options = (	"shortener"             =>      "goo.gl|tiny.cc|bit.ly|is.gd|tinyurl.com|ur1.ca",
+my %options = ( "shortener"             =>      "goo.gl|tiny.cc|bit.ly|is.gd|tinyurl.com|ur1.ca",
                 "expander"              =>      "http://untiny.me/api/1.0/extract?url= http://api.longurl.org/v1/expand?url= http://expandurl.com/api/v1/?url=",
                 "color"                 =>      "blue",
                 "prefix"                =>      "[url]",
@@ -51,11 +58,17 @@ my %options = (	"shortener"             =>      "goo.gl|tiny.cc|bit.ly|is.gd|tin
                 "expand_own"            =>      "off",
 );
 
+my %option_desc = ( "shortener"         =>      "list of know shortener. \"|\" separated list",
+                    "expander"          =>      "list of expander to use in script. Please use a space \" \" to separate expander",
+                    "color"             =>      "color to use for expanded url in buffer",
+                    "color_prefix"      =>      "color for prefix",
+                    "prefix"            =>      "prefix to use (default: [url])",
+                    "expand_own"        =>      "own shortened urls will be expand (on|off)",
+);
+
 my %uris;
-my $uri_only;
 my @url_expander;                       # used expander
-my $url_expander;                       # store number of expander
-my $expand_counter = -1;
+my $url_expander_number = 0;            # store number of expander
 my $weechat_version;
 
 sub hook_print_cb{
@@ -78,17 +91,19 @@ if ( $options{expand_own} eq "off" ){
   }
 }
 
+  # search uri in message. result in %uris
   %uris = ();
   my $finder = URI::Find->new( \&uri_find_cb );
-  my $how_many_found = $finder->find(\$message);                # search uri in message. result in $uri_only
+  my $how_many_found = $finder->find(\$message);
 
   if ( $how_many_found >= 1 ){                                  # does message contains an url?
     my @uris = keys %uris;
     foreach my $uri (@uris) {
         if ($uri =~ m/$options{shortener}/) {                   # known shortener used?
-            if ( $url_expander >= 1 ){
-                $expand_counter = 1;
-                my $hook_process = weechat::hook_process("url:".$url_expander[0].$uri, 10000 ,"hook_process_cb","$buffer $uri");
+            if ( $url_expander_number > 0 ){                    # one expander exists?
+#                weechat::print("",$uri);
+                my $expand_counter = 0;
+                weechat::hook_process("url:".$url_expander[$expand_counter].$uri, 10000 ,"hook_process_cb","$buffer $uri $expand_counter");
             }
         }
     }
@@ -99,17 +114,22 @@ return weechat::WEECHAT_RC_OK;
 # callback from hook_process()
 sub hook_process_cb {
 my ($data, $command, $return_code, $out, $err) = @_;
-    my ($buffer,$uri) = split(" ",$data);
-    my $expand_URI;
-    my $how_many_found = 0;
+    my ($buffer, $uri, $expand_counter) = split(" ",$data);
+
+#    my ($buffer,$uri) = split(" ",$data);
     # output not empty. Try to catch long URI
     if ($out ne ""){
-        my @array = split(/\n/,$out);
+        my $how_many_found = 0;
+        my @array = split(/\n/,$out);                                   # split output to single raw lines
         foreach ( @array ){
-            $uri_only = "";
-            my $finder = URI::Find->new( \&uri_find_one_cb );
+            my $uri_only = "";
+            my $finder = URI::Find->new(sub {
+                my($uri, $orig_uri) = @_;
+                $uri_only = $orig_uri;
+                return $orig_uri;});
+#            my $finder = URI::Find->new( \&uri_find_one_cb );
             $how_many_found = $finder->find(\$_);
-            if ( $how_many_found >= 1 ){                              # does message contains an url?
+            if ( $how_many_found >= 1 ){                                # does message contains at least one an url?
                 weechat::print($buffer, weechat::color($options{color_prefix}).
                                         $options{prefix}."\t".
                                         weechat::color($options{color}).
@@ -117,23 +137,13 @@ my ($data, $command, $return_code, $out, $err) = @_;
                 last;
             }
         }
-        return weechat::WEECHAT_RC_OK;
-    }
-
-    return weechat::WEECHAT_RC_OK if ($expand_counter == -1);
-
-    if ($return_code > 0 or $out eq "" or $expand_counter > 0){
-        $expand_URI = $url_expander[$expand_counter];
+    return weechat::WEECHAT_RC_OK;
+    }elsif ($url_expander_number > 1){
         $expand_counter++;
-    }
-    if ($expand_counter > $url_expander){
-        $expand_counter = -1;
+        return weechat::WEECHAT_RC_OK if ($expand_counter > $url_expander_number - 1);
+        weechat::hook_process("url:".$url_expander[$expand_counter].$uri, 10000 ,"hook_process_cb","$buffer $uri $expand_counter");
         return weechat::WEECHAT_RC_OK;
     }
-    if (defined $expand_URI and $return_code > 0 or $out eq "" or $expand_counter > 0){
-        weechat::hook_process("url:".$expand_URI.$uri, 10000 ,"hook_process_cb","$buffer $uri");
-    }
-return weechat::WEECHAT_RC_OK;
 }
 
 # callback from URI::Find
@@ -145,7 +155,7 @@ return "";
 
 sub uri_find_one_cb {
 my ( $uri_url, $uri ) = @_;
-  $uri_only = $uri;
+#  $uri_only = $uri;
 return "";
 }
 
@@ -159,9 +169,13 @@ sub init_config{
             $options{$option} = weechat::config_get_plugin($option);
             if ($option eq "expander"){
                 @url_expander = split(/ /,$options{expander});      # split expander
-                $url_expander = @url_expander;
+                $url_expander_number = @url_expander;
             }
         }
+    }
+    # create help text
+    foreach my $option (keys %option_desc){
+        weechat::config_set_desc_plugin( $option,$option_desc{$option} );
     }
 }
 # changes in settings hooked by hook_config()?
@@ -171,7 +185,7 @@ my ( $pointer, $name, $value ) = @_;
     $options{$name} = $value;
     if ($name eq "expander"){
         @url_expander = split(/ /,$options{expander});      # split expander
-        $url_expander = @url_expander;
+        $url_expander_number = @url_expander;
     }
 return weechat::WEECHAT_RC_OK ;
 }
@@ -179,11 +193,11 @@ return weechat::WEECHAT_RC_OK ;
 # first function called by a WeeChat-script.
 weechat::register($PRGNAME, $AUTHOR, $version,$LICENSE, $DESC, "", "");
 
-  $weechat_version = weechat::info_get("version_number", "");
-  if (( $weechat_version eq "" ) or ( $weechat_version < 0x00030700 )){
+$weechat_version = weechat::info_get("version_number", "");
+if (( $weechat_version eq "" ) or ( $weechat_version < 0x00030700 )){
     weechat::print("",weechat::prefix("error")."$PRGNAME: needs WeeChat >= 0.3.7. Please upgrade: http://www.weechat.org/");
     weechat::command("","/wait 1ms /perl unload $PRGNAME");
-  }
+}
 
 init_config();
 
