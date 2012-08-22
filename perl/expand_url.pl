@@ -17,9 +17,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # 0.5  : fix expand_own() tag "prefix_nick_ccc" (thanks roughnecks)
+#      : add item "%nick" for prefix (idea by roughnecks)
+#      : improved option "expander". Now more than one expander can be used (Thanks FiXato for some information about URLs)
 #      : add new options: "prefix" and "color_prefix"
 #      : add help text for options
-#      : improved option "expander". Now more than one expander can be used (Thanks FiXato for some information about URLs)
 # 0.4  : some code optimizations
 # 0.3  : fixed: script won't worked if more than one URL per message exists.
 #      : fixed: output buffer wasn't correctly set for each message.
@@ -62,8 +63,8 @@ my %option_desc = ( "shortener"         =>      "list of know shortener. \"|\" s
                     "expander"          =>      "list of expander to use in script. Please use a space \" \" to separate expander",
                     "color"             =>      "color to use for expanded url in buffer",
                     "color_prefix"      =>      "color for prefix",
-                    "prefix"            =>      "prefix to use (default: [url])",
-                    "expand_own"        =>      "own shortened urls will be expand (on|off)",
+                    "prefix"            =>      "displayed prefix. You can use item \"\%nick\" to display nick in prefix (default: [url])",
+                    "expand_own"        =>      "own shortened urls will be expanded (on|off)",
 );
 
 my %uris;
@@ -91,6 +92,8 @@ if ( $options{expand_own} eq "off" ){
   }
 }
 
+    $tags =~ m/(^|,)nick_(.*),/;
+    my $nick_wo_suffix = $2;                                                                        # nickname without nick_suffix
   # search uri in message. result in %uris
   %uris = ();
   my $finder = URI::Find->new( \&uri_find_cb );
@@ -101,9 +104,8 @@ if ( $options{expand_own} eq "off" ){
     foreach my $uri (@uris) {
         if ($uri =~ m/$options{shortener}/) {                   # known shortener used?
             if ( $url_expander_number > 0 ){                    # one expander exists?
-#                weechat::print("",$uri);
                 my $expand_counter = 0;
-                weechat::hook_process("url:".$url_expander[$expand_counter].$uri, 10000 ,"hook_process_cb","$buffer $uri $expand_counter");
+                weechat::hook_process("url:".$url_expander[$expand_counter].$uri, 10000 ,"hook_process_cb","$buffer $uri $expand_counter $nick_wo_suffix");
             }
         }
     }
@@ -114,9 +116,8 @@ return weechat::WEECHAT_RC_OK;
 # callback from hook_process()
 sub hook_process_cb {
 my ($data, $command, $return_code, $out, $err) = @_;
-    my ($buffer, $uri, $expand_counter) = split(" ",$data);
+    my ($buffer, $uri, $expand_counter, $nick_wo_suffix) = split(" ",$data);
 
-#    my ($buffer,$uri) = split(" ",$data);
     # output not empty. Try to catch long URI
     if ($out ne ""){
         my $how_many_found = 0;
@@ -129,9 +130,22 @@ my ($data, $command, $return_code, $out, $err) = @_;
                 return $orig_uri;});
 #            my $finder = URI::Find->new( \&uri_find_one_cb );
             $how_many_found = $finder->find(\$_);
+
+            my $print_suffix = weechat::color($options{color_prefix}).
+                                        $options{prefix};
+
             if ( $how_many_found >= 1 ){                                # does message contains at least one an url?
-                weechat::print($buffer, weechat::color($options{color_prefix}).
-                                        $options{prefix}."\t".
+                if ( grep /$options{prefix}/,"\%nick" ){
+                    my $nick_color = weechat::info_get('irc_nick_color', $nick_wo_suffix);# get nick-color
+                    $print_suffix = $options{prefix};
+                    my $nick_prefix =   $nick_color.
+                                        $nick_wo_suffix.
+                                        weechat::color($options{color_prefix});
+                    $print_suffix =~ s/%nick/$nick_prefix/;
+                    $print_suffix = weechat::color($options{color_prefix}).$print_suffix;
+                }
+                weechat::print($buffer, $print_suffix.
+                                        "\t".
                                         weechat::color($options{color}).
                                         $uri_only);
                 last;
@@ -141,7 +155,7 @@ my ($data, $command, $return_code, $out, $err) = @_;
     }elsif ($url_expander_number > 1){
         $expand_counter++;
         return weechat::WEECHAT_RC_OK if ($expand_counter > $url_expander_number - 1);
-        weechat::hook_process("url:".$url_expander[$expand_counter].$uri, 10000 ,"hook_process_cb","$buffer $uri $expand_counter");
+        weechat::hook_process("url:".$url_expander[$expand_counter].$uri, 10000 ,"hook_process_cb","$buffer $uri $expand_counter $nick_wo_suffix");
         return weechat::WEECHAT_RC_OK;
     }
 }
@@ -153,11 +167,11 @@ my ( $uri_url, $uri ) = @_;
 return "";
 }
 
-sub uri_find_one_cb {
-my ( $uri_url, $uri ) = @_;
+#sub uri_find_one_cb {
+#my ( $uri_url, $uri ) = @_;
 #  $uri_only = $uri;
-return "";
-}
+#return "";
+#}
 
 # get settings or set them if they do not exists.
 sub init_config{
