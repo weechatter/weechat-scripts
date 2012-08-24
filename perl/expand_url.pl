@@ -51,7 +51,7 @@ my $AUTHOR      = "Nils Görs <weechatter\@arcor.de>";
 my $LICENSE     = "GPL3";
 my $DESC	= "Get information on a short URL. Find out where it goes.";
 # default values
-my %options = ( "shortener"             =>      "goo.gl|tiny.cc|bit.ly|is.gd|tinyurl.com|ur1.ca",
+my %options = ( "shortener"             =>      "t.co/|goo.gl|tiny.cc|bit.ly|is.gd|tinyurl.com|ur1.ca",
                 "expander"              =>      "http://untiny.me/api/1.0/extract?url= http://api.longurl.org/v1/expand?url= http://expandurl.com/api/v1/?url=",
                 "color"                 =>      "blue",
                 "prefix"                =>      "[url]",
