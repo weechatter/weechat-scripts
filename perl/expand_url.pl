@@ -103,7 +103,6 @@ if ( $options{expand_own} eq "off" ){
     my @uris = keys %uris;
     foreach my $uri (@uris) {
         if ($uri =~ m/$options{shortener}/) {                   # known shortener used?
-        weechat::print("","anzahl: $url_expander_number");
             if ( $url_expander_number > 0 ){                    # one expander exists?
                 my $expand_counter = 0;
                 weechat::hook_process("url:".$url_expander[$expand_counter].$uri, 10000 ,"hook_process_cb","$buffer $uri $expand_counter $nick_wo_suffix");
@@ -119,9 +118,6 @@ sub hook_process_cb {
 my ($data, $command, $return_code, $out, $err) = @_;
     my ($buffer, $uri, $expand_counter, $nick_wo_suffix) = split(" ",$data);
 
-weechat::print("",$data);
-weechat::print("",$out);
-weechat::print("",$err);
     # output not empty. Try to catch long URI
     if ($out ne ""){
         my $how_many_found = 0;
@@ -183,7 +179,6 @@ sub init_config{
         if (!weechat::config_is_set_plugin($option)){
             weechat::config_set_plugin($option, $options{$option});
             if ($option eq "expander"){
-                weechat::print("","set: $options{$option}");
                 @url_expander = split(/ /,$options{expander});      # split expander
                 $url_expander_number = @url_expander;
             }
@@ -191,7 +186,6 @@ sub init_config{
         else{
             $options{$option} = weechat::config_get_plugin($option);
             if ($option eq "expander"){
-                weechat::print("","get: $options{$option}");
                 @url_expander = split(/ /,$options{expander});      # split expander
                 $url_expander_number = @url_expander;
             }
