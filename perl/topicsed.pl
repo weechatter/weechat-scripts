@@ -1,6 +1,6 @@
 #
-# Copyright (C) 2011 by stfn <stfnmd@googlemail.com>
-# Copyright (c) 2011 by Nils Görs <weechatter@arcor.de>
+# Copyright (C) 2011-2012 by stfn <stfnmd@googlemail.com>
+# Copyright (c) 2011-2012 by Nils Görs <weechatter@arcor.de>
 #
 # Edit channel topics by perl regular expressions or in input-line
 #
@@ -17,10 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# v0.2: fix: Use of uninitialized value
+#
+# Development is currently hosted at
+# https://github.com/weechatter/weechat-scripts
 
 use strict;
 my $PRGNAME     = "topicsed";
-my $VERSION     = "0.1";
+my $VERSION     = "0.2";
 my $AUTHOR      = "stfn <stfnmd\@googlemail.com> & Nils Görs <weechatter\@arcor.de>";
 my $LICENCE     = "GPL3";
 my $DESCR       = "Edit channel topics by perl regular expressions or in input-line";
@@ -148,8 +152,7 @@ my ($getargs) = ($_[2]);
 
 my @args=split(/ /, $getargs);
 
-$args[0] = lc ($args[0]);
-
+$args[0] = lc ($args[0]) if (defined $args[0]);
 
 if ( not defined $args[0] or $args[0] eq "-e"  or $args[0] eq "-edit" or $args[0] eq ""){
   if ( not defined $Hooks{modifier} ){
@@ -218,9 +221,9 @@ weechat::hook_command($PRGNAME, $DESCR,
                 "\n".
                 "Example:\n".
                 " show a preview of changed topic\n".
-                "   /topicsed -p s/apple/banana/\n".
+                "   /$PRGNAME -p s/apple/banana/\n".
                 " change word \"apple\" to word \"banana\"\n".
-                "  /topicsed s/apple/banana/\n".
+                "  /$PRGNAME s/apple/banana/\n".
                 " bind command to a key, to start the input-line editor\n".
                 "  /key bind meta-E /$PRGNAME\n".
                 "",
