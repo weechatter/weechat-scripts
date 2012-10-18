@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# 1.5   : fixed: wrong pointer in bar_item_remove()
+#       : fixed: perl error: Use of uninitialized value $nickname
 # 1.4   : added: option hide.servername.in.buddylist (suggested by Cubox)
 # 1.3.1 : fixed: perl error: Use of uninitialized value in string comparison (reported by ArcAngel)
 # 1.3   : added: mouse support (weechat >= v0.3.6)
@@ -73,7 +75,7 @@
 use strict;
 
 my $prgname		= "buddylist";
-my $version		= "1.4";
+my $version		= "1.5";
 my $description		= "display status from your buddies a bar-item.";
 
 # -------------------------------[ config ]-------------------------------------
@@ -160,7 +162,7 @@ init();
 buddylist_read();
 
 weechat::bar_item_new($prgname, "build_buddylist", "");
-weechat::bar_new($prgname, "0", "0", "root", "", "left", "horizontal",
+weechat::bar_new($prgname, "1", "0", "root", "", "left", "horizontal",
 		"vertical", "0", "0", "default", "default", "default", "1",
 		$prgname);
 
@@ -639,18 +641,20 @@ sub remove_nick{
 #1                     2   3      4            5                                            6                    7      8 9  10
 #
 sub from_hook_who{
-	my ( $data, $servername, $args ) = @_;
+    my ( $data, $servername, $args ) = @_;
 
-	my @words = split(" ",$args);						# [7] = nick
-		($servername) = split(/,/, $servername);			# get name from server
-		my $nickname = $words[7];
+    my @words = split(" ",$args);                               # [7] = nick
+    ($servername) = split(/,/, $servername);                    # get name from server
+    my $nickname = $words[7];
 
-	if (exists $nick_structure{$servername}{$nickname}){			# nick in buddylist?
-		my $status = 0;							# 0 = offline
-		$status = 1 if (substr($words[8],0,1) eq "G");			# buddy is away (1)
-			add_to_nicktable($servername, $nickname, $status);
-		weechat::bar_item_update($prgname);
-	}
+    return if (not defined $nickname);
+
+    if (exists $nick_structure{$servername}{$nickname}){        # nick in buddylist?
+        my $status = 0;                                         # 0 = offline
+        $status = 1 if (substr($words[8],0,1) eq "G");          # buddy is away (1)
+        add_to_nicktable($servername, $nickname, $status);
+        weechat::bar_item_update($prgname);
+    }
 }
 
 # add buddy to my structure
@@ -1115,7 +1119,6 @@ sub unhook_timer{
 	  weechat::unhook($Hooks{redirect});
 	  delete $Hooks{redirect};
 	}
-weechat::bar_item_remove($prgname);
 }
 
 
