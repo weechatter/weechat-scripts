@@ -49,6 +49,7 @@ OPTIONS         = { 'number'       : ('0','number of history commands/text to sa
                     'save_global'  : ('off','save global history, possible values are \"command\", \"text\", \"all\" or \"off\"(default: off)'),
                     'min_length'   : ('2','minimum length of command/text (default: 2)'),
                     'rmodifier'    : ('off','use rmodifier options to ignore commands/text (default:off)'),
+                    'buffer_close' : ('off','save command history, when buffer will be closed (default: off)'),
                   }
 
 filename_global_history = 'global_history'
@@ -283,7 +284,8 @@ def create_hooks():
     weechat.hook_signal('quit', 'quit_signal_cb', '')
     weechat.hook_signal('upgrade_ended', 'upgrade_ended_cb', '')
     weechat.hook_signal('buffer_opened', 'buffer_opened_cb', '')
-    weechat.hook_config( 'plugins.var.python.' + SCRIPT_NAME + '.*', 'toggle_refresh', '' )
+    weechat.hook_config('plugins.var.python.' + SCRIPT_NAME + '.*', 'toggle_refresh', '' )
+    weechat.hook_signal('buffer_closing', 'buffer_closing_cb', '')
 
 def quit_signal_cb(data, signal, signal_data):
     # create dir, if not exist
@@ -297,6 +299,21 @@ def buffer_opened_cb(data, signal, signal_data):
     filename = get_filename_with_path('%s.%s' % (plugin,name))
 
     read_history(filename,signal_data)
+    return weechat.WEECHAT_RC_OK
+
+def buffer_closing_cb(data, signal, signal_data):
+    if OPTIONS['buffer_close'].lower() == 'on' and signal_data:
+        # check for localvar_save_history
+        if not weechat.buffer_get_string(signal_data, 'localvar_save_history'):
+            return weechat.WEECHAT_RC_OK
+
+        plugin = weechat.buffer_get_string(signal_data, 'localvar_plugin')
+        name = weechat.buffer_get_string(signal_data, 'localvar_name')
+        filename = get_filename_with_path('%s.%s' % (plugin,name))
+        get_buffer_history(signal_data)
+
+        if len(history_list):
+            write_history(filename)
     return weechat.WEECHAT_RC_OK
 
 def upgrade_ended_cb(data, signal, signal_data):
@@ -348,15 +365,16 @@ if __name__ == '__main__':
                             '  list: list local buffer variable(s)\n'
                             '\n'
                             'If you \"/quit\" WeeChat, the script will automatically save the command history to file.\n'
+                            'You can also force the script to save command history, when a buffer will be closed.\n'
                             'If you restart WeeChat again the command history will be restored, when buffer opens again.\n'
-                            'To save and restore global command history, use option \"save_global\".\n'
+                            'To save and restore \"global\" command history, use option \"save_global\".\n'
                             '\n'
                             'The command history of a buffer will be saved \"only\", if the the local variable \"save_history\" is set.\n'
                             'You will need script \"buffer_autoset.py\" to make local variabe persistent (see examples, below)!!\n'
                             '\n'
                             'You can use following values for local variable:\n'
                             '  command: save commands only\n'
-                            '     text: save text only (for example from a channel buffer)\n'
+                            '     text: save text only (text sent to a channel buffer)\n'
                             '      all: save commands and text\n'
                             '\n'
                             'Examples:\n'
