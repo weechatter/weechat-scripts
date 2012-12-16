@@ -19,6 +19,8 @@
 #
 # History:
 #
+# 2012-12-16,  nils_2 <weechatter@arcor.de>:
+#     version 2.9: fix focus window with iset buffer on mouse click
 # 2012-08-25,  nils_2 <weechatter@arcor.de>:
 #     version 2.8: most important key and mouse bindings for iset buffer added to title-bar (idea The-Compiler)
 # 2012-07-31,  nils_2 <weechatter@arcor.de>:
@@ -98,7 +100,7 @@
 use strict;
 
 my $PRGNAME = "iset";
-my $VERSION = "2.8";
+my $VERSION = "2.9";
 my $DESCR   = "Interactive Set for configuration options";
 my $AUTHOR  = "Sebastien Helleu <flashcode\@flashtux.org>";
 my $LICENSE = "GPL3";
@@ -1154,7 +1156,22 @@ sub iset_hsignal_mouse_cb
             }
         }
     }
+    window_switch();
 }
+
+sub window_switch
+{
+    my $current_window = weechat::current_window();
+    my $dest_window = weechat::window_search_with_buffer(weechat::buffer_search("perl","iset"));
+    return 0 if ($dest_window eq "" or $current_window eq $dest_window);
+
+    my $infolist = weechat::infolist_get("window", $dest_window, "");
+    weechat::infolist_next($infolist);
+    my $number = weechat::infolist_integer($infolist, "number");
+    weechat::infolist_free($infolist);
+    weechat::command("","/window " . $number);
+}
+    
 sub distance
 {
     my ($x1,$x2) = ($_[0], $_[1]);
