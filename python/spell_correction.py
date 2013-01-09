@@ -40,13 +40,13 @@ SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "a simple spell correction for a 'mispelled' word"
 
 OPTIONS         = { 'auto_pop_up_item'       : ('off','automatic pop-up of suggestion item'),
-                    'auto_replace'           : ('off','replaces misspelled word with selected suggestion, automatically'),
+                    'auto_replace'           : ('on','replaces misspelled word with selected suggestion, automatically. If you use "off" you will have to bind a command "/%s replace" to a key' % SCRIPT_NAME),
                     'catch_input_completion' : ('on','will catch the input_complete commands [TAB-key]'),
                   }
 
 Hooks = {'auto_pop_up_item': '', 'catch_input_completion': '', 'catch_input_return': ''}
 
-#multiline_input = 0
+multiline_input = 0
 # ================================[ weechat options & description ]===============================
 def init_options():
     for option,value in OPTIONS.items():
@@ -75,6 +75,7 @@ def toggle_refresh(pointer, name, value):
             weechat.unhook(Hooks['catch_input_return'])
     elif OPTIONS['catch_input_completion'].lower() == "on":
         if not Hooks['catch_input_completion']:
+            Hooks['catch_input_completion'] = weechat.hook_command_run('/input complete*', 'input_complete_cb', '')
             Hooks['catch_input_return'] = weechat.hook_command_run('/input return', 'input_return_cb', '')
 
     return weechat.WEECHAT_RC_OK
@@ -147,11 +148,10 @@ def show_item (data, item, window):
 
 # if a suggestion is selected and you edit input line, then replace misspelled word!
 def input_text_changed_cb(data, signal, signal_data):
+    global multiline_input
 
-#    global multiline_input
-
-#    if multiline_input == '1':
-#        return weechat.WEECHAT_RC_OK
+    if multiline_input == '1':
+        return weechat.WEECHAT_RC_OK
 
     buffer = signal_data
     if not buffer:
@@ -247,14 +247,8 @@ def multiline_cb(data, signal, signal_data):
     return weechat.WEECHAT_RC_OK
 
 # ================================[ hook_keys() ]===============================
-
+# TAB key pressed?
 def input_complete_cb(data, buffer, command):
-#    global multiline_input
-
-#    if multiline_input == '1':
-#        multiline_input = '0'
-#        return weechat.WEECHAT_RC_OK
-
     tab_complete,position,aspell_suggest_item = get_position_and_suggest_item(buffer)
     weechat.buffer_set(buffer, 'localvar_set_suggest_item', '%s:%s:%s' % ('2',position,aspell_suggest_item))
 
@@ -277,6 +271,8 @@ def input_complete_cb(data, buffer, command):
             auto_suggest_cmd_cb('', buffer, command)
         else:
             return weechat.WEECHAT_RC_OK
+    else:
+        auto_suggest_cmd_cb('', buffer, command)
 
 #    tab_complete = 1
 #    if tab_complete:
@@ -352,7 +348,7 @@ if __name__ == "__main__":
         weechat.hook_command_run('/input move*', 'input_move_cb', '')
         weechat.hook_signal ('input_text_changed', 'input_text_changed_cb', '')
         # multiline workaround
-#        weechat.hook_signal('input_flow_free', 'multiline_cb', '')
+        weechat.hook_signal('input_flow_free', 'multiline_cb', '')
 
         weechat.bar_item_new('aspell_correction', 'show_item', '')
         if OPTIONS['auto_pop_up_item'].lower() == "on":
