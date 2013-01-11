@@ -24,9 +24,10 @@
 #
 # Development is currently hosted at
 # https://github.com/weechatter/weechat-scripts
-
-# TODO: /spell_correction next and /spell_correction previous instead 
-# I would also appreciate it if it would list from which dictionary the suggestion came.
+#
+# TODO:
+# I would also appreciate it if it would list from which dictionary the suggestion came. (FiXato)
+# comes with WeeChat 0.4.1
 
 try:
     import weechat, re, sys, string
@@ -339,17 +340,15 @@ def input_return_cb(data, signal, signal_data):
 
     return weechat.WEECHAT_RC_OK
 
-# DEL key pressed?
+# /input delete_*
 def input_delete_cb(data, signal, signal_data):
     buffer = signal
     weechat.buffer_set(buffer, 'localvar_del_spell_correction_suggest_item', '')
     weechat.buffer_set(buffer, 'localvar_del_spell_correction_suggest_input_line', '')
     weechat.bar_item_update('spell_correction')
-
-#    tab_complete,position,aspell_suggest_item = get_position_and_suggest_item(buffer)
-#    weechat.buffer_set(buffer, 'localvar_set_spell_correction_suggest_item', '%s:%s:%s' % ('1',position,aspell_suggest_item))
     return weechat.WEECHAT_RC_OK
 
+# /input move_* (cursor position)
 def input_move_cb(data, signal, signal_data):
     buffer = signal
 
@@ -399,7 +398,7 @@ if __name__ == "__main__":
 
         init_options()
 
-        weechat.hook_command_run('/input delete_previous_char', 'input_delete_cb', '')
+        weechat.hook_command_run('/input delete_*', 'input_delete_cb', '')
         weechat.hook_command_run('/input move*', 'input_move_cb', '')
         weechat.hook_signal ('input_text_changed', 'input_text_changed_cb', '')
         # multiline workaround
