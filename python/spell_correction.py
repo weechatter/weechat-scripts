@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2012 by nils_2 <weechatter@arcor.de>
+# Copyright (c) 2013 by nils_2 <weechatter@arcor.de>
 #
 # a simple spell correction for a "mispelled" word
 #
@@ -30,7 +30,7 @@
 # comes with WeeChat 0.4.1
 
 try:
-    import weechat, re, sys, string
+    import weechat, re, sys
 
 except Exception:
     print("This script must be run under WeeChat.")
