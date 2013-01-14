@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # 2012-01-13: nils_2, (freenode.#weechat)
-#       0.1 : - under dev -
+#       0.1 : - initial release -
 #
 # requires: WeeChat version 0.3.x
 #
@@ -59,9 +59,9 @@ multiline_input = 0
 # ================================[ weechat options & description ]===============================
 def init_options():
     for option,value in OPTIONS.items():
+        weechat.config_set_desc_plugin(option, '%s (default: "%s")' % (value[1], value[0]))
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, value[0])
-            weechat.config_set_desc_plugin(option, '%s (default: "%s")' % (value[1], value[0]))
             OPTIONS[option] = value[0]
         else:
             OPTIONS[option] = weechat.config_get_plugin(option)
@@ -231,7 +231,6 @@ def input_text_changed_cb(data, signal, signal_data):
     return weechat.WEECHAT_RC_OK
 
 def replace_misspelled_word(buffer):
-
     input_line = weechat.buffer_get_string(buffer, 'localvar_spell_correction_suggest_input_line')
     if OPTIONS['eat_input_char'].lower() == 'off' or input_line == '':
         input_pos = weechat.buffer_get_integer(buffer,'input_pos')
