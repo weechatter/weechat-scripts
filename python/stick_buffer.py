@@ -19,8 +19,8 @@
 #
 # idea by shad0VV@freenode.#weechat
 #
-# 2013-01-20: nils_2, (freenode.#weechat)
-#       0.1 : under dev
+# 2013-01-21: nils_2, (freenode.#weechat)
+#       0.1 : initial release
 #
 # requires: WeeChat version 0.3.0
 #
@@ -28,7 +28,7 @@
 # https://github.com/weechatter/weechat-scripts
 
 try:
-    import weechat,re
+    import weechat
 
 except Exception:
     print "This script must be run under WeeChat."
@@ -65,12 +65,31 @@ def get_buffer_number_as_string(data):
 
 # ===============================[ callback() ]=============================
 def buffer_switch_cb(signal, callback, callback_data):
-    # switch to buffer?
-    str_buffer_number = get_buffer_number_as_string(callback_data)
+    if callback_data == '':
+        return weechat.WEECHAT_RC_OK
+
+    argv = callback_data.strip().split(' ',)[1:]
+    if len(argv) == 0 or len(argv) > 1:
+        return weechat.WEECHAT_RC_OK
+
+    # check out if string is a number
+    str_buffer_number = get_buffer_number_as_string(argv[0])
     if not str_buffer_number:
         return weechat.WEECHAT_RC_OK
 
-    buffer_name, ptr_buffer = infolist_get_buffer_name_and_ptr(str_buffer_number)
+    curren_buffer_number = infolist_get_current_buffer_number()
+    if not curren_buffer_number:
+        return weechat.WEECHAT_RC_OK
+    if argv[0][0] == '-':
+        switch_to_buffer = curren_buffer_number - int(argv[0][1:])      # [1:] don't use first sign
+        if switch_to_buffer < 1:
+            switch_to_buffer = 1
+    elif argv[0][0] == '+':
+        switch_to_buffer = curren_buffer_number + int(argv[0][1:])      # [1:] don't use first sign
+    else:
+        switch_to_buffer = int(str_buffer_number)
+
+    buffer_name, ptr_buffer = infolist_get_buffer_name_and_ptr(switch_to_buffer)
     if not buffer_name or not ptr_buffer:
         return weechat.WEECHAT_RC_OK
 
@@ -82,47 +101,6 @@ def buffer_switch_cb(signal, callback, callback_data):
         weechat.command('','/window %s' % window_number)
     return weechat.WEECHAT_RC_OK
 
-def buffer_switch_plus_cb(signal, callback, callback_data):
-    # switch to buffer?
-    str_buffer_number = get_buffer_number_as_string(callback_data)
-    if not str_buffer_number:
-        return weechat.WEECHAT_RC_OK
-
-    curren_buffer_number = infolist_get_current_buffer_number()
-    if not curren_buffer_number:
-        return weechat.WEECHAT_RC_OK
-
-    switch_to_buffer = curren_buffer_number + int(str_buffer_number)
-    buffer_name, ptr_buffer = infolist_get_buffer_name_and_ptr(switch_to_buffer)
-    if not buffer_name or not ptr_buffer:
-        return weechat.WEECHAT_RC_OK
-
-    window_number = weechat.buffer_get_string(ptr_buffer,'localvar_stick_buffer_to_window')
-    if window_number:
-        weechat.command('','/window %s' % window_number)
-    return weechat.WEECHAT_RC_OK
-
-def buffer_switch_minus_cb(signal, callback, callback_data):
-    # switch to buffer?
-    str_buffer_number = get_buffer_number_as_string(callback_data)
-    if not str_buffer_number:
-        return weechat.WEECHAT_RC_OK
-    curren_buffer_number = infolist_get_current_buffer_number()
-    if not curren_buffer_number:
-        return weechat.WEECHAT_RC_OK
-
-    switch_to_buffer = curren_buffer_number - int(str_buffer_number)
-    if switch_to_buffer < 1:
-        switch_to_buffer = 1
-
-    buffer_name, ptr_buffer = infolist_get_buffer_name_and_ptr(switch_to_buffer)
-    if not buffer_name or not ptr_buffer:
-        return weechat.WEECHAT_RC_OK
-
-    window_number = weechat.buffer_get_string(ptr_buffer,'localvar_stick_buffer_to_window')
-    if window_number:
-        weechat.command('','/window %s' % window_number)
-    return weechat.WEECHAT_RC_OK
 
 def open_buffer_cmd_cb(data, buffer, args):
     argv = args.strip().split(' ', 1)
@@ -156,16 +134,4 @@ if __name__ == "__main__":
                             'list %-',
                             'open_buffer_cmd_cb', '')
 
-        weechat.hook_command_run('/buffer +*', 'buffer_switch_plus_cb', '')
-        weechat.hook_command_run('/buffer -*', 'buffer_switch_minus_cb', '')
-        weechat.hook_command_run('/buffer **', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 0*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 1*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 2*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 3*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 4*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 5*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 6*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 7*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 8*', 'buffer_switch_cb', '')
-        weechat.hook_command_run('/buffer 9*', 'buffer_switch_cb', '')
+        weechat.hook_command_run('/buffer *', 'buffer_switch_cb', '')
