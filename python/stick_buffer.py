@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2013 by nils_2 <weechatter@arcor.de>
 #
-# description
+# stick buffer to a window, irssi style
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ SCRIPT_NAME     = "stick_buffer"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
 SCRIPT_VERSION  = "0.1"
 SCRIPT_LICENSE  = "GPL"
-SCRIPT_DESC     = "stick buffer to a window"
+SCRIPT_DESC     = "stick buffer to a window, irssi style"
 
 # ===============================[ infolist() ]=============================
 def infolist_get_buffer_name_and_ptr(str_buffer_number):
