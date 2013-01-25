@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2011 by nils_2 <weechatter@arcor.de>
+# Copyright (c) 2011-2013 by nils_2 <weechatter@arcor.de>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,13 +29,15 @@
 # /set plugins.var.python.purgelogs.blacklist "#weechat,#weechat-fr,nils_2"
 #
 # History:
-# 2011-09-18: nils_2 (freenode.#weechat)
+# 2013-01-25: nils_2, (freenode.#weechat)
+#       0.4 : make script compatible with Python 3.x
+# 2011-09-18: nils_2, (freenode.#weechat)
 #     0.3.1 : code optimization
-# 2011-09-17: nils_2 (freenode.#weechat)
+# 2011-09-17: nils_2, (freenode.#weechat)
 #       0.3 : added: search for log-files smaller than age/size (new functions: age_ls and size_ls)
-# 2011-03-11: nils_2 (freenode.#weechat)
+# 2011-03-11: nils_2, (freenode.#weechat)
 #       0.2 : added blacklist option
-# 2011-02-18: nils_2 (freenode.#weechat)
+# 2011-02-18: nils_2, (freenode.#weechat)
 #       0.1 : initial release
 #
 # Development is currently hosted at
@@ -49,13 +51,13 @@ try:
     from datetime import date, timedelta
     
 except Exception:
-    print "This script must be run under WeeChat."
-    print "Get WeeChat now at: http://www.weechat.org/"
+    print("This script must be run under WeeChat.")
+    print("Get WeeChat now at: http://www.weechat.org/")
     quit()
 
 SCRIPT_NAME    = "purgelogs"
 SCRIPT_AUTHOR  = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION = "0.3.1"
+SCRIPT_VERSION = "0.4"
 SCRIPT_LICENSE = "GPL"
 SCRIPT_DESC    = "delete weechatlog-files by age or size (YOU ARE USING THIS SCRIPT AT YOUR OWN RISK!)"
 
@@ -272,7 +274,8 @@ if __name__ == "__main__":
                              "purgelogs_cb", "")
     w.hook_config('plugins.var.python.%s.blacklist' %SCRIPT_NAME, 'update_blacklist', '')
 
-    for option, default_value in purgelogs_options.iteritems():
+    for option, default_value in purgelogs_options.items():
+#    for option, default_value in purgelogs_options.iteritems():
       if w.config_get_plugin(option) == "":
         w.config_set_plugin(option, default_value)
       else:
