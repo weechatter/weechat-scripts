@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2013 by nils_2 <weechatter@arcor.de>
 #
-# stick buffer to a window, irssi style
+# stick buffer to a window, irssi like
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,10 @@
 #
 # idea by shad0VV@freenode.#weechat
 #
+# 2013-01-25: nils_2, (freenode.#weechat)
+#       0.2 : make script compatible with Python 3.x
+#           : smaller improvements
+#
 # 2013-01-21: nils_2, (freenode.#weechat)
 #       0.1 : initial release
 #
@@ -28,18 +32,18 @@
 # https://github.com/weechatter/weechat-scripts
 
 try:
-    import weechat
+    import weechat, sys
 
 except Exception:
-    print "This script must be run under WeeChat."
-    print "Get WeeChat now at: http://www.weechat.org/"
+    print("This script must be run under WeeChat.")
+    print("Get WeeChat now at: http://www.weechat.org/")
     quit()
 
 SCRIPT_NAME     = "stick_buffer"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.1"
+SCRIPT_VERSION  = "0.2"
 SCRIPT_LICENSE  = "GPL"
-SCRIPT_DESC     = "stick buffer to a window, irssi style"
+SCRIPT_DESC     = "stick buffer to a window, irssi like"
 
 # ===============================[ infolist() ]=============================
 def infolist_get_buffer_name_and_ptr(str_buffer_number):
@@ -55,17 +59,23 @@ def infolist_get_buffer_name_and_ptr(str_buffer_number):
     weechat.infolist_free(infolist)
     return full_name, ptr_buffer
 
-def infolist_get_current_buffer_number():
+def get_current_buffer_number():
     ptr_buffer = weechat.window_get_pointer(weechat.current_window(), 'buffer')
     return weechat.buffer_get_integer(ptr_buffer, 'number')
 
 # return empty string if no number is found
 def get_buffer_number_as_string(data):
-    return filter(lambda x: x.isdigit(), data)
+    if sys.version_info < (3,):
+        return filter(lambda x: x.isdigit(), data)
+    return [x for x in data if x.isdigit()]
 
 # ===============================[ callback() ]=============================
 def buffer_switch_cb(signal, callback, callback_data):
     if callback_data == '':
+        return weechat.WEECHAT_RC_OK
+
+    window_number = weechat.buffer_get_string(ptr_buffer,'localvar_stick_buffer_to_window')
+    if not window_number:
         return weechat.WEECHAT_RC_OK
 
     argv = callback_data.strip().split(' ',)[1:]
@@ -77,7 +87,7 @@ def buffer_switch_cb(signal, callback, callback_data):
     if not str_buffer_number:
         return weechat.WEECHAT_RC_OK
 
-    curren_buffer_number = infolist_get_current_buffer_number()
+    curren_buffer_number = get_current_buffer_number()
     if not curren_buffer_number:
         return weechat.WEECHAT_RC_OK
     if argv[0][0] == '-':
@@ -87,7 +97,7 @@ def buffer_switch_cb(signal, callback, callback_data):
     elif argv[0][0] == '+':
         switch_to_buffer = curren_buffer_number + int(argv[0][1:])      # [1:] don't use first sign
     else:
-        switch_to_buffer = int(str_buffer_number)
+        switch_to_buffer = int(str_buffer_number[0])
 
     buffer_name, ptr_buffer = infolist_get_buffer_name_and_ptr(switch_to_buffer)
     if not buffer_name or not ptr_buffer:
@@ -96,7 +106,6 @@ def buffer_switch_cb(signal, callback, callback_data):
     if ptr_buffer == weechat.window_get_pointer(weechat.current_window(),'buffer'):
         return weechat.WEECHAT_RC_OK
 
-    window_number = weechat.buffer_get_string(ptr_buffer,'localvar_stick_buffer_to_window')
     if window_number:
         weechat.command('','/window %s' % window_number)
     return weechat.WEECHAT_RC_OK
@@ -135,3 +144,5 @@ if __name__ == "__main__":
                             'open_buffer_cmd_cb', '')
 
         weechat.hook_command_run('/buffer *', 'buffer_switch_cb', '')
+#        weechat.prnt("","%s.%s" % (sys.version_info[0], sys.version_info[1]))
+
