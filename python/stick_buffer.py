@@ -74,10 +74,6 @@ def buffer_switch_cb(signal, callback, callback_data):
     if callback_data == '':
         return weechat.WEECHAT_RC_OK
 
-    window_number = weechat.buffer_get_string(ptr_buffer,'localvar_stick_buffer_to_window')
-    if not window_number:
-        return weechat.WEECHAT_RC_OK
-
     argv = callback_data.strip().split(' ',)[1:]
     if len(argv) == 0 or len(argv) > 1:
         return weechat.WEECHAT_RC_OK
@@ -106,6 +102,7 @@ def buffer_switch_cb(signal, callback, callback_data):
     if ptr_buffer == weechat.window_get_pointer(weechat.current_window(),'buffer'):
         return weechat.WEECHAT_RC_OK
 
+    window_number = weechat.buffer_get_string(ptr_buffer,'localvar_stick_buffer_to_window')
     if window_number:
         weechat.command('','/window %s' % window_number)
     return weechat.WEECHAT_RC_OK
