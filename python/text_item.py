@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2012 by nils_2 <weechatter@arcor.de>
+# Copyright (c) 2012-2013 by nils_2 <weechatter@arcor.de>
 #
 # add a plain text to item bar
 #
@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# 2013-01-25: nils_2, (freenode.#weechat)
+#       0.2 : make script compatible with Python 3.x
+#
 # 2012-12-23: nils_2, (freenode.#weechat)
 #       0.1 : initial release
 #
@@ -27,7 +30,7 @@
 #
 # Template:
 #  /set plugins.var.python.text_item.<item_name> <type> <${color}><text>
-#  type : channel, server, private
+#  type : all, channel, server, private
 #  (use /buffer localvar)
 #
 # Example:
@@ -47,18 +50,18 @@ try:
     import weechat,re
 
 except Exception:
-    print "This script must be run under WeeChat."
-    print "Get WeeChat now at: http://www.weechat.org/"
+    print("This script must be run under WeeChat.")
+    print("Get WeeChat now at: http://www.weechat.org/")
     quit()
 
 SCRIPT_NAME     = "text_item"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.1"
+SCRIPT_VERSION  = "0.2"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "add a plain text to item bar"
 
 # regexp to match ${color} tags
-regex_color=re.compile('\$\{[^\{\}]+\}')
+regex_color=re.compile('\$\{([^\{\}]+)\}')
 
 # ================================[ options refresh ]===============================
 def create_bar_items():
@@ -86,7 +89,7 @@ def update_item (data, item, window):
     value = weechat.config_get_plugin(data)
 
     if value:
-        value = check_type(window,value)
+        value = check_buffer_type(window,value)
     else:
         return ""
 
@@ -94,10 +97,7 @@ def update_item (data, item, window):
         return ""
 
     # substitute colors in output
-    for color_tag in regex_color.findall(value):
-        value = value.replace(color_tag, weechat.color(color_tag.lstrip('${').rstrip('}')))
-
-    return value
+    return re.sub(regex_color, lambda match: weechat.color(match.group(1)), value)
 
 def toggle_refresh(pointer, name, value):
     option_name = name[len('plugins.var.python.' + SCRIPT_NAME + '.'):]      # get optionname
@@ -120,7 +120,7 @@ def toggle_refresh(pointer, name, value):
     weechat.bar_item_update(option_name)
     return weechat.WEECHAT_RC_OK
 
-def check_type(window, value):
+def check_buffer_type(window, value):
 
     bufpointer = weechat.window_get_pointer(window,"buffer")
     if bufpointer == "":
@@ -133,9 +133,10 @@ def check_type(window, value):
     channel_type = value[0]
     value = value[1]
 
-    if weechat.buffer_get_string(bufpointer,'localvar_type') != channel_type:
-          return ""
-    return value
+    if channel_type == 'all' or weechat.buffer_get_string(bufpointer,'localvar_type') == channel_type:
+        return value
+
+    return ""
 # ================================[ main ]===============================
 if __name__ == "__main__":
     if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, '', ''):
