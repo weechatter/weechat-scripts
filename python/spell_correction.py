@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2013 by nils_2 <weechatter@arcor.de>
 #
-# a simple spell correction for a "mispelled" word
+# a simple spell correction for a "misspelled" word
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,20 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# 2013-01-31: nils_2, (freenode.#weechat)
+#       0.3 : using new info "aspell_dict" (weechat >= 0.4.1)
+#
+# 2013-01-25: nils_2, (freenode.#weechat)
+#       0.2 : make script compatible with Python 3.x
+#
 # 2012-01-13: nils_2, (freenode.#weechat)
 #       0.1 : - initial release -
 #
-# requires: WeeChat version 0.3.x
+# requires: WeeChat version >= 0.4.0
 #
 # Development is currently hosted at
 # https://github.com/weechatter/weechat-scripts
 #
-# TODO:
-# I would also appreciate it if it would list from which dictionary the suggestion came. (FiXato)
-# a simple work around is implemented. see source for further information (def get_localvar_dict(buffer):)
-#
 try:
-    import weechat, re, sys
+    import weechat, re #sys
 
 except Exception:
     print("This script must be run under WeeChat.")
@@ -39,9 +41,9 @@ except Exception:
 
 SCRIPT_NAME     = "spell_correction"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.1"
+SCRIPT_VERSION  = "0.2"
 SCRIPT_LICENSE  = "GPL"
-SCRIPT_DESC     = "a simple spell correction for a 'mispelled' word"
+SCRIPT_DESC     = "a simple spell correction for a 'misspelled' word"
 
 OPTIONS         = { 'auto_pop_up_item'       : ('off','automatic pop-up suggestion item on a misspelled word'),
                     'auto_replace'           : ('on','replaces misspelled word with selected suggestion, automatically. If you use "off" you will have to bind command "/%s replace" to a key' % SCRIPT_NAME),
@@ -58,7 +60,8 @@ regex_optional_tags=re.compile('%\{[^\{\}]+\}')
 multiline_input = 0
 # ================================[ weechat options & description ]===============================
 def init_options():
-    for option,value in OPTIONS.items():
+    for option,value in list(OPTIONS.items()):
+#    for option,value in OPTIONS.items():
         weechat.config_set_desc_plugin(option, '%s (default: "%s")' % (value[1], value[0]))
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, value[0])
@@ -165,7 +168,7 @@ def show_item_cb (data, item, window):
     if dicts_found:
         # aspell.dict.full_name = en_GB,de_DE-neu
         # localvar_dict = en_GB,de_DE-neu
-        dictionary = get_localvar_dict(buffer)
+        dictionary = get_aspell_dict_for(buffer)
         if not dictionary:
             return aspell_suggest_item
         dictionary_list = dictionary.split(',')
@@ -191,10 +194,10 @@ def show_item_cb (data, item, window):
         if config_spell_suggest_item:
             show_item = config_spell_suggest_item.replace('%S',aspell_suggest_item)
             if weechat.config_get_plugin('hide_single_dict').lower() == 'off':
-                show_item = show_item.replace('%D',get_localvar_dict(buffer))
+                show_item = show_item.replace('%D',get_aspell_dict_for(buffer))
             else:
                 show_item = show_item.replace('%D','').rstrip()
-                
+
             show_item = substitute_colors(show_item)
             return '%s' % (show_item)
     return aspell_suggest_item
@@ -260,7 +263,7 @@ def replace_misspelled_word(buffer):
     if input_line[-2:] == '  ':
         input_line = input_line.rstrip()
         input_line = input_line + ' '
-            
+
     weechat.buffer_set(buffer,'input',input_line)
     weechat.bar_item_update('spell_correction')
 
@@ -280,14 +283,17 @@ def replace_misspelled_word(buffer):
 def get_localvar_aspell_suggest(buffer):
     return weechat.buffer_get_string(buffer, 'localvar_aspell_suggest')
 
-def get_localvar_dict(buffer):
-    # TODO: this is a "simple" work around and its only working for buffers with given dictionary
-    # no fallback for partial name like "aspell.dict.irc".
-    # WeeChat 0.4.1 will offer a new function to get the dict from a buffer in a correct manner
+def get_aspell_dict_for(buffer):
+    # this should never happens, but to be sure. Otherwise WeeChat will crash
+    if buffer == '':
+        return ''
+    if int(version) > 0x00040000:
+        return weechat.info_get("aspell_dict", buffer) 
 
+    # this is a "simple" work around and its only working for buffers with given dictionary
+    # no fallback for partial name like "aspell.dict.irc". Get your hands on WeeChat 0.4.1
     full_name = weechat.buffer_get_string(buffer,'full_name')
     return weechat.config_string(weechat.config_get('aspell.dict.%s' % weechat.buffer_get_string(buffer,'full_name')))
-#    return weechat.buffer_get_string(buffer, 'localvar_aspell_dict')
 
 def substitute_colors(text):
     # substitute colors in output
@@ -402,23 +408,23 @@ if __name__ == "__main__":
             weechat.prnt('','%s%s %s' % (weechat.prefix('error'),SCRIPT_NAME,': needs version 0.4.0 or higher'))
             weechat.command('','/wait 1ms /python unload %s' % SCRIPT_NAME)
 
-        weechat.hook_command(SCRIPT_NAME, SCRIPT_DESC, 'replace|previous',
+        weechat.hook_command(SCRIPT_NAME, SCRIPT_DESC, 'previous|replace',
                             '\n'
-                            'add item "spell_correction" to a bar (i suggest the input bar)\n'
+                            'Add item "spell_correction" to a bar (i suggest the input bar).\n'
                             '\n'
                             'On an misspelled word, press TAB to cycle through suggestions. Any key on suggestion will replace misspelled word\n'
                             'with current suggestion.\n'
                             '\n'
-                            'You have to set "aspell.check.suggestions" to a value >= 0 (default: -1 (off))\n'
-                            'Using "aspell.check.real_time" the nick-completion will not work, until all misspelled words in input_line are replaced\n'
+                            'You have to set "aspell.check.suggestions" to a value >= 0 (default: -1 (off)).\n'
+                            'Using "aspell.check.real_time" the nick-completion will not work, until all misspelled words in input_line are replaced.\n'
                             '\n'
                             'You can bind following commands to key:\n'
                             ' /' + SCRIPT_NAME + '           : to cycle though next suggestion\n'
                             ' /' + SCRIPT_NAME + ' previous  : to cycle though previous suggestion\n'
                             ' /' + SCRIPT_NAME + ' replace   : to replace misspelled word\n'
                             '',
-                            '',
-                            'auto_suggest_cmd_cb', '')                
+                            'previous|replace',
+                            'auto_suggest_cmd_cb', '')
 
         init_options()
 
