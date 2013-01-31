@@ -41,7 +41,7 @@ except Exception:
 
 SCRIPT_NAME     = "spell_correction"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.2"
+SCRIPT_VERSION  = "0.3"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "a simple spell correction for a 'misspelled' word"
 
