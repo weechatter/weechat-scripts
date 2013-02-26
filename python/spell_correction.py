@@ -17,6 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# 2013-02-16: nils_2, (freenode.#weechat)
+#       0.4 : bug with empty localvar removed (reported by swimmer)
+#
 # 2013-01-31: nils_2, (freenode.#weechat)
 #       0.3 : using new info "aspell_dict" (weechat >= 0.4.1)
 #
@@ -41,7 +44,7 @@ except Exception:
 
 SCRIPT_NAME     = "spell_correction"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.3"
+SCRIPT_VERSION  = "0.4"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "a simple spell correction for a 'misspelled' word"
 
@@ -235,6 +238,11 @@ def input_text_changed_cb(data, signal, signal_data):
 
 def replace_misspelled_word(buffer):
     input_line = weechat.buffer_get_string(buffer, 'localvar_spell_correction_suggest_input_line')
+    if not input_line:
+        # remove spell_correction item
+        weechat.buffer_set(buffer, 'localvar_del_spell_correction_suggest_item', '')
+        weechat.bar_item_update('spell_correction')
+        return
     if OPTIONS['eat_input_char'].lower() == 'off' or input_line == '':
         input_pos = weechat.buffer_get_integer(buffer,'input_pos')
         # check cursor position
@@ -287,10 +295,10 @@ def get_aspell_dict_for(buffer):
     # this should never happens, but to be sure. Otherwise WeeChat will crash
     if buffer == '':
         return ''
-    if int(version) > 0x00040000:
-        return weechat.info_get("aspell_dict", buffer) 
+    if int(version) >= 0x00040100:
+        return weechat.info_get("aspell_dict", buffer)
 
-    # this is a "simple" work around and its only working for buffers with given dictionary
+    # this is a "simple" work around and it only works for buffers with given dictionary
     # no fallback for partial name like "aspell.dict.irc". Get your hands on WeeChat 0.4.1
     full_name = weechat.buffer_get_string(buffer,'full_name')
     return weechat.config_string(weechat.config_get('aspell.dict.%s' % weechat.buffer_get_string(buffer,'full_name')))
