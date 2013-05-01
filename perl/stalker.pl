@@ -19,8 +19,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # History:
+# version 0.2: nils_2@freenode.#weechat
+# 2013-05-01: fix: bug with regular expressions using /whois
+#             removed: option 'allow_regex_for_search'
+#             add: command option '-regex'
+#
 # version 0.1: nils_2@freenode.#weechat
-# 2013-04-23: - dev version -
+# 2013-04-23: - initial release -
 #
 # thanks to firebird and mave_ for testing...
 #
@@ -45,7 +50,7 @@ use File::Spec;
 use DBI;
 
 my $SCRIPT_NAME         = "stalker";
-my $SCRIPT_VERSION      = "0.1";
+my $SCRIPT_VERSION      = "0.2";
 my $SCRIPT_AUTHOR       = "Nils Görs <weechatter\@arcor.de>";
 my $SCRIPT_LICENCE      = "GPL3";
 my $SCRIPT_DESC         = "Records and correlates nick!user\@host information";
@@ -65,7 +70,6 @@ my %options = ('db_name'                => '%h/nicks.db',
                'guest_host_regex'       => '^webchat',
                'normalize_nicks'        => 'on',
                'search_this_network_only' => 'on',
-               'allow_regex_for_search' => 'off',
                'use_localvar'           => 'off',
                'ignore_nickchange'      => 'off',
                'ignore_whois'           => 'off',
@@ -84,7 +88,6 @@ my %desc_options = ('db_name'           => 'file containing the SQLite database 
                     'use_localvar'      => 'When enabled, only channels with a localvar \'stalker\' will be monitored. This option will not affect /NICK and /WHOIS monitoring. It\'s only for /JOIN messages. (default: off)',
                     'ignore_nickchange' => 'When enabled, /NICK changes won\'t be monitored. (default: off)',
                     'ignore_whois'      => 'When enabled, /WHOIS won\'t be monitored. (default: off)',
-                    'allow_regex_for_search' => 'When enabled you can use regular expressions for nick/host search. Note that regex matching will not use SQLite indices, but will iterate over all rows, so it could be quite costly in terms of performance. (default: off)',
 );
 
 my $count;
@@ -324,11 +327,11 @@ sub get_host_records {
 
 sub get_nick_records
 {
-    # type = host|nick, $query = name, $serv = server, @return = "."
-    my ( $suppress, $type, $query, $serv, @return ) = @_;
+    # type = host|nick, $query = nick, $serv = server, use_regex = 0|1, @return = "."
+    my ( $suppress, $type, $query, $serv, $use_regex, @return ) = @_;
 
     $count = 0; %data = (  );
-    my %data = _r_search( $suppress, $serv, $type, $query );
+    my %data = _r_search( $suppress, $serv, $type, $use_regex, $query );
     for my $k ( keys %data ) {
         DEBUG( "info", "$type query for database records on $query from server $serv. returned: $k" );
         push @return, $k if $data{$k} eq 'nick';
@@ -343,7 +346,7 @@ sub get_nick_records
 }
 
 sub _r_search {
-    my ( $suppress, $serv, $type, @input ) = @_;
+    my ( $suppress, $serv, $type, $use_regex, @input ) = @_;
 
     return %data if $count > 1000;
     return %data if $count > $options{'max_recursion'};
@@ -355,16 +358,19 @@ sub _r_search {
         $count++;
         for my $nick ( @input ) {
             next if exists $data{$nick};
+
             $data{$nick} = 'nick';
-            my @hosts = _get_hosts_from_nick( $nick, $serv );
-            _r_search( $suppress, $serv, 'host', @hosts );
+            my @hosts = _get_hosts_from_nick( $nick, $serv, $use_regex );
+            # use regex only for nick search!
+            $use_regex = 0 if ( $use_regex );
+            _r_search( $suppress, $serv, 'host', $use_regex, @hosts );
         }
     } elsif ( $type eq 'host' ) {
         $count++;
         for my $host ( @input ) {
             next if exists $data{$host};
             $data{$host} = 'host';
-            my @nicks = _get_nicks_from_host( $host, $serv );
+            my @nicks = _get_nicks_from_host( $host, $serv, $use_regex );
             my $a = @nicks;
             next if ($a <= 0);
 
@@ -385,20 +391,22 @@ sub _r_search {
 
             weechat::print($ptr_buffer,$output) if ($suppress eq 'no');
 
-            _r_search( $suppress, $serv, 'nick', @nicks );
+            # use regex only for host search!
+            $use_regex = 0 if ( $use_regex );
+            _r_search( $suppress, $serv, 'nick', $use_regex, @nicks );
         }
     }
     return %data;
 }
 
 sub _get_hosts_from_nick {
-    my ( $nick, $serv, @return ) = @_;
+    my ( $nick, $serv, $use_regex, @return ) = @_;
 
     my $sth;
 
     if ( lc($options{'search_this_network_only'}) eq "on" )
     {
-        if ( lc($options{'allow_regex_for_search'}) eq "on" )
+        if ( $use_regex )
         {
             $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick REGEXP ? AND serv = ?" );
             $sth->execute( $nick, $serv );
@@ -411,7 +419,7 @@ sub _get_hosts_from_nick {
     }
     else
     {
-        if ( lc($options{'allow_regex_for_search'}) eq "on" )
+        if ( $use_regex )
         {
             $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick REGEXP ?");
         }
@@ -423,17 +431,16 @@ sub _get_hosts_from_nick {
     }
     # nothing found in database
 #    return '' if (not defined $sth->fetchrow_hashref);
-
     return _ignore_guests( 'host', $sth );
 }
 
 sub _get_nicks_from_host {
-    my ( $host, $serv, @return ) = @_;
+    my ( $host, $serv, $use_regex, @return ) = @_;
 
     my $sth;
     if ( lc($options{'search_this_network_only'}) eq "on" )
     {
-        if ( lc($options{'allow_regex_for_search'}) eq "on" )
+        if ( $use_regex )
         {
             $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE host REGEXP ? AND serv = ?" );
             $sth->execute( $host, $serv );
@@ -446,7 +453,7 @@ sub _get_nicks_from_host {
     }
     else
     {
-        if ( lc($options{'allow_regex_for_search'}) eq "on" )
+        if ( $use_regex )
         {
             $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE host REGEXP ?" );
         }
@@ -458,7 +465,6 @@ sub _get_nicks_from_host {
     }
     # nothing found in database
 #    return '' if (not defined $sth->fetchrow_hashref);
-
     return _ignore_guests( 'nick', $sth );
 }
 
@@ -526,6 +532,7 @@ sub stalker_command_cb
 
     return weechat::WEECHAT_RC_OK if ($number <= 0);
 
+    # get localvar from current buffer
     my $name = weechat::buffer_get_string(weechat::current_buffer(),'localvar_name');
     my $server = weechat::buffer_get_string(weechat::current_buffer(),'localvar_server');
     my $type = weechat::buffer_get_string(weechat::current_buffer(),'localvar_type');
@@ -549,28 +556,31 @@ sub stalker_command_cb
     # at least, we have two arguments
     return weechat::WEECHAT_RC_OK if ($number <= 1);
 
+    my $use_regex = 0;
+
     if (lc($args_array[0]) eq 'scan' && $args_array[1] ne "")
     {
         $args_array[1] =~ s/\./,/;                      # info_get() needs an "," instead of "."
         my $ptr_buffer = weechat::info_get('irc_buffer',$args_array[1]);
 #        channel_scan_41($ptr_buffer) if ( $ptr_buffer ne "");
         channel_scan($ptr_buffer) if ( $ptr_buffer ne "");
-    }elsif (lc($args_array[0]) eq 'nick')
-    {
-        $server = $args_array[2] if ( defined $args_array[2] and $args_array[2] ne "" );
-        if ( $server eq "" )
-        {
-            my $text = 'command must be executed on irc buffer (server or channel) or a server must be given';
-            my $color  = weechat::color(weechat::config_color(weechat::config_get('weechat.color.chat_prefix_error')));
-            my $DEBUG_prefix = weechat::config_string(weechat::config_get('weechat.look.prefix_error'));
-            weechat::print('', _color_str($color, $DEBUG_prefix) . "\t$SCRIPT_NAME: $text");
-            return weechat::WEECHAT_RC_OK;
-        }
-        my $nicks_found = join( ", ", (get_nick_records('no', 'nick', $args_array[1], $server)));
     }
-    elsif (lc($args_array[0]) eq 'host')
+    elsif (lc($args_array[0]) eq 'nick' or lc($args_array[0]) eq 'host')
     {
-        $server = $args_array[2] if ( defined $args_array[2] and $args_array[2] ne "" );
+        if ( defined $args_array[2] and $args_array[2] eq "-regex" )
+        {
+            $use_regex = 1;
+        }
+        else
+        {
+            $server = $args_array[2] if ( defined $args_array[2] and $args_array[2] ne "" );
+        }
+
+        if ( defined $args_array[3] and $args_array[3] eq "-regex" )
+        {
+            $use_regex = 1;
+        }
+
         if ( $server eq "" )
         {
             my $text = 'command must be executed on irc buffer (server or channel) or a server must be given';
@@ -579,8 +589,8 @@ sub stalker_command_cb
             weechat::print('', _color_str($color, $DEBUG_prefix) . "\t$SCRIPT_NAME: $text");
             return weechat::WEECHAT_RC_OK;
         }
-        my $hosts_found = join( ", ", (get_nick_records('no', 'host', $args_array[1], $server)));
-#        weechat::print("","host: $hosts_found");
+        # $args_array[0]: 'nick' or 'host', $args_array[1]: nick or host name
+        my $nicks_found = join( ", ", (get_nick_records('no', $args_array[0], $args_array[1], $server, $use_regex)));
     }
     return weechat::WEECHAT_RC_OK;
 }
@@ -764,11 +774,13 @@ sub irc_in2_whois_cb
         }
     }
 
-    my $nicks_found = join( ", ", (get_nick_records('yes', 'nick', $nick, $server)));
+    my $use_regex = 0;
+    my $nicks_found = join( ", ", (get_nick_records('yes', 'nick', $nick, $server, $use_regex)));
 
-    # only the given nick is returned.
+    # only the given nick is returned?
     return weechat::WEECHAT_RC_OK if ($nicks_found eq $nick);
 
+    # more than one nick was returned from sqlite
     my $prefix_network = weechat::prefix('network');
     my $color_chat_delimiter = weechat::color('chat_delimiters');
     my $color_chat_nick = weechat::color('chat_nick');
@@ -870,7 +882,7 @@ weechat::register($SCRIPT_NAME, $SCRIPT_AUTHOR, $SCRIPT_VERSION,
         init_config();
         open_database();
 
-        weechat::hook_command($SCRIPT_NAME, $SCRIPT_DESC, "host <host> [server] || nick <nick> [server] || scan [<server.channel>]",
+        weechat::hook_command($SCRIPT_NAME, $SCRIPT_DESC, "host <host> [server] [-regex] || nick <nick> [server] [-regex] || scan [<server.channel>]",
                       "   host : look for hostname\n".
                       "   nick : look for nick\n".
                       "   scan : scan a channel (be careful; scanning large channels take a while!)\n".
@@ -882,8 +894,8 @@ weechat::register($SCRIPT_NAME, $SCRIPT_AUTHOR, $SCRIPT_VERSION,
                       "/buffer set localvar_set_stalker [value]\n".
                       "  values: \"on\", \"true\", \"t\", \"yes\", \"y\", \"1\")\n".
                       "\n".
-                      "$SCRIPT_NAME performs standard perl regular expression matching with option 'allow_regex_for_search'. If you don't know about\n".
-                      "regular expressions, leave the option untouched. You should increase value from 'max_recursion' option, using regex matching.\n".
+                      "$SCRIPT_NAME performs standard perl regular expression matching with option '-regex'.\n".
+                      "Note that regex matching will not use SQLite indices, but will iterate over all rows, so it could be quite costly in terms of performance.\n".
                       "\n".
                       "Examples:\n".
                       "  search for nick 'nils_2'\n".
@@ -891,12 +903,12 @@ weechat::register($SCRIPT_NAME, $SCRIPT_AUTHOR, $SCRIPT_VERSION,
                       "  search for nick 'nils_2' on a different server named 'unknown'\n".
                       "    /".$SCRIPT_NAME." nick nils_2 unknown\n".
                       "  search for nicks starting with 'ni'\n".
-                      "    /".$SCRIPT_NAME." nick \\bni.*\n".
+                      "    /".$SCRIPT_NAME." nick \\bni.* -regex\n".
                       "  search all hosts located in 'de'\n".
-                      "    /".$SCRIPT_NAME." host .*\\.de \n".
+                      "    /".$SCRIPT_NAME." host .*\\.de -regex\n".
                       "",
-                      "host %% %(irc_servers) %-||".
-                      "nick %(nick) %(irc_servers) %-||".
+                      "host %% %(irc_servers)|-regex %-||".
+                      "nick %(nick) %(irc_servers)|-regex -regex %-||".
                       "scan %(buffers_names) %-", "stalker_command_cb", "");
 
         weechat::hook_config("plugins.var.perl.$SCRIPT_NAME.*", "toggle_config_by_set", "");
