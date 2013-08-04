@@ -487,6 +487,39 @@ sub _get_nicks_from_host {
     return _ignore_guests( 'nick', $sth );
 }
 
+sub _deassociate_nick_from_host {
+    my ( $nick, $host, $serv, $use_regex, @return ) = @_;
+
+    my $sth;
+    if ( lc($options{'search_this_network_only'}) eq "on" )
+    {
+        if ( $use_regex )
+        {
+            $sth = $DBH->prepare( "DELETE FROM records WHERE host REGEXP ? AND nick REGEXP ? AND serv = ?" );
+        }
+        else
+        {
+            $sth = $DBH->prepare( "DELETE FROM records WHERE host = ? AND nick = ? AND serv = ?" );
+        }
+        $res = $sth->execute( $host, $nick, $serv );
+        weechat::print('', "\t$SCRIPT_NAME: _deassociate_nick_from_host query: DELETE FROM records WHERE host = $host AND nick = $nick AND serv = $serv");
+    }
+    else
+    {
+        if ( $use_regex )
+        {
+            $sth = $DBH->prepare( "DELETE FROM records WHERE host REGEXP ? AND nick REGEXP ?" );
+        }
+        else
+        {
+            $sth = $DBH->prepare( "DELETE FROM records WHERE host = ? AND nick = ?" );
+        }
+        $sth->execute( $host, $nick );
+        weechat::print('', "\t$SCRIPT_NAME: _deassociate_nick_from_host query: DELETE FROM records WHERE host = $host AND nick = $nick");
+    }
+    return $sth->rows;
+}
+
 sub _ignore_guests {
     my ( $field, $sth ) = @_;
     my @return;
@@ -637,6 +670,27 @@ sub stalker_command_cb
         # $args_array[0]: 'nick' or 'host', $args_array[1]: nick or host name
         my $nicks_found = join( ", ", (get_nick_records('no', $args_array[0], $args_array[1], $server, $use_regex)));
     }
+    elsif (lc($args_array[0]) eq 'remove_nick_from_host')
+    {
+      if('-regex' ~~ $args_array) { $use_regex = 1; }
+
+      my $server = weechat::buffer_get_string(weechat::current_buffer(),'localvar_server');
+
+      if ( $server eq "" )
+      {
+          my $text = 'command must be executed on irc buffer (server or channel) or a server must be given';
+          my $color  = weechat::color(weechat::config_color(weechat::config_get('weechat.color.chat_prefix_error')));
+          my $DEBUG_prefix = weechat::config_string(weechat::config_get('weechat.look.prefix_error'));
+          weechat::print('', _color_str($color, $DEBUG_prefix) . "\t$SCRIPT_NAME: $text");
+          return weechat::WEECHAT_RC_OK;
+      }
+
+      my $affected_rows = _deassociate_nick_from_host( $args_array[1], $args_array[2], $server, $use_regex );
+      my $color  = weechat::color(weechat::config_color(weechat::config_get('weechat.color.chat_prefix_error')));
+      my $DEBUG_prefix = weechat::config_string(weechat::config_get('weechat.look.prefix_error'));
+      weechat::print('', _color_str($color, $DEBUG_prefix) . "\t$SCRIPT_NAME: $affected_rows deleted");
+    }
+    
     return weechat::WEECHAT_RC_OK;
 }
 
