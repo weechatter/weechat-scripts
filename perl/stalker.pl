@@ -433,7 +433,7 @@ sub _get_hosts_from_nick {
         }
         else
         {
-            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick = ? AND serv = ?" );
+            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick = ? COLLATE NOCASE AND serv = ?" );
             $sth->execute( $nick, $serv );
         }
     }
@@ -445,7 +445,7 @@ sub _get_hosts_from_nick {
         }
         else
         {
-            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick = ?" );
+            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick = ? COLLATE NOCASE" );
         }
         $sth->execute( $nick );
     }
