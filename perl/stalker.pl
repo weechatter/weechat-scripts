@@ -20,6 +20,11 @@
 #
 # History:
 #
+# version 0.8: Ratler@freenode.#weechat
+# 2013-08-09: add: case insensitive nick search 
+#             add: show "server.nickname" in search results when search_this_network_only is set to off
+#             fix: type no longer needed for _ignore_guests() 
+#
 # version 0.7: nils_2@freenode.#weechat
 # 2013-08-04: add: support of colors with format "${color:xxx}" (>= WeeChat 0.4.2)
 #             add: function "remove_nick_from_host" (patch by FiXato)
@@ -68,7 +73,7 @@ use File::Spec;
 use DBI;
 
 my $SCRIPT_NAME         = "stalker";
-my $SCRIPT_VERSION      = "0.7";
+my $SCRIPT_VERSION      = "0.8";
 my $SCRIPT_AUTHOR       = "Nils Görs <weechatter\@arcor.de>";
 my $SCRIPT_LICENCE      = "GPL3";
 my $SCRIPT_DESC         = "Records and correlates nick!user\@host information";
