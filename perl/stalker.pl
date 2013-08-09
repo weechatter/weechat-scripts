@@ -351,7 +351,7 @@ sub get_nick_records
     my ( $suppress, $type, $query, $serv, $use_regex, @return ) = @_;
 
     $count = 0; %data = (  );
-    my %data = _r_search( $suppress, $serv, $type, $use_regex, $query );
+    my %data = _r_search( $suppress, $serv, $type, $use_regex, ({ $type => $query }) );
     for my $k ( keys %data ) {
         DEBUG( "info", "$type query for database records on $query from server $serv. returned: $k" );
         push @return, $k if $data{$k} eq 'nick';
@@ -376,7 +376,8 @@ sub _r_search {
     
     if ( $type eq 'nick' ) {
         $count++;
-        for my $nick ( @input ) {
+        for my $row ( @input ) {
+            my $nick = $row->{nick};
             next if exists $data{$nick};
 
             $data{$nick} = 'nick';
@@ -387,12 +388,21 @@ sub _r_search {
         }
     } elsif ( $type eq 'host' ) {
         $count++;
-        for my $host ( @input ) {
+        for my $row ( @input ) {
+            my $host = $row->{host};
             next if exists $data{$host};
             $data{$host} = 'host';
             my @nicks = _get_nicks_from_host( $host, $serv, $use_regex );
-            my $a = @nicks;
-            next if ($a <= 0);
+            next if (scalar(@nicks) <= 0);
+
+            my $output_nicks;
+            if ( lc($options{'search_this_network_only'}) eq "on" )
+            {
+                $output_nicks = join( ", ", map { $_->{nick} } @nicks );
+            }
+            else {
+                $output_nicks = join( ", ", map { $_->{serv} . "." . $_->{nick} } @nicks );
+            }
 
             my $ptr_buffer = weechat::current_buffer();
 
@@ -405,8 +415,7 @@ sub _r_search {
                          weechat::color('chat_delimiters').
                          "] ".
                          weechat::color('reset').
-                         "Found nicks: ".
-                         join( " , ", @nicks ).
+                         "Found nicks: $output_nicks".
                          " from host $host";
 
             OUTPUT($ptr_buffer,$output) if ($suppress eq 'no');
@@ -433,7 +442,7 @@ sub _get_hosts_from_nick {
         }
         else
         {
-            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick = ? AND serv = ?" );
+            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick = ? COLLATE NOCASE AND serv = ?" );
             $sth->execute( $nick, $serv );
         }
     }
@@ -441,17 +450,17 @@ sub _get_hosts_from_nick {
     {
         if ( $use_regex )
         {
-            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick REGEXP ?");
+            $sth = $DBH->prepare( "SELECT nick, host, serv FROM records WHERE nick REGEXP ?");
         }
         else
         {
-            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE nick = ?" );
+            $sth = $DBH->prepare( "SELECT nick, host, serv FROM records WHERE nick = ? COLLATE NOCASE" );
         }
         $sth->execute( $nick );
     }
     # nothing found in database
 #    return '' if (not defined $sth->fetchrow_hashref);
-    return _ignore_guests( 'host', $sth );
+    return _ignore_guests( $sth );
 }
 
 sub _get_nicks_from_host {
@@ -475,22 +484,22 @@ sub _get_nicks_from_host {
     {
         if ( $use_regex )
         {
-            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE host REGEXP ?" );
+            $sth = $DBH->prepare( "SELECT nick, host, serv FROM records WHERE host REGEXP ?" );
         }
         else
         {
-            $sth = $DBH->prepare( "SELECT nick, host FROM records WHERE host = ?" );
+            $sth = $DBH->prepare( "SELECT nick, host, serv FROM records WHERE host = ?" );
         }
         $sth->execute( $host );
     }
     # nothing found in database
 #    return '' if (not defined $sth->fetchrow_hashref);
-    return _ignore_guests( 'nick', $sth );
+    return _ignore_guests( $sth );
 }
 
 sub _ignore_guests
 {
-    my ( $field, $sth ) = @_;
+    my ( $sth ) = @_;
     my @return;
 
     while ( my $row = $sth->fetchrow_hashref ) {
@@ -502,7 +511,7 @@ sub _ignore_guests
             my $regex = $options{'guest_host_regex'};
             next if( $row->{host} =~ m/$regex/i );
         }
-        push @return, $row->{$field};
+        push @return, $row;
     }
     return @return;
 }
