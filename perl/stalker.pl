@@ -460,7 +460,7 @@ sub _get_hosts_from_nick {
     }
     # nothing found in database
 #    return '' if (not defined $sth->fetchrow_hashref);
-    return _ignore_guests( 'host', $sth );
+    return _ignore_guests( $sth );
 }
 
 sub _get_nicks_from_host {
@@ -494,12 +494,12 @@ sub _get_nicks_from_host {
     }
     # nothing found in database
 #    return '' if (not defined $sth->fetchrow_hashref);
-    return _ignore_guests( 'nick', $sth );
+    return _ignore_guests( $sth );
 }
 
 sub _ignore_guests
 {
-    my ( $field, $sth ) = @_;
+    my ( $sth ) = @_;
     my @return;
 
     while ( my $row = $sth->fetchrow_hashref ) {
