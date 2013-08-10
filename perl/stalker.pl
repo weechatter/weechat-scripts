@@ -21,9 +21,9 @@
 # History:
 #
 # version 0.8: Ratler@freenode.#weechat
-# 2013-08-09: add: case insensitive nick search 
+# 2013-08-09: add: case insensitive nick search
 #             add: show "server.nickname" in search results when search_this_network_only is set to off
-#             fix: type no longer needed for _ignore_guests() 
+#             fix: type no longer needed for _ignore_guests()
 #
 # version 0.7: nils_2@freenode.#weechat
 # 2013-08-04: add: support of colors with format "${color:xxx}" (>= WeeChat 0.4.2)
@@ -205,15 +205,15 @@ sub stat_database {
 
 sub create_database {
     my ( $DBH ) = @_;
-    
-    my @queries = ( 
+
+    my @queries = (
         "DROP TABLE IF EXISTS records",
         "CREATE TABLE records (nick TEXT NOT NULL," .
             "user TEXT NOT NULL, host TEXT NOT NULL, serv TEXT NOT NULL, " .
             "added DATE NOT NULL DEFAULT CURRENT_TIMESTAMP)",
         "INSERT INTO records (nick, user, host, serv) VALUES( 1, 1, 1, 'script-test-string' )"
     );
-    
+
     # Drop table is exists
     # Create the table and indices
     # Insert test record
@@ -224,12 +224,12 @@ sub create_database {
     index_db( $DBH );
 }
 
-# Add indices to the DB. If they already exist, no harm done. 
+# Add indices to the DB. If they already exist, no harm done.
 # Is there an easy way to test if they exist already?
 sub index_db {
     my ( $DBH ) = @_;
 
-    my @queries = ( 
+    my @queries = (
         "CREATE INDEX index1 ON records (nick)",
         "CREATE INDEX index2 ON records (host)",
     );
@@ -378,7 +378,7 @@ sub _r_search {
     return %data if $count == 2 and ! $options{'recursive_search'};
 
     DEBUG( "info", "Recursion Level: $count" );
-    
+
     if ( $type eq 'nick' ) {
         $count++;
         for my $row ( @input ) {
@@ -719,7 +719,7 @@ sub command_must_be_executed_on_irc_buffer
 }
 # hdata_search()
 # hdata: hdata pointer
-# pointer: pointer to a WeeChat/plugin object 
+# pointer: pointer to a WeeChat/plugin object
 # search: expression to evaluate, default pointer in expression is the name of hdata (and this pointer changes for each element in list); for help on expression, see command /eval in WeeChat User’s guide
 # move: number of jump(s) to execute after unsuccessful search (negative or positive integer, different from 0)
 
