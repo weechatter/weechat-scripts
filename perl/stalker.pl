@@ -225,18 +225,23 @@ sub create_database {
 }
 
 # Add indices to the DB. If they already exist, no harm done.
-# Is there an easy way to test if they exist already?
 sub index_db {
     my ( $DBH ) = @_;
 
-    my @queries = (
-        "CREATE INDEX index1 ON records (nick)",
-        "CREATE INDEX index2 ON records (host)",
+    my @indices = (
+        { 'name' => 'index1', 'column' => 'nick' },
+        { 'name' => 'index2', 'column' => 'host' },
     );
+
+    my %idx_exists;
+    for my $index ( @{ $DBH->selectall_arrayref( "PRAGMA INDEX_LIST(records)" ) } ) {
+        $idx_exists{$index->[1]} = 1;
+    }
+
     $DBH->{RaiseError} = 0;
     $DBH->{PrintError} = 0;
-    for my $query (@queries) {
-        $DBH->do( $query );
+    for my $index ( @indices ) {
+        $DBH->do( "CREATE INDEX $index->{name} ON records ($index->{column})" ) unless ( $idx_exists{$index->{name}} );
     }
     $DBH->{RaiseError} = 1;
     $DBH->{PrintError} = 1;
