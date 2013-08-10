@@ -35,9 +35,18 @@
 # The latest version can be obtained from either http://www.inexistent.com/ or
 # http://imbezol.org/sysinfo/
 #
-# ported to weechat (http://www.weechat.org/) by Nils Görs. Copyright
-# (c) 2011-2012 Nils Görs
+# You can also reach Travis in #crd on efnet.
 #
+# ported to WeeChat (http://www.weechat.org/) by Nils Görs. Copyright
+# (c) 2011-2013 Nils Görs
+#
+# 2013-08-10: 0.7 nils_2 (freenode@nils_2)
+#           : add: support of vcgencmd (eg raspberry pi)
+# 2013-03-06: 0.6 Thomas Poechtrager <t.poechtrager@gmail.com>
+#           : fixed memory usage
+# 2012-11-15: 0.5 nils_2 (freenode@nils_2)
+#           : based on sysinfo 2.81.21
+#           : bug with "armv5tel" in sysinfo 2.81.21 fixed (Version bumped to 2.81.22 and sent to maintainer)
 # 2012-01-07: 0.4 welwood08
 #	    : Fix distro+version for Ubuntu LTS
 #	    : version bumped to 0.4 and copyright status changed
@@ -56,9 +65,11 @@
 use POSIX qw(floor);
 use strict;
 
-my $PRGNAME     = "sysinfo";
-my $VERSION     = "0.4";
-my $DESCR       = "provides a system info command";
+my $SCRIPT_NAME         = "sysinfo";
+my $SCRIPT_VERSION      = "0.7";
+my $SCRIPT_DESCR        = "provides a system info command";
+my $SCRIPT_LICENSE      = "GPL3";
+my $SCRIPT_AUTHOR       = "Nils Görs <weechatter\@arcor.de>";
 
 # Set up the arrays and variables first.
 use vars qw(
@@ -165,13 +176,13 @@ my $col2 = '';
 my $bar_item = "";
 my %Hooks       = ();
 my $weechat_version = "";
-
+my $vcgencmd = "/usr/bin/vcgencmd";
 ###############################################
 ### Nothing below here should need changed. ###
 ###############################################
 
-my $sysinfoVer	= '2.81.16';
-my $sysinfoDate	= 'Jun 11, 2009, 11:09am MDT';
+my $sysinfoVer  = '2.81.22';
+my $sysinfoDate = 'Nov 16, 2012, 22:20 CET';
 
 my $os		= `uname -s`; chomp($os);
 my $osn		= `uname -n`; chomp($osn);
@@ -194,16 +205,20 @@ my $sun			= 1 if $os =~ /^SunOS$/;
 
 
 my $alpha		= 1 if $osm =~ /^alpha$/;
-my $armv4l		= 1 if $osm =~ /^armv4l$/;
-my $armv5l		= 1 if $osm =~ /^armv5l$/;
+my $arm                 = 1 if $osm =~ /^arm/;
 my $i586		= 1 if $osm =~ /^i586$/;
 my $i686		= 1 if $osm =~ /^i686$/;
 my $ia64		= 1 if $osm =~ /^ia64$/;
 my $mips		= 1 if $osm =~ /^mips$/;
 my $parisc		= 1 if $osm =~ /^parisc$/;
-my $parisc64	= 1 if $osm =~ /^parisc64$/;
+my $parisc64            = 1 if $osm =~ /^parisc64$/;
 my $ppc			= 1 if $osm =~ /^ppc$/;
 my $ppc64		= 1 if $osm =~ /^ppc64$/;
+my $s390                = 1 if $osm =~ /^s390$/;
+my $s390x               = 1 if $osm=~ /^s390x$/;
+my $sh                  = 1 if $osm=~ /^sh/;
+my $sparc               = 1 if $osm =~ /^sparc$/;
+my $sparc64             = 1 if $osm =~ /^sparc64$/;
 my $x86_64		= 1 if $osm =~ /^x86_64$/;
 
 
@@ -211,7 +226,7 @@ my $d7		= 1 if $darwin && $osv =~ /^7\.\d+\.\d+/;
 my $d8		= 1 if $darwin && $osv =~ /^8\.\d+\.\d+/;
 my $d9		= 1 if $darwin && $osv =~ /^9\.\d+\.\d+/;
 my $l26		= 1 if $linux && $osv =~ /^2\.6/;
-my $l30         = 1 if $linux && $osv =~ /^3\../;
+my $l3          = 1 if $linux && $osv =~ /^2\.7/  || $osv =~ /^3\./;
 my $f_old	= 1 if $freebsd && $osv =~ /^4\.1-/ || $osv =~ /^4\.0-/ || $osv =~ /^3/ || $osv =~ /^2/;
 
 my $progArgs = $ARGV[0];
@@ -360,17 +375,18 @@ if($linux) {
 
 	if($options{showdistro} eq "on") {
 		@distros = (
-		"Gentoo",		"/etc/gentoo-release",
-		"Fedora Core",	"/etc/fedora-release",
-		"SuSE",			"/etc/SuSE-release",
-		"Slackware",	"/etc/slackware-version",
-		"Cobalt",		"/etc/cobalt-release",
-		"Debian",		"/etc/debian_version",
-		"Mandrake",		"/etc/mandrake-release",
-		"Mandrake",		"/etc/mandrakelinux-release",
-		"Yellow Dog",	"/etc/yellowdog-release",
-		"OpenFiler",	"/etc/distro-release",
-		"Red Hat",		"/etc/redhat-release"
+                "Arch",         "/etc/arch-release",
+		"Gentoo",       "/etc/gentoo-release",
+		"Fedora Core",  "/etc/fedora-release",
+		"SUSE",         "/etc/SuSE-release",
+		"Slackware",    "/etc/slackware-version",
+		"Cobalt",       "/etc/cobalt-release",
+		"Debian",       "/etc/debian_version",
+		"Mandrake",     "/etc/mandrake-release",
+		"Mandrake",     "/etc/mandrakelinux-release",
+		"Yellow Dog",   "/etc/yellowdog-release",
+		"OpenFiler",    "/etc/distro-release",
+		"Red Hat",      "/etc/redhat-release"
 		);
 		$distro = "";
 		$distrov = "";
@@ -392,8 +408,8 @@ if($linux) {
 					$realdistro	=~ s/"$//;
 					$distro		= $realdistro;
 					$distrov	= $realdistro;
-					$distro		=~ s/ [0-9.]+.*$//;
-					$distrov	=~ s/.* ([0-9.]+.*)/$1/;
+                                        $distro         =~ s/ [0-9.]+.*$//;
+                                        $distrov        =~ s/$distro //;
 				}
 			}
 		}
@@ -403,6 +419,18 @@ if($linux) {
 				$distro = "CentOS";
 			}
 		}
+                if ($distro eq "SUSE") {
+                        $realdistro = `cat /etc/SuSE-release`;
+                        if ($realdistro =~ "^openSUSE") {
+                                $distro = "openSUSE";
+                        }
+                        elsif ($realdistro =~ "^SUSE Linux Enterprise Server") {
+                                $distro = "SLES";
+                        }
+                        elsif ($realdistro =~ "^SUSE Linux Enterprise Desktop") {
+                                $distro = "SLED";
+                        }
+                }
 	}
 } elsif($irix || $irix64) {
 	@hinv			= `hinv`;
@@ -418,14 +446,13 @@ if($linux) {
 	} else {
 		$sysctl		= '/sbin/sysctl';
 	}
-	if($armv4l || $armv5l) {
-		$df			= 'df -k';
-	} elsif($f_old) {
-		$df			= 'df -k';
-	} else {
-		$df			= 'df -lk';
-	}
-
+        if($arm) {
+                $df                     = 'df -k';
+        } elsif($f_old) {
+                $df                     = 'df -k';
+        } else {
+                $df                     = 'df -lk';
+        }
 }
 
 if($options{showcpu} eq "on") {
@@ -508,12 +535,25 @@ if($options{showcpu} eq "on") {
 		if($alpha) {
 			$cpu		= &cpuinfo("cpu\\s+: ");
 			$model		= &cpuinfo("cpu model\\s+: ");
-			$cpu		= "$cpu $model";
+                        $model          = "$model (" . &cpuinfo("system type") . ")";
+                        $mhz            = &cpuinfo("cycle frequency \\[Hz\\]\\s+: ");
+                        $mhz            = ($mhz / 1000000);
+                        $mhz            = sprintf("%.2f", $mhz);
+                        $cpu            = "$cpu $model ($mhz MHz)";
 			$smp		= &cpuinfo("cpus detected\\s+: ");
 		}
-		if($armv4l || $armv5l) {
-			$cpu		= &cpuinfo("Processor\\s+: ");
-		}
+                if($arm) {
+                        $cpu            = &cpuinfo("Processor\\s+: ");
+                        if (-e $vcgencmd) {
+                            $mhz = `vcgencmd measure_clock arm`;
+                            $mhz = substr($mhz,length($mhz) - (length($mhz)-index($mhz,")=")-2)) / 1000000;
+                            my $temp = `vcgencmd measure_temp`;
+                            $temp =~ tr/\r\n//d;
+                            $temp = substr($temp,5);
+                            $cpu = "$cpu ($mhz MHz / $temp)";
+                        }
+
+                }
 		if($i686 || $i586 || $x86_64) {
 			$cpu		= &cpuinfo("model name\\s+: ");
 			$cpu		=~ s/(.+) CPU family\t+\d+MHz/$1/g;
@@ -544,6 +584,8 @@ if($options{showcpu} eq "on") {
 			$mhz		= &cpuinfo("cpu MHz\\s+: ");
 			$mhz		= sprintf("%.2f", $mhz);
 			$cpu		= "$model $cpu ($mhz MHz)";
+                        @smp            = grep(/processor\s+: /, @cpuinfo);
+                        $smp            = scalar @smp;
 		}
 		if($ppc || $ppc64) {
 			$cpu		= &cpuinfo("cpu\\s+: ");
@@ -560,6 +602,26 @@ if($options{showcpu} eq "on") {
 			$cpu		= "$model $cpu ($mhz)";
 			$smp		= `/bin/grep -c -e '^processor\\s*:\\s*[0-9]\\+' /proc/cpuinfo`; chomp($smp);
 		}
+                if($s390 || $s390x) {
+                        $cpu            = &cpuinfo("vendor_id\\s+: ");
+                        $smp            = &cpuinfo("processors\\s+: ");
+                }
+                if($sh) {
+                        $cpu            = &cpuinfo("cpu family\\s+: ");
+                        $model          = &cpuinfo("cpu type\\s+: ");
+                        $mhz            = &cpuinfo("cpu_clk\\s+: ");
+                        $cpu            = "$cpu $model ($mhz MHz)";
+                }
+
+                if($sparc || $sparc64) {
+                        $cpu            = &cpuinfo("cpu\\s+: ");
+                        $model          = &cpuinfo("type\\s+: ");
+                        $cpu            = "$model $cpu";
+                        $mhz            = &cpuinfo("Cpu0ClkTck\\s+: ");
+                        $mhz            = (hex($mhz) / 1000000);
+                        $cpu            = "$cpu ($mhz MHz)";
+                        $smp            = &cpuinfo("ncpus active\\s+: ");
+                }
       } elsif($sun) {
 			my $osp		= `uname -p`; chomp($osp);
 			if($osv =~ /^5\.11/ || ($osv =~ /^5\.10/ && $osp =~ "i386")) {
@@ -696,11 +758,7 @@ sub diskusage {
 
 sub loadaverage {
 	$var = `uptime`; chomp($var);
-	if($irix || $irix64 || $linux || $sun) {
-		@arr = split(/average: /, $var, 2);
-	} else {
-		@arr = split(/averages: /, $var, 2);
-	}
+        @arr = split(/averages*: /, $var, 2);
 	if($darwin) {
 		@arr = split(/ +/, $arr[1], 2);
 	} else {
@@ -712,7 +770,7 @@ sub loadaverage {
 
 sub meminfo {
 	my $string = shift;
-	@arr = grep(/$string/, @meminfo);
+        @arr = grep(/^$string/, @meminfo);
 	$var = join("\n", $arr[0]);
 	@arr = split(/\s+/, $var);
 	$var = $arr[1];
@@ -721,7 +779,7 @@ sub meminfo {
 
 sub memoryusage {
 	if($linux) {
-		if($l26 or $l30) {
+                if(($l26)||($l3)) {
 			$vara = &meminfo("MemTotal:") * 1024;
 			$varb = &meminfo("Buffers:") * 1024;
 			$varc = &meminfo("Cached:") * 1024;
@@ -759,10 +817,10 @@ sub memoryusage {
 		$vard = `vmstat -s | grep 'pages active' | awk '{print \$1}'` * `vmstat -s | grep 'per page' | awk '{print \$1}'`;
 		$vara = `$sysctl -n hw.physmem`;
 	}
-	$varp = sprintf("%.2f", $vard / $vara * 100);
+	$varp = sprintf("%.2f", 100-($vard / ($vara-$vard) * 100));
 	$vara = sprintf("%.2f", $vara / 1024 / 1024);
 	$vard = sprintf("%.2f", $vard / 1024 / 1024);
-	return $vard."MB/".$vara."MB ($varp%)";
+	return ($vara-$vard)."MB/".$vara."MB ($varp%)";
 }
 
 sub networkinfobsd {
@@ -929,7 +987,7 @@ return $output;
 }
 
 sub baritems_update{
-    weechat::bar_item_update($PRGNAME);
+    weechat::bar_item_update($SCRIPT_NAME);
     return weechat::WEECHAT_RC_OK
 }
 
@@ -938,11 +996,11 @@ sub hook_timer{
        $Hooks{timer} = weechat::hook_timer($options{refresh} * 1000, 0 , 0, "baritems_update", "");
                 if ($Hooks{timer} eq '')
                 {
-                        weechat::print("","ERROR: can't enable $PRGNAME, hook failed");
+                        weechat::print("","ERROR: can't enable $SCRIPT_NAME, hook failed");
                         return 0;
                 }
-        $bar_item = weechat::bar_item_new($PRGNAME, "create_item", "");
-        weechat::bar_item_update($PRGNAME);
+        $bar_item = weechat::bar_item_new($SCRIPT_NAME, "create_item", "");
+        weechat::bar_item_update($SCRIPT_NAME);
         return 1;
 }
 sub unhook_timer{
@@ -955,7 +1013,7 @@ sub unhook_timer{
 sub toggle_config_by_set
 {
     my ($pointer, $name, $value) = @_;
-    $name = substr($name, length("plugins.var.perl.".$PRGNAME."."), length($name));
+    $name = substr($name, length("plugins.var.perl.".$SCRIPT_NAME."."), length($name));
     $options{$name} = $value;
 
         if ($options{refresh} ne "0"){
@@ -976,7 +1034,7 @@ sub toggle_config_by_set
         }
 
 
-weechat::bar_item_update($PRGNAME);
+weechat::bar_item_update($SCRIPT_NAME);
 return weechat::WEECHAT_RC_OK;
 }
 
@@ -1005,14 +1063,14 @@ sub init_config
 
 # -------------------------------[ init ]-------------------------------------
 # first function called by a WeeChat-script.
-weechat::register($PRGNAME, "Nils Görs <weechatter\@arcor.de>", $VERSION,
-                  "GPL3", $DESCR, "", "");
+weechat::register($SCRIPT_NAME, $SCRIPT_AUTHOR, $SCRIPT_VERSION,
+                  $SCRIPT_LICENSE, $SCRIPT_DESCR, "", "");
 $weechat_version = weechat::info_get("version_number", "");
 
 init_config();
 hook_timer() if ($options{refresh} ne "0");
 
-weechat::hook_command($PRGNAME, $DESCR, "hostname || os || cpu || processes || uptime || loadaverage || battery || memory || disk || network || users || distro || -channel",
+weechat::hook_command($SCRIPT_NAME, $SCRIPT_DESCR, "hostname || os || cpu || processes || uptime || loadaverage || battery || memory || disk || network || users || distro || -channel",
                       "   hostname : show hostname\n".
                       "         os : show os\n".
                       "        cpu : show cpu\n".
@@ -1028,13 +1086,13 @@ weechat::hook_command($PRGNAME, $DESCR, "hostname || os || cpu || processes || u
                       "   -channel : print output to channel\n".
                       "\n".
                       "Options:\n".
-                      "plugins.var.perl.$PRGNAME.nic     : comma separated list to specify your NIC interface name(s) (wlan0,eth0,etc)\n".
-                      "plugins.var.perl.$PRGNAME.nicname : comma separated list with name(s) for interface(s) (wireless,cable,etc)\n".
-                      "plugins.var.perl.$PRGNAME.baritems: comma separated list with name(s) of systeminformation to be displayed in a bar\n".
-                      "plugins.var.perl.$PRGNAME.refresh : refresh rate in seconds for info-bar (0 means off)\n".
-                      "add \"$PRGNAME\" to weechat.bar.status.items, to use $PRGNAME as an item in status-bar.\n".
+                      "plugins.var.perl.$SCRIPT_NAME.nic     : comma separated list to specify your NIC interface name(s) (wlan0,eth0,etc)\n".
+                      "plugins.var.perl.$SCRIPT_NAME.nicname : comma separated list with name(s) for interface(s) (wireless,cable,etc)\n".
+                      "plugins.var.perl.$SCRIPT_NAME.baritems: comma separated list with name(s) of systeminformation to be displayed in a bar\n".
+                      "plugins.var.perl.$SCRIPT_NAME.refresh : refresh rate in seconds for info-bar (0 means off)\n".
+                      "add \"$SCRIPT_NAME\" to weechat.bar.status.items, to use $SCRIPT_NAME as an item in status-bar.\n".
                       "",
                       "hostname|os|cpu|processes|uptime|loadaverage|battery|memory|disk|network|users|distro|-channel%*", "cmd_sysinfo", "");
 
-weechat::hook_config("plugins.var.perl.$PRGNAME.*", "toggle_config_by_set", "");
+weechat::hook_config("plugins.var.perl.$SCRIPT_NAME.*", "toggle_config_by_set", "");
 $col1 = weechat::color ("reset");
