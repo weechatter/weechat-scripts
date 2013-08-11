@@ -135,6 +135,13 @@ my %tables = (
       ],
   );
 
+# SQLite index definitions
+my %indices = (
+    'records' => [
+        { 'name' => 'index1', 'column' => 'nick' },
+        { 'name' => 'index2', 'column' => 'host' },
+      ],
+  );
 # -----------------------------[ Database ]-----------------------------------
 sub open_database {
     my $db = weechat_dir();
@@ -275,27 +282,24 @@ sub create_table {
     }
 }
 
-# Add indices to the DB. If they already exist, no harm done.
+# Add indices to the DB.
 sub index_db {
     my ( $DBH ) = @_;
 
-    my @indices = (
-        { 'name' => 'index1', 'column' => 'nick' },
-        { 'name' => 'index2', 'column' => 'host' },
-    );
+    for my $table (keys %indices) {
+        my %idx_exists;
+        for my $index ( @{ $DBH->selectall_arrayref( "PRAGMA INDEX_LIST($table)" ) } ) {
+            $idx_exists{$index->[1]} = 1;
+        }
 
-    my %idx_exists;
-    for my $index ( @{ $DBH->selectall_arrayref( "PRAGMA INDEX_LIST(records)" ) } ) {
-        $idx_exists{$index->[1]} = 1;
+        $DBH->{RaiseError} = 0;
+        $DBH->{PrintError} = 0;
+        for my $index ( @{$indices{$table}} ) {
+            $DBH->do( "CREATE INDEX $index->{name} ON $table ($index->{column})" ) unless ( $idx_exists{$index->{name}} );
+        }
+        $DBH->{RaiseError} = 1;
+        $DBH->{PrintError} = 1;
     }
-
-    $DBH->{RaiseError} = 0;
-    $DBH->{PrintError} = 0;
-    for my $index ( @indices ) {
-        $DBH->do( "CREATE INDEX $index->{name} ON records ($index->{column})" ) unless ( $idx_exists{$index->{name}} );
-    }
-    $DBH->{RaiseError} = 1;
-    $DBH->{PrintError} = 1;
 }
 
 sub normalize {
