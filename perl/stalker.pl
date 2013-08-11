@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2013 by Nils Görs <weechatter@arcor.de>
+# Copyright (c) 2013 by Stefan Wold <ratler@stderr.eu>
 # based on irssi script stalker.pl from Kaitlyn Parkhurst (SymKat) <symkat@symkat.com>
 # https://github.com/symkat/Stalker
 #
@@ -19,6 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # History:
+#
+# version 0.9: Ratler@freenode.#weechat
+# 2013-08-11: fix: removed trailing whitespaces
+#             fix: only add index if it doesn't exist
+#             fix: dynamically create or upgrade database based on missing tables or columns
+#             fix: allow dynamically creating indices for future tables
 #
 # version 0.8: Ratler@freenode.#weechat
 # 2013-08-09: add: case insensitive nick search
@@ -73,7 +80,7 @@ use File::Spec;
 use DBI;
 
 my $SCRIPT_NAME         = "stalker";
-my $SCRIPT_VERSION      = "0.8";
+my $SCRIPT_VERSION      = "0.9";
 my $SCRIPT_AUTHOR       = "Nils Görs <weechatter\@arcor.de>";
 my $SCRIPT_LICENCE      = "GPL3";
 my $SCRIPT_DESC         = "Records and correlates nick!user\@host information";
