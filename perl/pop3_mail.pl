@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2010 by Nils Görs <weechatter@arcor.de>
+# Copyright (c) 2010-2013 by Nils Görs <weechatter@arcor.de>
 #
 # checks POP3 server for mails and display mail headers 
 #
@@ -18,6 +18,11 @@
 #
 # Config:
 # Add [mail] to your weechat.bar.status.items
+#
+#
+# 2013-07-29: nils_2 (freenode.#weechat)
+#       0.2 : support of /secure for passwords
+#           : added: %h variable for filename
 #
 # 0.1: initial version
 # Thanks to Trashlord for the hint with hook_process()
@@ -48,14 +53,14 @@ use Crypt::Rijndael;
 use Encode;
 
 #"✉"
-my $prgname	= "pop3_mail";
-my $version	= "0.1";
-my $description	= "check POP3 server for mails and display mail header";
-my $item_name	= "mail";
+my $prgname             = "pop3_mail";
+my $SCRIPT_version      = "0.2";
+my $description         = "check POP3 server for mails and display mail header";
+my $item_name           = "mail";
 
 
 # -------------------------------[ config ]-------------------------------------
-my $default_pop3list = "pop3list.txt";
+my $default_pop3list = "%h/pop3list.txt";
 my %default_options = ("refresh"			=> "10",		# interval in minutes to check pop3 accounts
                        "pop3_timeout"			=> "20",		# timeout for pop3_server (in seconds)
                        "show_header"			=> "From|Subject",
@@ -65,10 +70,11 @@ my %default_options = ("refresh"			=> "10",		# interval in minutes to check pop3
 
 
 # ------------------------------[ internal ]-----------------------------------
-my %Hooks	= ();		# space for my hooks
-my %mailcount	= ();		# how many mails for all accounts and in how many accounts?
-my $bar_item	= "";
-my $filename	= ();
+my %Hooks               = ();   # space for my hooks
+my %mailcount           = ();   # how many mails for all accounts and in how many accounts?
+my $bar_item            = "";
+my $filename            = ();
+my $weechat_version     = "";
 
 # -------------------------------[ hook_process() command ]-------------------------------------
 # arguments: user, password, server, port, timeout, (no)header
@@ -148,8 +154,16 @@ sub toggled_by_set{
 	}elsif ($option eq $plugin_name."show_header"){
 	  $default_options{show_header} = $value;
 	}elsif ($option eq $plugin_name."passphrase"){
-	  return weechat::WEECHAT_RC_OK if (check_passphrase_length($value) eq 1);
-	  $default_options{passphrase} = $value;
+            weechat::print("",$value);
+          if ( ($weechat_version ne "") && ($weechat_version >= 0x00040200) )    # v0.4.2
+          {
+              $default_options{passphrase} = weechat::string_eval_expression($value,{},{});
+          }
+          else
+          {
+              $default_options{passphrase} = $value;
+          }
+          return weechat::WEECHAT_RC_OK if (check_passphrase_length($value) eq 1);
 	}elsif ($option eq $plugin_name."delete_passphrase_on_exit"){
 	  $default_options{delete_passphrase_on_exit} = $value;
 	}
@@ -308,19 +322,16 @@ sub user_cmd{
 return weechat::WEECHAT_RC_OK;
 }
 
-sub init{
-	if ( weechat::config_get_plugin("pop3_list") eq "" ) {
-		my $wd = weechat::info_get( "weechat_dir", "" );
-		$wd =~ s/\/$//;
-		weechat::config_set_plugin("pop3_list", $wd . "/" . $default_pop3list );
-	}
-	read_file();
+sub init
+{
+    weechat::config_set_plugin("pop3_list", $default_pop3list ) if ( weechat::config_get_plugin("pop3_list") eq "" );
+    read_file();
 
-# get absolute path of script
-	my $infolist_pnt = weechat::infolist_get("perl_script","",$prgname);
-	weechat::infolist_next($infolist_pnt);
-	$filename = weechat::infolist_string($infolist_pnt,"filename");
-	weechat::infolist_free($infolist_pnt);
+    # get absolute path of script
+    my $infolist_pnt = weechat::infolist_get("perl_script","",$prgname);
+    weechat::infolist_next($infolist_pnt);
+    $filename = weechat::infolist_string($infolist_pnt,"filename");
+    weechat::infolist_free($infolist_pnt);
 
 #set default config
 foreach my $option (keys %default_options) {
@@ -330,6 +341,7 @@ foreach my $option (keys %default_options) {
 	  $default_options{$option} = weechat::config_get_plugin($option);
     }
 }
+    $default_options{passphrase} = weechat::string_eval_expression($default_options{passphrase},{},{}) if ( ($weechat_version ne "") && ($weechat_version >= 0x00040200) );    # v0.4.2
     return if (check_passphrase_length($default_options{passphrase}) eq 1);
 }
 
@@ -476,35 +488,54 @@ return 0; #true
 }
 
 # -------------------------------[ load, save, shutdown, debug routine ]-------------------------------------
-sub save_file {
-  my $x = keys %pop3_accounts;
-  if ($x ne 0){							# entries in pop3_accounts?
-	my $pop3list = weechat::config_get_plugin( "pop3_list" );
-	open (WL, ">", $pop3list) || DEBUG("write pop3_list: $!");
-	while ( my($user,$passwort) = each %pop3_accounts) {
-			print WL "$user $passwort\n";
-	}
-	close WL;
-  }else{
-	my $pop3list = weechat::config_get_plugin( "pop3_list" );
-      unlink($pop3list);
-  }
+sub save_file
+{
+    my $x = keys %pop3_accounts;
+    if ($x ne 0)                        # messages in pop3_accounts?
+    {
+        my $pop3list = weechat_dir();
+        open (WL, ">", $pop3list) || DEBUG("write pop3_list: $!");
+        while ( my($user,$passwort) = each %pop3_accounts)
+        {
+            print WL "$user $passwort\n";
+        }
+        close WL;
+    }
+    else
+    {
+        my $pop3list = weechat_dir();
+        unlink($pop3list);
+    }
 }
-sub read_file {
-	my $pop3list = weechat::config_get_plugin("pop3_list");
-	return unless -e $pop3list;
-	open (WL, "<", $pop3list) || DEBUG("$pop3list: $!");
-	while (<WL>) {
-		chomp;								# kill LF
-			my ( $user, $password ) = split / /;			# <user> <password>
-			if (not defined $user){
-				close WL;
-				weechat::print("",weechat::prefix("error")."$prgname: $pop3list is not valid...");
-				return;
-			}
-		$pop3_accounts{$user} = $password  if length $_;
-	}
-	close WL;
+sub read_file
+{
+    my $pop3list = weechat_dir();
+    return unless -e $pop3list;
+    open (WL, "<", $pop3list) || DEBUG("$pop3list: $!");
+    while (<WL>)
+    {
+        chomp;                                                  # kill LF
+        my ( $user, $password ) = split / /;                    # <user> <password>
+        if (not defined $user)
+        {
+            close WL;
+            weechat::print("",weechat::prefix("error")."$prgname: $pop3list is not valid...");
+            return;
+        }
+        $pop3_accounts{$user} = $password  if length $_;
+    }
+    close WL;
+}
+
+sub weechat_dir
+{
+    my $dir = weechat::config_get_plugin("pop3_list");
+    if ( $dir =~ /%h/ )
+    {
+        my $weechat_dir = weechat::info_get( 'weechat_dir', '');
+        $dir =~ s/%h/$weechat_dir/;
+    }
+    return $dir;
 }
 
 sub shutdown{
@@ -527,8 +558,9 @@ sub shutdown{
 sub DEBUG {weechat::print('', "***\t" . $_[0]);}
 
 # first function called by a WeeChat-script.
-weechat::register($prgname, "Nils Görs <weechatter\@arcor.de>", $version,
+weechat::register($prgname, "Nils Görs <weechatter\@arcor.de>", $SCRIPT_version,
                   "GPL3", $description, "shutdown", "");
+$weechat_version = weechat::info_get("version_number", "");
 
 init();
 
@@ -547,7 +579,8 @@ $Hooks{command} = weechat::hook_command($prgname, $description,
 		"\n".
 		"Options:\n".
 		"plugins.var.perl.$prgname.passphrase                   : to encrypt pop3 passwords in config file (default: empty)\n".
-		"plugins.var.perl.$prgname.pop3_list                    : file to store account, server and password (default: ~/.weechat/pop3list.txt)\n".
+		"                                                          Since WeeChat 0.4.2 its possible to encrypt passphrase (see /help secure) eg: \${sec.data.pop3_passphrase}\n".
+		"plugins.var.perl.$prgname.pop3_list                    : file to store account, server and password (default: %h/pop3list.txt)\n".
 		"plugins.var.perl.$prgname.pop3timeout                  : set a timeout value for socket operations (default: 20 seconds)\n".
 		"plugins.var.perl.$prgname.refresh                      : checks pop3 account (default: 10 minutes)\n".
 		"plugins.var.perl.$prgname.show_header                  : displays mail headers (default: From|Subject)\n".
