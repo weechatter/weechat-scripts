@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2012 by Nils Görs <weechatter@arcor.de>
+# Copyright (c) 2011-2013 by Nils Görs <weechatter@arcor.de>
 #
 # irc-buffers will be sorted alphabetically or in reverse order
 #
@@ -16,12 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# 2012-01-28, nils_2:
-#               : add: option hook_signal(), server will be sort when server are not merged
-# 2011-12-04, nils_2:
-#               : add: hook_signal("buffer_opened")
 # 2011-04-14, nils_2:
 #     version 0.1: initial release
+# 2013-07-16, prurigro:
+#     version 0.2: fixed sorting duplicate channel names on different servers
+# 2013-07-20, nils_2:
+#     version 0.3: add options for script on hook_signal("buffer_opened")
+#                : fix bug when irc.look.server_buffer was independent
 
 use strict;
 
@@ -37,8 +38,8 @@ my $args_all            = 0;
 my $args_reverse        = 0;
 
 # default values
-my %options = ("sort_order"       => ["default", "sort of buffers \"default\" or \"reverse\" order."],     # or reverse
-               "server_wide"      => ["on", "buffers will be sorted server wide"],
+my %options = ("sort_order"       => ["default", "sort of buffers \"default\" or \"reverse\" order. This option takes only effect when option \"hook_signal\" is on."],     # or reverse
+               "server_wide"      => ["on", "buffers will be sorted server wide. This option takes only effect when option \"hook_signal\" is on."],
                "hook_signal"      => ["off","if \"on\" buffers will be sort every time a buffer was opened. Keep in mind that sorting buffers will delete read_marker."],
     );
 
@@ -116,6 +117,12 @@ sub reverse_sort{
       }
     }else{
       foreach my $s ( reverse sort keys %buffer_struct ) {
+        foreach my $n ( sort { $buffer_struct{$s}{$b}->{buffer_short_name} cmp $buffer_struct{$s}{$a}->{buffer_short_name}} keys %{$buffer_struct{$s}} ) {
+          buffer_movement($n);
+        }
+      }
+
+      foreach my $s ( reverse sort keys %buffer_struct ) {
         foreach my $n ( reverse sort keys %{$buffer_struct{$s}} ) {
           buffer_movement($n);
         }
@@ -126,17 +133,22 @@ sub reverse_sort{
 # sort a-z
 sub normal_sort{
     if ( $args_all == 1 ){
-        foreach my $s ( sort keys %buffer_struct ){
-            foreach my $n ( sort { $buffer_struct{$s}{$a}->{buffer_short_name} cmp $buffer_struct{$s}{$b}->{buffer_short_name}} keys %{$buffer_struct{$s}} ){
-                buffer_movement($n);
-            }
+      foreach my $s ( sort keys %buffer_struct ) {
+        foreach my $n ( sort { $buffer_struct{$s}{$a}->{buffer_short_name} cmp $buffer_struct{$s}{$b}->{buffer_short_name}} keys %{$buffer_struct{$s}} ) {
+          buffer_movement($n);
         }
+      }
     }else{
-      foreach my $s ( sort keys %buffer_struct ){
-              buffer_movement($s);
-          foreach my $n ( sort keys %{$buffer_struct{$s}} ){
-              buffer_movement($n);
-            }
+      foreach my $s ( sort keys %buffer_struct ) {
+        foreach my $n ( sort { $buffer_struct{$s}{$a}->{buffer_short_name} cmp $buffer_struct{$s}{$b}->{buffer_short_name}} keys %{$buffer_struct{$s}} ) {
+          buffer_movement($n);
+        }
+      }
+
+      foreach my $s ( sort keys %buffer_struct ) {
+        foreach my $n ( sort keys %{$buffer_struct{$s}} ) {
+          buffer_movement($n);
+        }
       }
     }
 }
@@ -185,10 +197,13 @@ my $from_buffer_called = weechat::buffer_get_string($buffer,"name");            
 
 sub look_server_buffer{
     my $look_server = weechat::config_string(weechat::config_get("irc.look.server_buffer"));
-    if ($look_server eq "merge_with_core"){
+    if ($look_server eq "merge_with_core")
+    {
         weechat::command("","/buffer core.weechat");
         weechat::command("","/buffer move 1");
-    }elsif($look_server eq "merge_without_core"){
+    }
+    else
+    {
         weechat::command("","/buffer core.weechat");
         weechat::command("","/buffer move 1");
         my $infolist = weechat::infolist_get("buffer","","*server.*");
@@ -249,6 +264,4 @@ $weechat_version = weechat::info_get("version_number", "");
 
 weechat::hook_config("plugins.var.perl.$PRGNAME.*", "toggle_config_by_set", "");
 weechat::hook_signal("buffer_opened","buffer_opened_cb","");
-#weechat::hook_signal("irc_channel_opened","buffer_opened_cb","");
-#weechat::hook_signal("irc_pv_opened","buffer_opened_cb","");
 init_config();
