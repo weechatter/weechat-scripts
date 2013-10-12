@@ -29,31 +29,31 @@ try:
     import weechat,re
 
 except Exception:
-    print("This script must be run under WeeChat.")
-    print("Get WeeChat now at: http://www.weechat.org/")
+    print "This script must be run under WeeChat."
+    print "Get WeeChat now at: http://www.weechat.org/"
     quit()
 
-SCRIPT_NAME     = "prgname"
+SCRIPT_NAME     = ""
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
 SCRIPT_VERSION  = "0.1"
 SCRIPT_LICENSE  = "GPL"
-SCRIPT_DESC     = "script description"
+SCRIPT_DESC     = "description"
 
-OPTIONS         = { 'new_option'        : ('value','help text'),
+OPTIONS         = { 'new_option'        : ('option','help text'),
                   }
+
 
 # ================================[ weechat options & description ]===============================
 def init_options():
-    for option,value in list(OPTIONS.items()):
-        if int(version) >= 0x00030500:
-            weechat.config_set_desc_plugin(option, '%s (default: "%s")' % (value[1], value[0]))
+    for option,value in OPTIONS.items():
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, value[0])
             OPTIONS[option] = value[0]
         else:
             OPTIONS[option] = weechat.config_get_plugin(option)
+        weechat.config_set_desc_plugin(option, '%s (default: "%s")' % (value[1], value[0]))
 
-def toggle_refresh_cb(pointer, name, value):
+def toggle_refresh(pointer, name, value):
     global OPTIONS
     option = name[len('plugins.var.python.' + SCRIPT_NAME + '.'):]        # get optionname
     OPTIONS[option] = value                                               # save new value
@@ -64,10 +64,9 @@ if __name__ == "__main__":
     if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, '', ''):
         version = weechat.info_get("version_number", "") or 0
 
-        init_options()
-        weechat.hook_config( 'plugins.var.python.' + SCRIPT_NAME + '.*', 'toggle_refresh_cb', '' )
-
 #        if int(version) >= 0x00030600:
+#            init_options()
+#            weechat.hook_config( 'plugins.var.python.' + SCRIPT_NAME + '.*', 'toggle_refresh', '' )
 #        else:
 #            weechat.prnt("","%s%s %s" % (weechat.prefix("error"),SCRIPT_NAME,": needs version 0.3.6 or higher"))
 #            weechat.command("","/wait 1ms /python unload %s" % SCRIPT_NAME)
