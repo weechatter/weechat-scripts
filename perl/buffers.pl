@@ -19,7 +19,10 @@
 # Display sidebar with list of buffers.
 #
 # History:
-#
+# 2013-10-31, nils_2@freenode.#weechat:
+#    v4.1: add option "detach_buffer_immediately" (idea by farn)
+# 2013-10-20, nils_2@freenode.#weechat:
+#    v4.0: add options "detach_displayed_buffers", "detach_display_window_number"
 # 2013-09-27, nils_2@freenode.#weechat:
 #    v3.9: add option "toggle_bar" and option "show_prefix_query" (idea by IvarB)
 #        : fix problem with linefeed at end of list of buffers (reported by grawity)
@@ -138,7 +141,7 @@ use strict;
 use Encode qw( decode encode );
 # -------------------------------[ internal ]-------------------------------------
 my $SCRIPT_NAME = "buffers";
-my $version = "3.9";
+my $version = "4.1";
 
 my $BUFFERS_CONFIG_FILE_NAME = "buffers";
 my $buffers_config_file;
@@ -151,6 +154,7 @@ my %options;
 my %hotlist_level       = (0 => "low", 1 => "message", 2 => "private", 3 => "highlight");
 my @whitelist_buffers   = ();
 my @immune_detach_buffers= ();
+my @detach_buffer_immediately= ();
 my @buffers_focus       = ();
 my %buffers_timer       = ();
 my %Hooks               = ();
@@ -217,9 +221,12 @@ weechat::hook_command(  $cmd_buffers_detach,
 if ($weechat_version >= 0x00030800)
 {
     weechat::hook_config("buffers.look.detach", "hook_timer_detach", "");
+    $Hooks{timer_detach} = weechat::hook_timer( weechat::config_integer( $options{"detach"}) * 1000, 60, 0, "buffers_signal_buffer", "") if ( weechat::config_integer( $options{"detach"}) > 0 );
 }
 
     weechat::hook_config("buffers.look.show_lag", "hook_timer_lag", "");
+
+    $Hooks{timer_lag} = weechat::hook_timer( weechat::config_integer(weechat::config_get("irc.network.lag_refresh_interval")) * 1000, 0, 0, "buffers_signal_hotlist", "") if ( weechat::config_boolean($options{"show_lag"}) );
 
 # -------------------------------- [ command ] --------------------------------
 sub buffers_cmd_whitelist
@@ -262,10 +269,11 @@ my ( $data, $buffer, $args ) = @_;
 }
 sub buffers_cmd_detach
 {
-my ( $data, $buffer, $args ) = @_;
+    my ( $data, $buffer, $args ) = @_;
     $args = lc($args);
     my $immune_detach_buffers = weechat::config_string( weechat::config_get("buffers.look.immune_detach_buffers") );
     return weechat::WEECHAT_RC_OK if ( $immune_detach_buffers eq "" and $args eq "del" or $immune_detach_buffers eq "" and $args eq "reset" );
+
     my @buffers_list = split( /,/, $immune_detach_buffers );
     # get buffers name
     my $infolist = weechat::infolist_get("buffer", weechat::current_buffer(), "");
@@ -410,7 +418,7 @@ my %default_options_look =
  "indenting_number"     =>      ["indenting_number", "boolean", "use indenting for numbers. This option only takes effect if bar is left/right positioned", "", 0, 0,"on", "on", 0, "", "", "buffers_signal_config", "", "", ""],
  "short_names"          =>      ["short_names", "boolean", "display short names (remove text before first \".\" in buffer name)", "", 0, 0,"on", "on", 0, "", "", "buffers_signal_config", "", "", ""],
  "show_number"          =>      ["show_number", "boolean", "display channel number in front of buffername", "", 0, 0,"on", "on", 0, "", "", "buffers_signal_config", "", "", ""],
- "show_number_char"     =>      ["number_char", "string", "display a char after channel number", "", 0, 0,".", ".", 0, "", "", "buffers_signal_config", "", "", ""],
+ "show_number_char"     =>      ["number_char", "string", "display a char behind channel number", "", 0, 0,".", ".", 0, "", "", "buffers_signal_config", "", "", ""],
  "show_prefix"          =>      ["prefix", "boolean", "displays your prefix for channel in front of buffername", "", 0, 0,"off", "off", 0, "", "", "buffers_signal_config", "", "", ""],
  "show_prefix_empty"    =>      ["prefix_empty", "boolean", "use a placeholder for channels without prefix", "", 0, 0,"on", "on", 0, "", "",  "buffers_signal_config", "", "", ""],
 "show_prefix_query"  =>      ["prefix_for_query", "string", "prefix displayed in front of query buffer", "", 0, 0,"", "", 0, "", "", "buffers_signal_config", "", "", ""],
@@ -419,12 +427,15 @@ my %default_options_look =
  "jump_prev_next_visited_buffer" => ["jump_prev_next_visited_buffer", "boolean", "jump to previously or next visited buffer if you click with left/right mouse button on currently visiting buffer", "", 0, 0,"off", "off", 0, "", "", "buffers_signal_config", "", "", ""],
  "name_size_max"        =>      ["name_size_max","integer","maximum size of buffer name. 0 means no limitation","",0,256,0,0,0, "", "", "buffers_signal_config", "", "", ""],
  "name_crop_suffix"     =>      ["name_crop_suffix","string","contains an optional char(s) that is appended when buffer name is shortened","",0,0,"+","+",0,"","","buffers_signal_config", "", "", ""],
- "detach"               =>      ["detach", "integer","detach channel from buffers list after a specific period of time (in seconds) without action (weechat ≥ 0.3.8 required)", "", 0, 31536000,0, "number", 0, "", "", "buffers_signal_config", "", "", ""],
- "immune_detach_buffers"=>      ["immune_detach_buffers", "string", "Comma seperated list of buffers to NOT automatically detatch. Allows \"*\" wildcard. Ex: \"BitlBee,freenode.*\"", "", 0, 0,"", "", 0, "", "", "buffers_signal_config_immune_detach_buffers", "", "", ""],
+ "detach"               =>      ["detach", "integer","detach channel from buffers list after a specific period of time (in seconds) without action (weechat ≥ 0.3.8 required) (0 means \"off\")", "", 0, 31536000,0, "number", 0, "", "", "buffers_signal_config", "", "", ""],
+ "immune_detach_buffers"=>      ["immune_detach_buffers", "string", "comma separated list of buffers to NOT automatically detatch. Allows \"*\" wildcard. Ex: \"BitlBee,freenode.*\"", "", 0, 0,"", "", 0, "", "", "buffers_signal_config_immune_detach_buffers", "", "", ""],
  "detach_query"         =>      ["detach_query", "boolean", "query buffer will be detachted", "", 0, 0,"off", "off", 0, "", "", "buffers_signal_config", "", "", ""],
+ "detach_buffer_immediately" => ["detach_buffer_immediately", "string", "comma separated list of buffers to detach immediately. A query and highlight message will attach buffer again. Allows \"*\" wildcard. Ex: \"BitlBee,freenode.*\"", "", 0, 0,"", "", 0, "", "", "buffers_signal_config_detach_buffer_immediately", "", "", ""],
  "detach_free_content"  =>      ["detach_free_content", "boolean", "buffers with free content will be detached (Ex: iset, chanmon)", "", 0, 0,"off", "off", 0, "", "", "buffers_signal_config", "", "", ""],
+ "detach_displayed_buffers"  => ["detach_displayed_buffers", "boolean", "buffers displayed in a (split) window will be detached", "", 0, 0,"on", "on", 0, "", "", "buffers_signal_config", "", "", ""],
+ "detach_display_window_number"  => ["detach_display_window_number", "boolean", "window number will be add, behind buffer name (this option takes only effect with \"detach_displayed_buffers\" option)", "", 0, 0,"off", "off", 0, "", "", "buffers_signal_config", "", "", ""],
  "mark_inactive"        =>      ["mark_inactive", "boolean", "if option is \"on\", inactive buffers (those you are not in) will have parentesis around them. An inactive buffer will not be detached.", "", 0, 0,"off", "off", 0, "", "", "buffers_signal_config", "", "", ""],
- "toggle_bar"           =>      ["toogle_bar", "boolean", "if option is \"on\", buffers bar will hide/show when script is (un)loaded.", "", 0, 0,"on", "on", 0, "", "", "buffers_signal_config", "", "", ""],
+ "toggle_bar"           =>      ["toogle_bar", "boolean", "if option is \"on\", buffers bar will hide/show when script is (un)loaded.", "", 0, 0,"on","on", 0, "", "", "buffers_signal_config", "", "", ""],
 );
     # section "color"
     my $section_color = weechat::config_new_section($buffers_config_file,"color", 0, 0, "", "", "", "", "", "", "", "", "", "");
@@ -530,6 +541,7 @@ sub build_buffers
         $buffer->{"number"} = $number;
         $buffer->{"active"} = $active;
         $buffer->{"current_buffer"} = weechat::infolist_integer($infolist, "current_buffer");
+        $buffer->{"num_displayed"} = weechat::infolist_integer($infolist, "num_displayed");
         $buffer->{"plugin_name"} = weechat::infolist_string($infolist, "plugin_name");
         $buffer->{"name"} = weechat::infolist_string($infolist, "name");
         $buffer->{"short_name"} = weechat::infolist_string($infolist, "short_name");
@@ -555,6 +567,11 @@ sub build_buffers
         }
 
         my $result = check_immune_detached_buffers($buffer->{"name"});          # checking for wildcard 
+
+        next if ( check_detach_buffer_immediately($buffer->{"name"}) eq 1
+                 and $buffer->{"current_buffer"} eq 0
+                 and ( not exists $hotlist{$buffer->{"pointer"}} or $hotlist{$buffer->{"pointer"}} < 2) );          # checking for buffer to immediately detach
+
         unless ($result)
         {
             my $detach_time = weechat::config_integer( $options{"detach"});
@@ -606,6 +623,31 @@ sub build_buffers
                 else
                 {
                     push(@current1, $buffer);
+                }
+            }
+            elsif ( $buffer->{"current_buffer"} eq 0
+            and not exists $hotlist{$buffer->{"pointer"}}
+#            and $buffer->{"type"} eq "channel"
+            and exists $buffers_timer{$buffer->{"pointer"}}
+            and $detach_time > 0
+            and $weechat_version >= 0x00030800
+            and $current_time - $buffers_timer{$buffer->{"pointer"}} >= $detach_time)
+            {   # check for option detach_displayed_buffers and if buffer is displayed in a split window
+                if ( $buffer->{"num_displayed"} eq 1
+                    and weechat::config_boolean($options{"detach_displayed_buffers"}) eq 0 )
+                {
+                    my $infolist_window = weechat::infolist_get("window","","");
+                    while (weechat::infolist_next($infolist_window))
+                    {
+                        my $buffer_ptr = weechat::infolist_pointer($infolist_window, "buffer");
+                        if ($buffer_ptr eq $buffer->{"pointer"})
+                        {
+                            $buffer->{"window"} = weechat::infolist_integer($infolist_window, "number");
+                        }
+                    }
+                    weechat::infolist_free($infolist_window);
+
+                    push(@current2, $buffer);
                 }
             }
         }
@@ -942,6 +984,14 @@ sub build_buffers
                 $str .= weechat::color("default") . " (" . weechat::color($color_lag) . $lag . weechat::color("default") . ")";
             }
         }
+        if (weechat::config_boolean($options{"detach_displayed_buffers"}) eq 0
+            and weechat::config_boolean($options{"detach_display_window_number"}) eq 1)
+        {
+            if ($buffer->{"window"})
+            {
+                $str .= weechat::color("default") . " (" . weechat::color(weechat::config_color( $options{"color_number"})) . $buffer->{"window"} . weechat::color("default") . ")";
+            }
+        }
         $str .= "\n";
         $old_number = $buffer->{"number"};
     }
@@ -1071,7 +1121,6 @@ my ($data, $signal, $signal_data) = @_;
             delete $buffers_timer{$signal_data};
         }
     }
-
     weechat::bar_item_update($SCRIPT_NAME);
     return weechat::WEECHAT_RC_OK;
 }
@@ -1090,10 +1139,19 @@ sub buffers_signal_config_whitelist
     weechat::bar_item_update($SCRIPT_NAME);
     return weechat::WEECHAT_RC_OK;
 }
+
 sub buffers_signal_config_immune_detach_buffers
 {
     @immune_detach_buffers = ();
     @immune_detach_buffers = split( /,/, weechat::config_string( $options{"immune_detach_buffers"} ) );
+    weechat::bar_item_update($SCRIPT_NAME);
+    return weechat::WEECHAT_RC_OK;
+}
+
+sub buffers_signal_config_detach_buffer_immediately
+{
+    @detach_buffer_immediately = ();
+    @detach_buffer_immediately = split( /,/, weechat::config_string( $options{"detach_buffer_immediately"} ) );
     weechat::bar_item_update($SCRIPT_NAME);
     return weechat::WEECHAT_RC_OK;
 }
@@ -1211,6 +1269,19 @@ sub check_immune_detached_buffers
     foreach ( @immune_detach_buffers ){
         my $immune_buffer = weechat::string_mask_to_regex($_);
         if ($buffername =~ /^$immune_buffer$/i)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+sub check_detach_buffer_immediately
+{
+    my ($buffername) = @_;
+    foreach ( @detach_buffer_immediately ){
+        my $detach_buffer = weechat::string_mask_to_regex($_);
+        if ($buffername =~ /^$detach_buffer$/i)
         {
             return 1;
         }
