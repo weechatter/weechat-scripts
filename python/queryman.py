@@ -20,7 +20,7 @@
 # idea by lasers@freenode.#weechat
 #
 # 2013-11-07: nils_2, (freenode.#weechat)
-#       0.2 : fix file not found (reported by calcifea)
+#       0.2 : fix file not found error (reported by calcifea)
 #           : make script compatible with Python 3.x
 #
 # 2013-07-26: nils_2, (freenode.#weechat)
@@ -110,8 +110,8 @@ def save_query_buffer_to_file():
             weechat.prnt('','%s%s: Error writing query buffer to "%s"' % (weechat.prefix('error'), SCRIPT_NAME, filename))
             raise
     else:       # no query buffer(s). remove file
-      if os.path.isfile(filename):
-	os.remove(filename)
+        if os.path.isfile(filename):
+            os.remove(filename)
     return
 
 # ================================[ main ]===============================
