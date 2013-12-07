@@ -113,9 +113,7 @@ def command_run_cb (data, signal, signal_data):
         return w.WEECHAT_RC_OK
     global length, cursor_pos, tc_input_text
     current_buffer = w.current_buffer()
-    start_pos = 1
-    if tc_options['start_cursor_pos_at_zero'].lower() == 'on':
-        start_pos = 0
+    start_pos = int(tc_options['start_cursor_pos_at_zero'].lower() == 'off')
     cursor_pos = w.buffer_get_integer(current_buffer,'input_pos') + start_pos
     if (cursor_pos -1) == 0:
         tc_action_cb()
@@ -146,9 +144,7 @@ def tc_bar_item (data, item, window):
         return ""
 
     length = w.buffer_get_integer(bufpointer,'input_length')
-    start_pos = 1
-    if tc_options['start_cursor_pos_at_zero'].lower() == 'on':
-        start_pos = 0
+    start_pos = int(tc_options['start_cursor_pos_at_zero'].lower() == 'off')
     cursor_pos = w.buffer_get_integer(bufpointer,'input_pos') + start_pos
 
     plugin = w.buffer_get_string(bufpointer, 'plugin')
