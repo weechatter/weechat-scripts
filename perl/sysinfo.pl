@@ -40,6 +40,8 @@
 # ported to WeeChat (http://www.weechat.org/) by Nils Görs. Copyright
 # (c) 2011-2013 Nils Görs
 #
+# 2015-01-10: 0.8 riotpunch (theriotpunch@gmail.com)
+#	    : fixed osx/darwin uptime being treated incorrectly
 # 2013-08-10: 0.7 nils_2 (freenode@nils_2)
 #           : add: support of vcgencmd (eg raspberry pi)
 # 2013-03-06: 0.6 Thomas Poechtrager <t.poechtrager@gmail.com>
@@ -66,7 +68,7 @@ use POSIX qw(floor);
 use strict;
 
 my $SCRIPT_NAME         = "sysinfo";
-my $SCRIPT_VERSION      = "0.7";
+my $SCRIPT_VERSION      = "0.8";
 my $SCRIPT_DESCR        = "provides a system info command";
 my $SCRIPT_LICENSE      = "GPL3";
 my $SCRIPT_AUTHOR       = "Nils Görs <weechatter\@arcor.de>";
