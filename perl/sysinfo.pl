@@ -925,10 +925,10 @@ sub uptime {
 		}
 		return $var;
 	} else {
-		if($freebsd || $dragonfly) {
+		if($freebsd || $dragonfly || $darwin) {
 			$var = `$sysctl -n kern.boottime | awk '{print \$4}'`;
 		}
-		if($netbsd || $openbsd || $darwin) {
+		if($netbsd || $openbsd) {
 			$var = `$sysctl -n kern.boottime`;
 		}
 		if($linux) {
