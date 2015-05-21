@@ -44,7 +44,7 @@ except Exception:
     quit()
 
 SCRIPT_NAME     = "stick_buffer"
-SCRIPT_AUTHOR   = "IcyMidnight <icymidnight@gmail.com>"
+SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
 SCRIPT_VERSION  = "0.3"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "Stick buffers to particular windows, like irssi"
