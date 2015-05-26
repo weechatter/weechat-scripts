@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2013 by nils_2 <weechatter@arcor.de>
+# Copyright (c) 2013-2015 by nils_2 <weechatter@arcor.de>
+# Copyright (c) 2015 by Damien Bargiacchi <icymidnight@gmail.com>
 #
 # stick buffer to a window, irssi like
 #
