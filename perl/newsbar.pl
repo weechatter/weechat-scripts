@@ -50,10 +50,23 @@
 # -----------------------------------------------------------------------------
 #
 # Changelog:
+# Version 0.19 2015-03-31, nils_2
+#   * FIX: remove_bar_on_unload
+#
+
+# Version 0.18 2014-10-26, nils_2
+#   * IMPROVED: use hook_print() instead of hook_signal() for private messages
+#   * ADD: option "blacklist_buffers" (idea by Pixelz)
+#   * ADD: option "highlights_current_channel" (idea by sjoshi)
+#
+# Version 0.17 2014-06-08, nils_2
+#   * FIX: update bar when option weechat.bar.newsbar_title.color_fg changed (reported by: bpeak)
+#   * IMPROVED: use weechat_string_eval_expression() for weechat.look.buffer_time_format
+#
 # Version 0.16 2014-04-10, nils_2
 #   * ADD: own color settings
 #   * FIX: update bar when script options changed
-#
+#of
 # Version 0.15 2013-12-03, nils_2
 #   * FIX: display error with ${color:nnn} in weechat.look.buffer_time_format
 #
@@ -169,8 +182,6 @@ use POSIX qw(strftime);
 use strict;
 use warnings;
 
-my $Version = "0.16";
-
 # constants
 #
 # script default options
@@ -208,12 +219,16 @@ my %SETTINGS = (
     "color_server_msg_tag"   => 'magenta',
     "color_privmsg_tag"      => 'red',
     "color_info_msg_tag"     => 'cyan',
+    "highlights_current_channel" => "on",
+    "blacklist_buffers"      => "",
 );
 
-my $SCRIPT      = "newsbar";
-my $AUTHOR      = "rettub";
-my $LICENCE     = "GPL3";
-my $DESCRIPTION = "Print highlights or text given by commands into bar 'NewsBar'. Auto popup on top of weechat if needed. 'beeps' can be executed local or remote";
+my $weechat_version;
+my $SCRIPT              = "newsbar";
+my $SCRIPT_VERSION      = "0.19";
+my $SCRIPT_AUTHOR       = "rettub";
+my $SCRIPT_LICENCE      = "GPL3";
+my $SCRIPT_DESCRIPTION  = "Print highlights or text given by commands into bar 'NewsBar'. Auto popup on top of weechat if needed. 'beeps' can be executed local or remote";
 my $COMMAND     = "newsbar";             # new command name
 my $ARGS_HELP   = "<always> | <away_only> | <beep> | <nobeep> | <beep_local> | <beep_remote> | <clear [regexp]>"
                  ."| <memo [text]> | <add [--color color] text>"
@@ -313,6 +328,9 @@ Config settings:
                             default: '$SETTINGS{ssh_key}'
     away_only:              Collect highlights only if you're away.
                             default: '$SETTINGS{away_only}'
+    highlights_current_channel:
+                            handle highlight for current channel. ('on'/'off'/'away')
+                            default: '$SETTINGS{highlights_current_channel}'
     show_highlights:        Enable/disable handling of public messages. ('on'/'off')
                             default: '$SETTINGS{show_highlights}'
     show_priv_msg:          Enable/disable handling of private messages. ('on'/'off')
@@ -358,7 +376,7 @@ Config settings:
                             default: '$SETTINGS{nick_flood_max_nicks}'
     most_recent:            display a new message in bar ('first'/'last')
                             default: '$SETTINGS{most_recent}'
-
+    blacklist_buffers:      comma-separated list of channels to be ignored (e.g. freenode.#weechat,irc_dcc.*)
     debug:                  Show some debug/warning messages on failure. ('on'/'off').
                             default: '$SETTINGS{debug}'
 
@@ -431,7 +449,6 @@ sub _colored {
 sub _get_prefix_mode_with_color
 {
     my $test = weechat::config_string( weechat::config_get('irc.color.nick_prefixes') );
-    weechat::print("",$test);
 #       irc.color.nick_prefixes
 #       modes    = 'qaohv'
 #       prefixes = '~&@%+'
@@ -495,11 +512,16 @@ sub _bar_clear
     _bar_hide();
 }
 
-sub _bar_date_time {
+sub _bar_date_time
+{
     my $dt = strftime( weechat::config_string (weechat::config_get('weechat.look.buffer_time_format')), localtime);
+    return weechat::string_eval_expression($dt, {}, {},{}) if ($weechat_version >= 0x00040200);
+
     my $dt_bak = $dt;
     my $dt_marker = 0;
-    while ( $dt_bak ~~ /\$\{(?:color:)?[^\{\}]+\}/ ){
+#    while ( $dt_bak ~~ /\$\{(?:color:)?[^\{\}]+\}/ )
+    while ( $dt_bak =~ /\$\{(?:color:)?[^\{\}]+\}/ )
+    {
         $dt_bak =~ /\$\{(?:color:)?(.*?)\}/;
         my $col = weechat::color($1);
         $dt_bak =~ s/\$\{(?:color:)?(.*?)\}/$col/;
@@ -607,8 +629,17 @@ sub del_double{
   return (keys %all);
 }
 # colored output of hilighted text to bar
-sub highlights_public {
+sub highlights_public
+{
     my ( $data, $bufferp, $date, $tags, $displayed, $ishilight, $nick, $message ) = @_;
+    # with 1.0 displayed and highlight changed from "string" to "integer"
+    $displayed = int($displayed);
+    $ishilight = int($ishilight);
+
+    # find buffer name, server name
+    # return if buffer is in a blacklist
+    my $buffername = weechat::buffer_get_string($bufferp, "name");
+    return weechat::WEECHAT_RC_OK if weechat::string_has_highlight($buffername, weechat::config_get_plugin('blacklist_buffers'));
 
     if ( $ishilight == 1
         and weechat::config_get_plugin('show_highlights') eq 'on' )
@@ -624,6 +655,16 @@ sub highlights_public {
             weechat::buffer_get_string( $bufferp, "localvar_channel" ),
             undef
         );
+
+        # check current buffer for hightlight and away status
+        my $current_buffer = weechat::current_buffer();
+        return weechat::WEECHAT_RC_OK if ( $bufferp eq $current_buffer and weechat::config_get_plugin('highlights_current_channel') eq 'off' );
+
+        # away status is set?
+        if ( $bufferp eq $current_buffer and weechat::config_get_plugin('highlights_current_channel') eq 'away' )
+        {       # nick is not away
+                return weechat::WEECHAT_RC_OK unless weechat::buffer_get_string( $bufferp, "localvar_away" );
+        }
 
         if ( $btype eq 'channel' ) {
             return weechat::WEECHAT_RC_OK
@@ -654,7 +695,39 @@ sub highlights_public {
 # colored output of private messages to bar
 # server messages aren't shown in the bar
 # format: 'nick[privmsg] | message' (/msg)
-sub highlights_private {
+sub highlights_private
+{
+    my ( $data, $bufferp, $date, $tags, $displayed, $ishilight, $nick, $message ) = @_;
+    # find buffer name, server name
+    # return if buffer is in a blacklist
+    my $buffername = weechat::buffer_get_string($bufferp, "name");
+    return weechat::WEECHAT_RC_OK if weechat::string_has_highlight( $buffername, weechat::config_get_plugin('blacklist_buffers') );
+
+    if ( weechat::config_get_plugin('show_priv_msg') eq "on"
+        and $nick ne '--' )
+    {
+        my $buffer_name = weechat::buffer_get_string( $bufferp, "short_name" );
+        my $plugin = weechat::buffer_get_string( $bufferp, "plugin" );
+        my $server = weechat::buffer_get_string( $bufferp, "localvar_server" ) if ($plugin eq "irc");
+
+        my $current_buffer_name = weechat::buffer_get_string( weechat::current_buffer(), "short_name" );
+        unless ( $current_buffer_name eq $nick )
+        {
+            _beep( $Beep_freq_msg, weechat::config_get_plugin('beep_duration') );
+            my $fmt = '%N@%s%c';
+            my $channel = weechat::color( weechat::config_get_plugin('color_privmsg_tag') ) . " [privmsg]";
+            $server = $plugin if ($plugin eq "xfer");
+            _print_formatted( $fmt, $message, $nick, $channel, $server );
+        }
+    }
+
+    return weechat::WEECHAT_RC_OK;
+}
+# obsolete sub-routine
+
+sub highlights_private2
+{
+    my ( $signal, $callback, $callback_data ) = @_;
     my ( $nick, $message ) = ( $_[2] =~ /(.*?)\t(.*)/ );
 
     my $fmt = '%N%c';
@@ -667,6 +740,11 @@ sub highlights_private {
         $buffer_name = weechat::buffer_get_string( $bufferp, "short_name" )
           if $bufferp;
 
+        # find buffer name, server name
+        # return if buffer is in a blacklist
+        my $buffername = weechat::buffer_get_string($bufferp, "name");
+        return weechat::WEECHAT_RC_OK if weechat::string_has_highlight( $buffername, weechat::config_get_plugin('blacklist_buffers') );
+
         unless ( $buffer_name and $buffer_name eq $nick) {
             _beep( $Beep_freq_msg, weechat::config_get_plugin('beep_duration') );
             my $channel = weechat::color( weechat::config_get_plugin('color_privmsg_tag') ) . "[privmsg]";
@@ -674,7 +752,6 @@ sub highlights_private {
             _print_formatted( $fmt, $message, $nick, $channel, $server );
         }
     }
-
     return weechat::WEECHAT_RC_OK;
 }
 
@@ -960,10 +1037,10 @@ sub unload {
     $Bar = weechat::bar_search( weechat::config_get_plugin('bar_name') );
 #    my ( $bar, $bar_title ) = _bar_get();
 
-#    if ($Bar and weechat::config_get_plugin('remove_bar_on_unload') eq 'on') {
+    if ($Bar and weechat::config_get_plugin('remove_bar_on_unload') eq 'on') {
         weechat::bar_remove(weechat::bar_search( $Bar_title_name));
         weechat::bar_remove($Bar);
-#    }
+    }
 
     return weechat::WEECHAT_RC_OK;
 }
@@ -1092,12 +1169,17 @@ sub color_help
 # init script
 # XXX If you don't check weechat::register() for succsess, %SETTINGS will be set
 # XXX by init_config() into the namespace of other perl scripts.
-if ( weechat::register(  $SCRIPT,  $AUTHOR, $Version, $LICENCE, $DESCRIPTION, "unload", "" ) )
+if ( weechat::register(  $SCRIPT,  $SCRIPT_AUTHOR, $SCRIPT_VERSION, $SCRIPT_LICENCE, $SCRIPT_DESCRIPTION, "unload", "" ) )
 {
+    $weechat_version = weechat::info_get('version_number', '');
+
     color_help();
-    weechat::hook_command( $COMMAND,  $DESCRIPTION,  $ARGS_HELP, $CMD_HELP, $COMPLETITION, $CALLBACK, "" );
-    weechat::hook_print( "", "", "", 1, "highlights_public", "" );
-    weechat::hook_signal( "weechat_pv",    "highlights_private", "" );
+    weechat::hook_command( $COMMAND,  $SCRIPT_DESCRIPTION,  $ARGS_HELP, $CMD_HELP, $COMPLETITION, $CALLBACK, "" );
+    weechat::hook_print( "", "notify_message", "", 1, "highlights_public", "" );
+    weechat::hook_print( "", "notify_private", "", 1, "highlights_private", "" );
+
+# obsolete
+#    weechat::hook_signal( "weechat_pv",    "highlights_private2", "" );
 
     init_config();
     init_bar();
@@ -1108,6 +1190,7 @@ if ( weechat::register(  $SCRIPT,  $AUTHOR, $Version, $LICENCE, $DESCRIPTION, "u
     weechat::hook_config( "plugins.var.perl." . $SCRIPT . ".nick_flood*", 'config_changed_nick_flood', "" );
 
     weechat::hook_config( "plugins.var.perl." . $SCRIPT . "*", '_bar_item_update', "" );
+    weechat::hook_config( "weechat.bar.newsbar_title.color_*", '_bar_item_update', "" );
 
 }
 # vim: ai ts=4 sts=4 et sw=4 foldmethod=marker :

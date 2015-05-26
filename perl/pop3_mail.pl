@@ -19,6 +19,8 @@
 # Config:
 # Add [mail] to your weechat.bar.status.items
 #
+# 2014-11-09: nils_2 (freenode.#weechat)
+#       0.4 : fix: numeric error
 #
 # 2013-09-15: nils_2 (freenode.#weechat)
 #       0.3 : add: option prefix_item
@@ -35,12 +37,15 @@
 # https://github.com/weechatter/weechat-scripts
 #
 # This script needs following perl modules:
+# You can install them using "cpan"
 # Tie::IxHash
 # Mail::POP3Client
 # IO::Socket::SSL
 # MIME::Base64
 # Crypt::Rijndael
-# You can install them using "cpan"
+
+# apt-get install libtie-ixhash-perl libmail-pop3client-perl libio-socket-ssl-perl libcrypt-rijndael-perl
+
 
 # do not sort my hash
 use Tie::IxHash;
@@ -57,7 +62,7 @@ use Crypt::Rijndael;
 use Encode;
 
 my $prgname             = "pop3_mail";
-my $SCRIPT_version      = "0.3";
+my $SCRIPT_version      = "0.4";
 my $description         = "check POP3 server for mails and display mail header";
 my $item_name           = "mail";
 
@@ -361,7 +366,7 @@ sub show_mail {
 sub hook_process_cb{
 my ($data, $command, $return_code, $out, $err) = @_;
 
-return weechat::WEECHAT_RC_OK if ( $return_code > 0 );				# something went wrong!
+return weechat::WEECHAT_RC_OK if ( $return_code > 0 or $out);                   # something went wrong!
 
 
 my (undef, undef, $nick, undef, $server, undef) = split /\s+/, $command, 6;
