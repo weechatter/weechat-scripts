@@ -2,6 +2,8 @@
 #
 # Copyright (c) 2012 by nils_2 <weechatter@arcor.de>
 #
+# using weechat >1.0 use /trigger
+#
 # to customise IRC messages (like join/part/quit/kill)
 #
 # This program is free software; you can redistribute it and/or modify
@@ -28,6 +30,11 @@
 # Development is currently hosted at
 # https://github.com/weechatter/weechat-scripts
 
+
+# TODO;
+# test this
+# :Testozaure!~testo@81-64-138-108.rev.numericable.fr JOIN :#ulminfo
+
 try:
     import weechat,re
 
@@ -51,8 +58,6 @@ OPTIONS         = { 'debug'             : ('off','show debug messages'),
                                            'customize quit message. possible items: %N = nick, %U = user, %H = host, %M = message'),
                     'kick_message'      : ('${white}%N${default} ${red}has kicked${default} ${blue}%K${default} ${green}(${default}%M${green})',
                                            'customize kill message. possible items: %N = nick, %U = user, %H = host, %K = kicked user, %C = channel, %M = message'),
-                    'action_message'    : ('${white}%N${default} ${red}has kicked${default} ${blue}%K${default} ${green}(${default}%M${green})',
-                                           'customize action message. possible items: %N = nick, %U = user, %H = host, %K = kicked user, %C = channel, %M = message'),
                     'no_log'            : ('on','don\'t log customize messages'),
                   }
 # ================================[ regex ]===============================
@@ -75,6 +80,34 @@ regex_get_user=re.compile(r"""
 """, re.VERBOSE)
 # ================================[ hook_modifier() ]===============================
 # modifier_data = internal server name
+def customize_privmsg_cb(data, modifier, modifier_data, string):
+    weechat.prnt("",data)
+    weechat.prnt("",modifier)
+    weechat.prnt("",modifier_data)
+    weechat.prnt("",string)
+    parsed = get_hashtable(string)
+    message = parsed['message'].strip()
+    # Filter out non-CTCP messages and non ACTION messages
+    if not message or ord(message[0]) != 1 or not message[1:].startswith("ACTION"):
+        return string
+    text = message[8:-1]
+
+    parsed['kicked_nick'] = ''                  # dummy. no irc_KICK here
+    parsed['message'] = text
+    message = create_output("${*blue}%N %M",parsed,'action')
+
+    buffer_ptr = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
+
+    prefix = weechat.config_string(weechat.config_get('weechat.look.prefix_action'))
+    prefix_color = weechat.color(weechat.config_color(weechat.config_get('weechat.color.chat_prefix_action')))
+    prefix = substitute_colors(prefix)
+    message_tags = ''
+
+    if weechat.config_get_plugin('no_log').lower() == 'on':
+        message_tags = 'no_log'
+    weechat.prnt_date_tags(buffer_ptr,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
+    return string
+
 def customize_join_cb(data, modifier, modifier_data, string):
     message = weechat.config_get_plugin('join_message')
     if message == '':
@@ -93,7 +126,7 @@ def customize_join_cb(data, modifier, modifier_data, string):
         weechat.prnt("",parsed['channel'])
         weechat.prnt("",parsed['message'])
 
-    buffer_ptr = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
+    buf_pointer = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
 
     prefix = weechat.config_string(weechat.config_get('weechat.look.prefix_join'))
     prefix_color = weechat.color(weechat.config_color(weechat.config_get('weechat.color.chat_prefix_join')))
@@ -102,7 +135,7 @@ def customize_join_cb(data, modifier, modifier_data, string):
 
     if weechat.config_get_plugin('no_log').lower() == 'on':
         message_tags = 'no_log'
-    weechat.prnt_date_tags(buffer_ptr,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
+    weechat.prnt_date_tags(buf_pointer,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
                
     return string
 
@@ -125,7 +158,7 @@ def customize_part_cb(data, modifier, modifier_data, string):
         weechat.prnt("",parsed['channel'])
         weechat.prnt("",parsed['message'])
 
-    buffer_ptr = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
+    buf_pointer = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
 
     prefix = weechat.config_string(weechat.config_get('weechat.look.prefix_quit'))
     prefix_color = weechat.color(weechat.config_color(weechat.config_get('weechat.color.chat_prefix_quit')))
@@ -134,7 +167,7 @@ def customize_part_cb(data, modifier, modifier_data, string):
 
     if weechat.config_get_plugin('no_log').lower() == 'on':
         message_tags = 'no_log'
-    weechat.prnt_date_tags(buffer_ptr,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
+    weechat.prnt_date_tags(buf_pointer,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
         
     return string
 
@@ -156,7 +189,7 @@ def customize_quit_cb(data, modifier, modifier_data, string):
         weechat.prnt("",parsed['channel'])
         weechat.prnt("",parsed['message'])
 
-    buffer_ptr = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
+    buf_pointer = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
 
     prefix = weechat.config_string(weechat.config_get('weechat.look.prefix_quit'))
     prefix_color = weechat.color(weechat.config_color(weechat.config_get('weechat.color.chat_prefix_quit')))
@@ -201,9 +234,7 @@ def customize_kick_cb(data, modifier, modifier_data, string):
         weechat.prnt("",parsed['channel'])
         weechat.prnt("",parsed['message'])
 
-    buffer_ptr = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
-    if not (buffer_ptr):
-        return string
+    buf_pointer = weechat.buffer_search('irc',"%s.%s" % (modifier_data,parsed['channel']))
 
     prefix = weechat.config_string(weechat.config_get('weechat.look.prefix_quit'))
     prefix_color = weechat.color(weechat.config_color(weechat.config_get('weechat.color.chat_prefix_quit')))
@@ -211,7 +242,7 @@ def customize_kick_cb(data, modifier, modifier_data, string):
 
     if weechat.config_get_plugin('no_log').lower() == 'on':
         message_tags = 'no_log'
-    weechat.prnt_date_tags(buffer_ptr,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
+    weechat.prnt_date_tags(buf_pointer,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
 
     return string
 
@@ -306,7 +337,7 @@ def customize_join_cb_signal(data, signal, signal_data):
     parsed['kicked_nick'] = '' # dummy. no KICK here
     message = create_output(message,parsed,'join')
 
-    buffer_ptr = weechat.buffer_search('irc',"%s.%s" % (signal.split(',', 1)[0],parsed['channel']))
+    buf_pointer = weechat.buffer_search('irc',"%s.%s" % (signal.split(',', 1)[0],parsed['channel']))
 
     prefix = weechat.config_string(weechat.config_get('weechat.look.prefix_join'))
     prefix_color = weechat.color(weechat.config_color(weechat.config_get('weechat.color.chat_prefix_join')))
@@ -314,7 +345,7 @@ def customize_join_cb_signal(data, signal, signal_data):
 
     if weechat.config_get_plugin('no_log').lower() == 'on':
         message_tags = 'no_log'
-    weechat.prnt_date_tags(buffer_ptr,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
+    weechat.prnt_date_tags(buf_pointer,0,message_tags,'%s%s\t%s' % (prefix_color,prefix,message))
 
     return weechat.WEECHAT_RC_OK
 # ================================[ main ]===============================
@@ -329,6 +360,8 @@ if __name__ == "__main__":
             weechat.hook_modifier("irc_in2_PART","customize_part_cb","")
             weechat.hook_modifier("irc_in_QUIT","customize_quit_cb","")
             weechat.hook_modifier("irc_in2_KICK","customize_kick_cb","")
+            weechat.hook_modifier("irc_in2_privmsg","customize_privmsg_cb","")
+            weechat.hook_modifier("irc_out_privmsg","customize_privmsg_cb","")
         else:
             weechat.prnt("","%s%s %s" % (weechat.prefix("error"),SCRIPT_NAME,": needs version 0.3.4 or higher"))
             weechat.command("","/wait 1ms /python unload %s" % SCRIPT_NAME)
