@@ -148,10 +148,10 @@ if __name__ == "__main__":
         version = weechat.info_get('version_number', '') or 0
         if int(version) >= 0x00030400:
             weechat.hook_command(SCRIPT_NAME,SCRIPT_DESC,
-            'add <nick> <color> || del <nick< <color> || list',
+            'add <nick> <color> || del <nick> <color> || list [<nick>]',
             'add <nick> <color>: add a nick with its color to irc.look.nick_color_force\n'
             'del <nick>        : delete given nick with its color from irc.look.nick_color_force\n'
-            'list <nick>       : list all forced nicks with its assigned color or optional from one nick\n\n'
+            'list [<nick>]     : list all forced nicks with its assigned color or optional from one nick\n\n'
             'Examples:\n'
             ' add nick nils_2 with color red:\n'
             '  /' + SCRIPT_NAME + ' add nils_2 red\n'
