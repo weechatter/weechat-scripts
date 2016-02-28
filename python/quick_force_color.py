@@ -59,14 +59,19 @@ DEFAULT_COLORS = {  0 : "darkgray", 1 : "red", 2 : "lightred", 3 : "green",
 
 colored_nicks = {}
 # ================================[ callback ]===============================
+def print_usage(buffer):
+    weechat.prnt(buffer, "Usage: /%s list [nick] | add nick color | del nick" % SCRIPT_NAME)
+
 def nick_colors_cmd_cb(data, buffer, args):
     global colored_nicks
 
     if args == "":                                                                              # no args given. quit
+        print_usage(buffer)
         return weechat.WEECHAT_RC_OK
 
     argv = args.strip().split(" ")
     if (len(argv) == 0) or (len(argv) >= 4):                                                    # maximum of 3 args!!
+        print_usage(buffer)
         return weechat.WEECHAT_RC_OK
 
     bufpointer = weechat.window_get_pointer(buffer,'buffer')                                    # current buffer
@@ -76,29 +81,29 @@ def nick_colors_cmd_cb(data, buffer, args):
     if argv[0].lower() == 'list':                                                               # list all nicks
         if len(colored_nicks) == 0:
             weechat.prnt(buffer,'%sno nicks in \"irc.look.nick_color_force\"...' % weechat.prefix("error"))
-            return weechat.WEECHAT_RC_OK
-        if len(argv) == 2:
+        elif len(argv) == 2:
             if argv[1] in colored_nicks:
                 color = colored_nicks[argv[1]]                                                  # get color from given nick
                 weechat.prnt(buffer,"%s%s: %s" % (weechat.color(color),argv[1],color))
             else:
                 weechat.prnt(buffer,"no color set for: %s" % (argv[1]))
-            return weechat.WEECHAT_RC_OK
+        else:
+            weechat.prnt(buffer,"List of nicks in : nick_color_force")
+#            for nick,color in colored_nicks.items():
+            for nick,color in list(colored_nicks.items()):
+                weechat.prnt(buffer,"%s%s: %s" % (weechat.color(color),nick,color))
 
-        weechat.prnt(buffer,"List of nicks in : nick_color_force")
-#        for nick,color in colored_nicks.items():
-        for nick,color in list(colored_nicks.items()):
-            weechat.prnt(buffer,"%s%s: %s" % (weechat.color(color),nick,color))
-        return weechat.WEECHAT_RC_OK
-
-    if (argv[0].lower() == 'add') and (len(argv) == 3):
+    elif (argv[0].lower() == 'add') and (len(argv) == 3):
         colored_nicks[argv[1]] = argv[2]
         save_new_force_nicks()
 
-    if (argv[0].lower() == 'del') and (len(argv) == 2):
+    elif (argv[0].lower() == 'del') and (len(argv) == 2):
         if argv[1] in colored_nicks:                                                            # search if nick exists
             del colored_nicks[argv[1]]
             save_new_force_nicks()
+
+    else:
+        print_usage(buffer)
 
     return weechat.WEECHAT_RC_OK
 
