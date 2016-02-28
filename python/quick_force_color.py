@@ -92,10 +92,7 @@ def nick_colors_cmd_cb(data, buffer, args):
         return weechat.WEECHAT_RC_OK
 
     if (argv[0].lower() == 'add') and (len(argv) == 3):
-        if argv[1] in colored_nicks:                                                            # search if nick exists
-            colored_nicks[argv[1]] = argv[2]
-        else:
-            colored_nicks[argv[1]] = argv[2]                                                    # add [nick] = [color]
+        colored_nicks[argv[1]] = argv[2]
         save_new_force_nicks()
 
     if (argv[0].lower() == 'del') and (len(argv) == 2):
