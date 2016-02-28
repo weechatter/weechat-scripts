@@ -105,7 +105,7 @@ def nick_colors_cmd_cb(data, buffer, args):
 def save_new_force_nicks():
     global colored_nicks
 #    new_nick_color_force = ';'.join([ ':'.join(item) for item in colored_nicks.items()])
-    new_nick_color_force = ';'.join([ ':'.join(item) for item in list(colored_nicks.items())])
+    new_nick_color_force = ';'.join([ ':'.join(item) for item in sorted(colored_nicks.items())])
     config_pnt = weechat.config_get('irc.look.nick_color_force')
     weechat.config_option_set(config_pnt,new_nick_color_force,1)
 
