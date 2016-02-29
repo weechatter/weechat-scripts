@@ -139,6 +139,7 @@ def force_nick_colors_completion_cb(data, completion_item, buffer, completion):
 def create_list():
     global nick_color_force,colored_nicks
 #        colored_nicks = dict([elem.split(':') for elem in nick_color_force.split(';')])
+    colored_nicks = {}
     nick_color_force = weechat.config_string(weechat.config_get('irc.look.nick_color_force'))   # get list
     if nick_color_force != '':
         nick_color_force = nick_color_force.strip(';')                                          # remove ';' at beginning and end of string
