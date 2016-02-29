@@ -94,6 +94,12 @@ def nick_colors_cmd_cb(data, buffer, args):
                 weechat.prnt(buffer,"%s%s: %s" % (weechat.color(color),nick,color))
 
     elif (argv[0].lower() == 'add') and (len(argv) == 3):
+        if argv[1] in colored_nicks:
+            weechat.prnt(buffer, "Changing nick '%s' to color %s%s" % (
+                argv[1], weechat.color(argv[2]), argv[2]))
+        else:
+            weechat.prnt(buffer, "Adding nick '%s' with color %s%s" % (
+                argv[1], weechat.color(argv[2]), argv[2]))
         colored_nicks[argv[1]] = argv[2]
         save_new_force_nicks()
 
@@ -101,6 +107,9 @@ def nick_colors_cmd_cb(data, buffer, args):
         if argv[1] in colored_nicks:                                                            # search if nick exists
             del colored_nicks[argv[1]]
             save_new_force_nicks()
+            weechat.prnt(buffer, "Removed nick '%s'" % argv[1])
+        else:
+            weechat.prnt(buffer, "Nick '%s' not found in nick_color_force" % argv[1])
 
     else:
         print_usage(buffer)
