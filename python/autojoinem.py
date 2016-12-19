@@ -19,7 +19,7 @@
 #
 # idea by azizLIGHTS
 #
-# 2016-12.19: nils_2, (freenode.#weechat)
+# 2016-12-19: nils_2, (freenode.#weechat)
 #       0.5 : fix problem with empty autojoin (reported by Caelum)
 # 2016-06-05: nils_2, (freenode.#weechat)
 #       0.4 : make script python3 compatible
