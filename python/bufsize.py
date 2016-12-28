@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2012-2013 by nils_2 <weechatter@arcor.de>
+# Copyright (c) 2012-2016 by nils_2 <weechatter@arcor.de>
 #                         and nesthib <nesthib@gmail.com>
 #
 # scroll indicator; displaying number of lines below last line, overall lines in buffer, number of current line and percent displayed
