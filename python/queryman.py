@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2013-2014 by nils_2 <weechatter@arcor.de>, Filip H.F. "FiXato" Slagter <fixato+weechat@gmail.com>
+# Copyright (c) 2013-2017 by nils_2 <weechatter@arcor.de>, Filip H.F. "FiXato" Slagter <fixato+weechat@gmail.com>
 #
 # save and restore query buffers after /quit
 #
@@ -19,12 +19,16 @@
 #
 # idea by lasers@freenode.#weechat
 #
-# 2014-12-05: nils_2 & FiXato, (freenode.#weechat)
-#       0.3 : big rewrite:
+# 2017-04-14: nils_2 & FiXato, (freenode.#weechat)
+#       0.4 : big rewrite:
 #           : added extra hooks:
 #           - query buffers are now also stored when opening/closing queries
 #           - queries only restored on connect; no longer on every reconnect
 #           : current buffer position is retained
+#           : manual saving of the query list (https://github.com/weechat/scripts/issues/196)
+#
+# 2015-02-27: nils_2, (freenode.#weechat)
+#       0.3 : make script consistent with "buffer_switch_autojoin" option (idea haasn)
 #
 # 2013-11-07: nils_2, (freenode.#weechat)
 #       0.2 : fix file not found error (reported by calcifea)
@@ -52,7 +56,7 @@ SCRIPT_AUTHOR   = 'nils_2 <weechatter@arcor.de>'
 SCRIPT_VERSION  = '0.3'
 SCRIPT_LICENSE  = 'GPL'
 SCRIPT_DESC     = 'save and restore query buffers after /quit and on open/close of queries'
-DEBUG           = True
+DEBUG           = False
 
 queryman_filename = 'queryman.txt'
 servers_opening = set([])
@@ -164,7 +168,11 @@ def add_channel_to_stored_list(server_name, channel_name):
 
 def open_query_buffer(server_name, nick):
     starting_buffer = weechat.current_buffer()
-    weechat.command('','/query -server %s %s' % (server_name, nick))
+    noswitch = ""
+    switch_autojoin = weechat.config_get("irc.look.buffer_switch_autojoin")
+    if not weechat.config_boolean(switch_autojoin):
+        noswitch = "-noswitch"
+    weechat.command('','/query %s -server %s %s' % ( noswitch, server_name, nick ))
     weechat.buffer_set(starting_buffer, 'display', 'auto')
 
 def open_stored_query_buffers_for_server(server_connected):
@@ -233,11 +241,25 @@ def debug_print(message):
         return
     weechat.prnt('','DEBUG/%s: %s' % (SCRIPT_NAME, message))
 
+def hook_command_cb(data, buffer, args):
+    if args == "":                                                                              # no args given. quit
+        return weechat.WEECHAT_RC_OK
+    argv = args.strip().split(" ")
+    if argv[0].lower() == 'save':
+        save_stored_query_buffers_to_file
+    return weechat.WEECHAT_RC_OK
+
 # ================================[ main ]===============================
 if __name__ == '__main__':
     if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, '', ''):
         version = weechat.info_get('version_number', '') or 0
         if int(version) >= 0x00030700:
+            weechat.hook_command(SCRIPT_NAME,SCRIPT_DESC,
+            'save',
+            'save : manual saving of the query list\n',
+            '',
+            'hook_command_cb', '')
+
             stored_query_buffers_per_server = get_stored_list_of_query_buffers()
             for (server_name, channels) in get_current_query_buffers().items():
                 # Reopen the buffers for the channels in the servers we already have open:
@@ -249,7 +271,6 @@ if __name__ == '__main__':
                 stored_query_buffers_per_server[server_name].update(channels)
                 debug_print("Now have %s channels for server %s: %s" % (len(stored_query_buffers_per_server[server_name]), server_name, ','.join(stored_query_buffers_per_server[server_name])))
             save_stored_query_buffers_to_file()
-            
             weechat.hook_signal('quit', 'quit_signal_cb', '')
 #            weechat.hook_signal('relay_client_disconnected', 'quit_signal_cb', '')
 #            weechat.hook_signal('relay_client_connected', 'irc_server_connected_signal_cb', '')
