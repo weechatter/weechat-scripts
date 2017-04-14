@@ -25,7 +25,7 @@
 #           - query buffers are now also stored when opening/closing queries
 #           - queries only restored on connect; no longer on every reconnect
 #           : current buffer position is retained
-#           : manual saving of the query list (https://github.com/weechat/scripts/issues/196)
+#           : manual saving of query list (https://github.com/weechat/scripts/issues/196)
 #
 # 2015-02-27: nils_2, (freenode.#weechat)
 #       0.3 : make script consistent with "buffer_switch_autojoin" option (idea haasn)
@@ -246,7 +246,7 @@ def hook_command_cb(data, buffer, args):
         return weechat.WEECHAT_RC_OK
     argv = args.strip().split(" ")
     if argv[0].lower() == 'save':
-        save_stored_query_buffers_to_file
+        save_stored_query_buffers_to_file()
     return weechat.WEECHAT_RC_OK
 
 # ================================[ main ]===============================
