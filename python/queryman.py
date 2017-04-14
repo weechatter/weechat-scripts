@@ -53,7 +53,7 @@ except Exception:
 
 SCRIPT_NAME     = 'queryman'
 SCRIPT_AUTHOR   = 'nils_2 <weechatter@arcor.de>'
-SCRIPT_VERSION  = '0.3'
+SCRIPT_VERSION  = '0.4'
 SCRIPT_LICENSE  = 'GPL'
 SCRIPT_DESC     = 'save and restore query buffers after /quit and on open/close of queries'
 DEBUG           = False
