@@ -147,7 +147,7 @@ def get_stored_list_of_query_buffers():
             stored_query_buffers_per_server[server_name].add(nick)
         f.close()
     else:
-        print_error('Error loading query buffer from "%s"' % filename)
+        debug_print('Error loading query buffer from "%s"' % filename)
     return stored_query_buffers_per_server
 
 def remove_channel_from_stored_list(server_name, channel_name):
