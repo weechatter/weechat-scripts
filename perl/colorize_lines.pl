@@ -228,7 +228,7 @@ sub colorize_cb
             $color = $channel_color if ($channel_color); 
         } else {
             # oh well
-            return $string;
+            return $string if ($config{highlight_words} eq "off");
         }
     }
     my $right_nocolor = weechat::string_remove_color($right, "");
@@ -263,7 +263,6 @@ sub colorize_cb
             }
             }
     ######################################## inject colors and go!
-
     my $out = "";
     if ($action) {
         # remove the first color reset - after * nick
