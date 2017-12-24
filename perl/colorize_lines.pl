@@ -228,7 +228,7 @@ sub colorize_cb
             $color = $channel_color if ($channel_color); 
         } else {
             # oh well
-            return $string if ($config{highlight_words} eq "off");
+            return $string if ($config{highlight_words} ne "on");
         }
     }
     my $right_nocolor = weechat::string_remove_color($right, "");
@@ -248,16 +248,16 @@ sub colorize_cb
                     my $i = $h;
                     # check word case insensitiv || check if word matches without "(?-i)" at beginning
                     if ( lc($l) eq lc($h) || (index($h,"(?-i)") != -1 && ($l eq substr($i,5,length($i)-5,""))) ) {
-                        $right =~ s/\b$l\b/$high_word_color$l$reset/;
+                        $right =~ s/\Q$l\E/$high_word_color$l$reset/;
                     # word starts with (?-i) and has a wildcard ?
                     } elsif ((index($h,"(?-i)") != -1) && (index($h,"*") != -1) ){
                         my $i = $h;
                         my $t = substr($i,5,length($i)-5,"");
                         my $regex = weechat::string_mask_to_regex($t);
-                        $right =~ s/\b$l\b/$high_word_color$l$reset/ if ($l =~ /^$regex$/i);    # use * without sensitive
+                        $right =~ s/\Q$l\E/$high_word_color$l$reset/ if ($l =~ /^$regex$/i);    # use * without sensitive
                       }elsif ((index($h,"*") == 0 || index($h,"*") == length($h)-1)){# wildcard at beginning or end ?
                         my $regex = weechat::string_mask_to_regex($h);
-                        $right =~ s/\b$l\b/$high_word_color$l$reset/ if ($l =~ /^$regex$/i);
+                        $right =~ s/\Q$l\E/$high_word_color$l$reset/ if ($l =~ /^$regex$/i);
                       }
                 }
             }
