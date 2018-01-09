@@ -21,7 +21,8 @@
 #
 # History:
 # version 1.6:nils_2@freenode.#weechat
-# 2018-01-18: add: hook_process() for /WHOIS
+# 2018-01-09: add: use hook_process_hashtable() for /WHOIS
+#           : imp: use hook_process_hashtable() instead hook_process() for security reasons
 #
 # version 1.5:nils_2@freenode.#weechat
 # 2015-06-15: add: new option del_date
@@ -151,7 +152,7 @@ my %desc_options = ('db_name'           => 'file containing the SQLite database 
                     'ignore_whois'      => 'When enabled, /WHOIS won\'t be monitored. (default: off)',
                     'tags'              => 'comma separated list of tags used for messages printed by stalker. See documentation for possible tags (e.g. \'no_log\', \'no_highlight\'). This option does not effect DEBUG messages.',
                     'additional_join_info' => 'add a line below the JOIN message that will display alternative nicks (tags: "irc_join", "irc_smart_filter" will be add to additional_join_info). You can use a localvar to drop additional join info for specific buffer(s) "stalker_drop_additional_join_info" (default: off)',
-                    'timeout'           => 'timeout in seconds for hook_process(), used with option "additional_join_info". On slower machines, like raspberry pi, increase time. (default: 1)',
+                    'timeout'           => 'timeout in seconds for hook_process_hashtable(), used with option "additional_join_info". On slower machines, like raspberry pi, increase time. (default: 1)',
                     'flood_timer'       => 'Time in seconds for which flood protection is active. Once max_nicks is reached, joins will be ignored for the remaining duration of the timer. (default:10)',
                     'flood_max_nicks'   => 'Maximum number of joins to allow in flood_timer length of time. Once maximum number of joins is reached, joins will be ignored until the timer ends (default:20)',
 );
@@ -184,7 +185,7 @@ my %indices = (
       ],
   );
 
-# ---------------[ external routines for hook_process() ]---------------------
+# ---------------[ external routines for hook_process_hashtable() ]---------------------
 if ($#ARGV == 8 ) # (0-8) nine arguments given?
 {
     my $db_filename = $ARGV[0];
@@ -518,7 +519,7 @@ sub add_record
     my ( $nick, $user, $host, $serv ) = @_;
     return unless ($nick and $user and $host and $serv);
 
-    # Check if we already have this record, before using a hook_process()
+    # Check if we already have this record, before using a hook_process_hashtable()
     my $sth = $DBH_child->prepare( "SELECT nick FROM records WHERE nick = ? AND user = ? AND host = ? AND serv = ?" );
     $sth->execute( $nick, $user, $host, $serv );
     my $result = $sth->fetchrow_hashref;
@@ -536,7 +537,22 @@ sub add_record
 
     my $db_filename = weechat_dir();
     DEBUG("info", "Start hook_process(), to add $nick $user\@$host on $serv to database");
-    weechat::hook_process("perl $filename $db_filename 'db_add_record' '$nick' '$user' '$host' '$serv' 'dummy' 'dummy' 'dummy'", 1000 * $options{'timeout'},"db_add_record_cb","");
+
+    weechat::hook_process_hashtable("perl",
+    {
+    "arg1"  => $filename,
+    "arg2"  => $db_filename,
+    "arg3"  => 'db_add_record',
+    "arg4"  => $nick,
+    "arg5"  => $user,
+    "arg6"  => $host,
+    "arg7"  => $serv,
+    "arg8"  => 'dummy',
+    "arg9"  => 'dummy',
+    "arg10" => 'dummy',
+    }, 1000 * $options{'timeout'},"db_add_record_cb","");
+
+
 }
 
 # function called when data from child is available, or when child has ended, arguments and return value
@@ -1153,7 +1169,19 @@ sub irc_in2_whois_cb
     my $name = weechat::buffer_get_string($ptr_buffer,'localvar_name');
     DEBUG("info", "Start hook_process(), get additional for WHOIS() info from $nick with $user\@$host on $name");
 
-    weechat::hook_process("perl $filename $db_filename 'additional_join_info' '$nick' '$user' '$host' '$server' $options{'max_recursion'} $options{'ignore_guest_nicks'} '$options{'guest_nick_regex'}'", 1000 * $options{'timeout'},"hook_process_get_nicks_records_cb","$nick $ptr_buffer 'dummy'");
+    weechat::hook_process_hashtable("perl",
+    {
+    "arg1"  => $filename,
+    "arg2"  => $db_filename,
+    "arg3"  => 'additional_join_info',
+    "arg4"  => $nick,
+    "arg5"  => $user,
+    "arg6"  => $host,
+    "arg7"  => $server,
+    "arg8"  => $options{'max_recursion'},
+    "arg9"  => $options{'ignore_guest_nicks'},
+    "arg10" => $options{'guest_nick_regex'},
+    }, 1000 * $options{'timeout'},"hook_process_get_nicks_records_cb","$nick $ptr_buffer 'dummy'");
 
 #    my $nicks_found = join( ", ", (get_nick_records('yes', 'nick', $nick, $server, $use_regex)));
 
@@ -1270,7 +1298,21 @@ sub irc_in2_join_cb
 
         my $db_filename = weechat_dir();
         DEBUG("info", "Start hook_process(), get additional info from $nick with $user\@$host on $name");
-        weechat::hook_process("perl $filename $db_filename 'additional_join_info' '$nick' '$user' '$host' '$server' $options{'max_recursion'} $options{'ignore_guest_nicks'} '$options{'guest_nick_regex'}'", 1000 * $options{'timeout'},"hook_process_get_nicks_records_cb","$nick $buffer $my_tags");
+
+        weechat::hook_process_hashtable("perl",
+        {
+        "arg1"  => $filename,
+        "arg2"  => $db_filename,
+        "arg3"  => 'additional_join_info',
+        "arg4"  => $nick,
+        "arg5"  => $user,
+        "arg6"  => $host,
+        "arg7"  => $server,
+        "arg8"  => $options{'max_recursion'},
+        "arg9"  => $options{'ignore_guest_nicks'},
+        "arg10" => $options{'guest_nick_regex'},
+        }, 1000 * $options{'timeout'},"hook_process_get_nicks_records_cb","$nick $ptr_buffer $my_tags");
+
       }
     return weechat::WEECHAT_RC_OK;
 }
