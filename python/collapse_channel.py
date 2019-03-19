@@ -95,8 +95,12 @@ def buffer_switch_cb(data, signal, signal_data):
         exclude_server('')
         single_channel_exclude()
     else:
-        if int(version) <= 0x02040000:                                          # workaround
+        if int(version) <= 0x02040000:                                                   # workaround
             weechat.command(server,'/allchan -current /buffer hide')
+        else:
+            bufpointer = weechat.window_get_pointer(weechat.current_window(), 'buffer') # get current channel pointer
+            weechat.command(server,'/allchan /buffer hide')
+            weechat.command(bufpointer,'/buffer unhide')                                # unhide current channel
     exclude_hotlist()
     return weechat.WEECHAT_RC_OK
 
@@ -139,7 +143,6 @@ def irc_server_connected_cb(data, signal, signal_data):
 
 # ================================[ hotlist ]==============================
 def hotlist_changed_cb(data, signal, signal_data):
-
     if not signal_data:
         plugin_name = weechat.buffer_get_string(weechat.current_buffer(), 'localvar_plugin')
         # TODO how about matrix script or other non-irc channel buffer? no idea! help is welcome
@@ -149,8 +152,6 @@ def hotlist_changed_cb(data, signal, signal_data):
     if OPTIONS['activity'].lower() == 'no' or OPTIONS['activity'].lower() == 'off' or OPTIONS['activity'].lower() == '0':
         exclude_server('')
         single_channel_exclude()
-    else:
-        weechat.command('','/allchan buffer hide')
 
     exclude_hotlist()
     return weechat.WEECHAT_RC_OK
