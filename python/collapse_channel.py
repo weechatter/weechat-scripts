@@ -46,7 +46,7 @@ OPTIONS         = { 'server_exclude'        : ('','exclude some server, comma se
                     'channel_exclude'       : ('','exclude some channel, comma separated list. This is server independent (wildcard "*" is allowed)'),
                     'single_channel_exclude': ('','exclude specific channels, space separated list (eg. freenode.#weechat)'),
                     'hotlist'               : ('0','unhide buffer by activity, when buffer is added to hotlist (0=off (default), 1=message, 2=private message, 3=highlight, 4=all)'),
-                    'activity'              : ('no','only show channels by activity. all exclude options will be ignored (default: off)'),
+                    'activity'              : ('off','show channels with activity only (see option hotlist). all exclude options will be ignored (default: off)'),
                   }
 
 # ================================[ buffer ]===============================
