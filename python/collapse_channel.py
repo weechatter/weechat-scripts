@@ -199,15 +199,18 @@ if __name__ == "__main__":
         init_options()
         weechat.hook_config('plugins.var.python.' + SCRIPT_NAME + '.*', 'toggle_refresh', '' )
 
-        # hide all channels
-        weechat.command("","/allchan -exclude=%s /buffer hide" % OPTIONS['channel_exclude'])
-        # show channel from current server
-        server = weechat.buffer_get_string(weechat.current_buffer(), 'localvar_server')
-        if server:
-            weechat.command(server,"/allchan -current /buffer unhide")
+        if OPTIONS['activity'].lower() == 'no' or OPTIONS['activity'].lower() == 'off' or OPTIONS['activity'].lower() == '0':
+            # hide all channels
+            weechat.command("","/allchan -exclude=%s /buffer hide" % OPTIONS['channel_exclude'])
+            # show channel from current server
+            server = weechat.buffer_get_string(weechat.current_buffer(), 'localvar_server')
+            if server:
+                weechat.command(server,"/allchan -current /buffer unhide")
+            exclude_server('')
+            single_channel_exclude()
+        else:
+            weechat.command('','/allchan /buffer hide')
         exclude_hotlist()
-        exclude_server('')
-        single_channel_exclude()
 
         weechat.hook_signal('buffer_switch', 'buffer_switch_cb', '')
         weechat.hook_signal('buffer_opened', 'buffer_opened_closed_cb', '')
