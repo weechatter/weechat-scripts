@@ -28,6 +28,7 @@
 #           : workaround for bug https://github.com/weechat/weechat/issues/1325#event-2214793184
 #           : workaround for signal buffer_switch, otherwise the warning "/allchan -current" will be printed
 #           : add command help
+#           : fix "/allchan -current" warning when /server raw is executed
 #
 # idea and testing by DJ-ArcAngel
 
@@ -56,7 +57,6 @@ OPTIONS         = { 'server_exclude'        : ('','exclude some server, comma se
 def buffer_opened_closed_cb(data, signal, signal_data):
     global OPTIONS
 
-    weechat.prnt("","buffer buffer_opened_closed_cb")
     # localvar not set in this moment? :-(
 #    server = weechat.buffer_get_string(signal_data, 'localvar_server')          # get internal servername
     infolist = weechat.infolist_get('buffer', signal_data, '')
@@ -72,7 +72,10 @@ def buffer_opened_closed_cb(data, signal, signal_data):
     if OPTIONS['activity'].lower() == 'no' or OPTIONS['activity'].lower() == 'off' or OPTIONS['activity'].lower() == '0':
         # don't remove /wait
         weechat.command('','/wait 1ms /allchan -exclude=%s /buffer hide' % OPTIONS['channel_exclude'])
-        weechat.command(signal_data,'/wait 1ms /allchan -current /buffer unhide')
+        if not signal_data:                                                     # signal_data available?
+            weechat.command(signal_data,'/wait 1ms /allchan -current /buffer unhide')
+        else:                                                                   # signal_data empty!
+            weechat.command('','/allchan /buffer hide')
         exclude_server('')
         single_channel_exclude()
     else:
@@ -91,8 +94,11 @@ def buffer_switch_cb(data, signal, signal_data):
     if OPTIONS['activity'].lower() == 'no' or OPTIONS['activity'].lower() == 'off' or OPTIONS['activity'].lower() == '0':
         # hide all channel but use -exclude
         weechat.command('','/allchan -exclude=%s /buffer hide' % OPTIONS['channel_exclude'])
-        if server != '':    # a buffer with server
-            weechat.command(buffer_ptr,'/allchan -current /buffer unhide')      # use buffer pointer from server
+        if server == 'irc_raw':                                                     # buffer is /server raw
+            weechat.command('','/allchan /buffer unhide')
+            weechat.command('','/allchan -exclude=%s /buffer hide' % OPTIONS['channel_exclude'])
+        elif server != '':                                                          # a buffer with server
+            weechat.command(buffer_ptr,'/allchan -current /buffer unhide')          # use buffer pointer from server
         exclude_server('')
         single_channel_exclude()
     else:
