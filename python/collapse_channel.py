@@ -25,6 +25,8 @@
 #
 # 2019-03-19: nils_2, (freenode.#weechat)
 #       0.3 : add function activity
+#           : workaround for bug https://github.com/weechat/weechat/issues/1325#event-2214793184
+#
 #
 # idea and testing by DJ-ArcAngel
 
@@ -57,8 +59,8 @@ def buffer_opened_closed_cb(data, signal, signal_data):
 #    server = weechat.buffer_get_string(signal_data, 'localvar_server')          # get internal servername
     infolist = weechat.infolist_get('buffer', signal_data, '')
     weechat.infolist_next(infolist)
-    plugin_name = weechat.infolist_string(infolist, "plugin_name")
-    name = weechat.infolist_string(infolist, "name")
+    plugin_name = weechat.infolist_string(infolist, 'plugin_name')
+    name = weechat.infolist_string(infolist, 'name')
     weechat.infolist_free(infolist)
 
     # TODO how about matrix script or other non-irc channel buffer? no idea! help is welcome
@@ -66,7 +68,7 @@ def buffer_opened_closed_cb(data, signal, signal_data):
         return weechat.WEECHAT_RC_OK
 
     arg1,arg2 = name.split('.')                                                 # server.freenode or freenode.#weechat
-    if arg1 == "server":
+    if arg1 == 'server':
         server = arg2
     else:
         server = arg1
@@ -83,24 +85,23 @@ def buffer_opened_closed_cb(data, signal, signal_data):
     return weechat.WEECHAT_RC_OK
 
 def buffer_switch_cb(data, signal, signal_data):
-    global OPTIONS
+    global OPTIONS, version
 
     server = weechat.buffer_get_string(signal_data, 'localvar_server')          # get internal servername
 
     if OPTIONS['activity'].lower() == 'no' or OPTIONS['activity'].lower() == 'off' or OPTIONS['activity'].lower() == '0':
         # hide all channel but use -exclude
-        weechat.command("","/allchan -exclude=%s /buffer hide" % OPTIONS['channel_exclude'])
+        weechat.command('','/allchan -exclude=%s /buffer hide' % OPTIONS['channel_exclude'])
         if server != '':    # a buffer with server
-            weechat.command(server,"/allchan -current /buffer unhide")
+            weechat.command(server,'/allchan -current /buffer unhide')
         exclude_server('')
         single_channel_exclude()
     else:
         if int(version) <= 0x02040000:                                                   # workaround
             weechat.command(server,'/allchan -current /buffer hide')
-        else:
-            bufpointer = weechat.window_get_pointer(weechat.current_window(), 'buffer') # get current channel pointer
-            weechat.command(server,'/allchan /buffer hide')
-            weechat.command(bufpointer,'/buffer unhide')                                # unhide current channel
+        bufpointer = weechat.window_get_pointer(weechat.current_window(), 'buffer') # get current channel pointer
+        weechat.command(server,'/allchan /buffer hide')
+        weechat.command(bufpointer,'/buffer unhide')                                # unhide current channel
     exclude_hotlist()
     return weechat.WEECHAT_RC_OK
 
@@ -112,19 +113,19 @@ def window_switch_cb(data, signal, signal_data):
 def exclude_server(server):
     global OPTIONS
     for server_exclude in OPTIONS['server_exclude'].split(','):
-        if server_exclude == "*":                                               # show buffer for all server
+        if server_exclude == '*':                                               # show buffer for all server
             weechat.command('','/buffer unhide -all')                           # simply unload script, no!? :-)
             break
 
         # search exclude server in list of servers
-        hdata = weechat.hdata_get("irc_server")
-        servers = weechat.hdata_get_list(hdata, "irc_servers")
-        server = weechat.hdata_search(hdata, servers, "${irc_server.name} =* %s" % server_exclude, 1)
+        hdata = weechat.hdata_get('irc_server')
+        servers = weechat.hdata_get_list(hdata, 'irc_servers')
+        server = weechat.hdata_search(hdata, servers, '${irc_server.name} =* %s' % server_exclude, 1)
         if server:
 #            is_connected    = weechat.hdata_integer(hdata, server, "is_connected")
 #            nick_modes      = weechat.hdata_string(hdata, server, "nick_modes")
-            buffer_ptr = weechat.hdata_pointer(hdata, server, "buffer")
-            weechat.command(buffer_ptr,"/allchan -current /buffer unhide")
+            buffer_ptr = weechat.hdata_pointer(hdata, server, 'buffer')
+            weechat.command(buffer_ptr,'/allchan -current /buffer unhide')
     return
 
 def single_channel_exclude():
@@ -146,8 +147,7 @@ def hotlist_changed_cb(data, signal, signal_data):
     if not signal_data:
         plugin_name = weechat.buffer_get_string(weechat.current_buffer(), 'localvar_plugin')
         # TODO how about matrix script or other non-irc channel buffer? no idea! help is welcome
-        # this is a workaround for bug https://github.com/weechat/weechat/issues/1325#event-2214793184
-        if plugin_name != "irc":                                                    # for example /fset, /color etc.pp buffer
+        if plugin_name != 'irc':                                                    # for example /fset, /color etc.pp buffer
             weechat.command('', '/allchan buffer hide')
     if OPTIONS['activity'].lower() == 'no' or OPTIONS['activity'].lower() == 'off' or OPTIONS['activity'].lower() == '0':
         exclude_server('')
@@ -190,23 +190,23 @@ def toggle_refresh(pointer, name, value):
 
 # unhide all buffers when script unloads
 def shutdown_cb():
-    weechat.command("","/buffer unhide -all")
+    weechat.command('', '/buffer unhide -all')
     return weechat.WEECHAT_RC_OK
 # ================================[ main ]===============================
 if __name__ == "__main__":
     global version
     if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, 'shutdown_cb', ''):
-        version = weechat.info_get("version_number", "") or 0
+        version = weechat.info_get('version_number', '') or 0
         init_options()
         weechat.hook_config('plugins.var.python.' + SCRIPT_NAME + '.*', 'toggle_refresh', '' )
 
         if OPTIONS['activity'].lower() == 'no' or OPTIONS['activity'].lower() == 'off' or OPTIONS['activity'].lower() == '0':
             # hide all channels
-            weechat.command("","/allchan -exclude=%s /buffer hide" % OPTIONS['channel_exclude'])
+            weechat.command('','/allchan -exclude=%s /buffer hide' % OPTIONS['channel_exclude'])
             # show channel from current server
             server = weechat.buffer_get_string(weechat.current_buffer(), 'localvar_server')
             if server:
-                weechat.command(server,"/allchan -current /buffer unhide")
+                weechat.command(server,'/allchan -current /buffer unhide')
             exclude_server('')
             single_channel_exclude()
         else:
