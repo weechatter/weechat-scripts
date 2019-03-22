@@ -25,7 +25,9 @@
 #
 # 2019-03-19: nils_2, (freenode.#weechat)
 #       0.3 : add function activity
-#           : workaround for bug https://github.com/weechat/weechat/issues/1325#event-2214793184
+#
+# 2019-03-21: nils_2, (freenode.#weechat)
+#       0.4 : workaround for bug https://github.com/weechat/weechat/issues/1325#event-2214793184
 #           : workaround for signal buffer_switch, otherwise the warning "/allchan -current" will be printed
 #           : add command help
 #           : fix "/allchan -current" warning when /server raw is executed
@@ -42,7 +44,7 @@ except Exception:
 
 SCRIPT_NAME     = "collapse_channel"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.3"
+SCRIPT_VERSION  = "0.4"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "collapse channel buffers from servers without focus"
 
