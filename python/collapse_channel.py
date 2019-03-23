@@ -34,6 +34,7 @@
 #
 # 2019-03-23: nils_2, (freenode.#weechat)
 #           : fix "/allchan -cuurent" warning when signal "buffer_opened" is called
+#           : changed default value for hotlist option
 #
 # idea and testing by DJ-ArcAngel
 
@@ -54,8 +55,8 @@ SCRIPT_DESC     = "collapse channel buffers from servers without focus"
 OPTIONS         = { 'server_exclude'        : ('','exclude some server, comma separated list (wildcard "*" is allowed)'),
                     'channel_exclude'       : ('','exclude some channel, comma separated list. This is server independent (wildcard "*" is allowed)'),
                     'single_channel_exclude': ('','exclude specific channels on specific server, space separated list (eg. freenode.#weechat)'),
-                    'hotlist'               : ('0','unhide buffer by activity, when buffer is added to hotlist (0=off (default), 1=message, 2=private message, 3=highlight, 4=all)'),
-                    'activity'              : ('off','show channels with activity only (see option hotlist). all exclude options will be ignored (default: off)'),
+                    'hotlist'               : ('4','unhide buffer by activity, when buffer is added to hotlist (0=off, 1=message, 2=private message, 3=highlight, 4=all)'),
+                    'activity'              : ('off','show channels with activity only (see option hotlist). all exclude options will be ignored'),
                   }
 
 # ================================[ buffer ]===============================
