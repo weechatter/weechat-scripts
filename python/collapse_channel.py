@@ -32,6 +32,9 @@
 #           : add command help
 #           : fix "/allchan -current" warning when /server raw is executed
 #
+# 2019-03-23: nils_2, (freenode.#weechat)
+#           : fix "/allchan -cuurent" warning when signal "buffer_opened" is called
+#
 # idea and testing by DJ-ArcAngel
 
 try:
@@ -44,7 +47,7 @@ except Exception:
 
 SCRIPT_NAME     = "collapse_channel"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.4"
+SCRIPT_VERSION  = "0.5"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "collapse channel buffers from servers without focus"
 
@@ -72,16 +75,15 @@ def buffer_opened_closed_cb(data, signal, signal_data):
         return weechat.WEECHAT_RC_OK
 
     if OPTIONS['activity'].lower() == 'no' or OPTIONS['activity'].lower() == 'off' or OPTIONS['activity'].lower() == '0':
-        # don't remove /wait
-        weechat.command('','/wait 1ms /allchan -exclude=%s /buffer hide' % OPTIONS['channel_exclude'])
+        weechat.command('','/allchan -exclude=%s /buffer hide' % OPTIONS['channel_exclude'])
         if not signal_data:                                                     # signal_data available?
-            weechat.command(signal_data,'/wait 1ms /allchan -current /buffer unhide')
+            weechat.command(signal_data,'/allchan -current /buffer unhide')
         else:                                                                   # signal_data empty!
             weechat.command('','/allchan /buffer hide')
         exclude_server('')
         single_channel_exclude()
     else:
-        weechat.command(signal_data,'/wait 1ms /allchan -current /buffer hide')
+        weechat.command('','/allchan /buffer hide')
     exclude_hotlist()
     return weechat.WEECHAT_RC_OK
 
