@@ -25,6 +25,8 @@
 #           : add hdata() example server search
 #           : add hdata() example hdata_update (FlashCode)
 #           : add own config file example
+# 2019-06-02: nils_2, (freenode.#weechat)
+#       0.3 : improve substitute_colors to work with split windows
 #
 # requires: WeeChat version 0.3.x
 #
@@ -41,7 +43,7 @@ except Exception:
 
 SCRIPT_NAME     = 'skeleton'
 SCRIPT_AUTHOR   = 'nils_2 <weechatter@arcor.de>'
-SCRIPT_VERSION  = '0.2'
+SCRIPT_VERSION  = '0.3'
 SCRIPT_LICENSE  = 'GPL'
 SCRIPT_DESC     = 'script description for weechat'
 
@@ -53,9 +55,10 @@ OPTIONS         = {'option_name'        : ('value','help text for option'),
 regex_color=re.compile('\$\{color:([^\{\}]+)\}')
 
 # ==========================[ eval_expression() ]========================
-def substitute_colors(text):
+def substitute_colors(text,window):
     if int(version) >= 0x00040200:
-        return weechat.string_eval_expression(text, {}, {}, {})
+        buffer_ptr = weechat.window_get_pointer(window,"buffer")
+        return weechat.string_eval_expression(text, {"window": window, "buffer": buffer_ptr}, {}, {})
     # substitute colors in output
     return re.sub(regex_color, lambda match: weechat.color(match.group(1)), text)
 
@@ -64,7 +67,8 @@ def substitute_colors(text):
 password = weechat.string_eval_expression(weechat.config_get_plugin('password'), {}, {}, {})
 
 # this is how to easily use weechat colors in your script
-text = substitute_colors('my text ${color:yellow}yellow${color:default} colored.')
+window = weechat.current_window()
+text = substitute_colors('my text ${color:yellow}yellow${color:default} colored.',window)
 
 
 # ================================[ item ]===============================
