@@ -27,6 +27,8 @@
 #           : add own config file example
 # 2019-06-02: nils_2, (freenode.#weechat)
 #       0.3 : improve substitute_colors to work with split windows
+# 2019-06-24: nils_2, (freenode.#weechat)
+#       0.4 : add localvar
 #
 # requires: WeeChat version 0.3.x
 #
@@ -122,6 +124,12 @@ def infolist_relay():
 #            weechat.prnt('', '%d %s' % (status, status_string))
         weechat.infolist_free(infolist_relay)                           # don't forget to free() infolist!
     return weechat.WEECHAT_RC_OK
+
+
+#
+# =============================[ localvars() ]============================
+    weechat.buffer_set(buffer, 'localvar_set_<name_of_localvar>', '%s' % value)
+    weechat.buffer_get_string(buffer,'localvar_<name_of_localvar>')
 
 # ==========================[ own .conf file ]==========================
 def init_own_config_file():
