@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2013-2018 by nils_2 <weechatter@arcor.de>
+# Copyright (c) 2013-2019 by nils_2 <weechatter@arcor.de>
 #
 # save channel key from protected channel(s) to autojoin or secure data
 #
@@ -19,7 +19,11 @@
 #
 # idea by freenode.elsae
 #
-# 2017-11-11: nils_2, (freenode.#weechat)
+# 2019-10-03: nils_2, (freenode.#weechat)
+#       0.5 : channel wasn't added when autojoin was empty (reported by jackie123)
+#           : bump min. version to 0.4.2
+#
+# 2018-05-11: nils_2, (freenode.#weechat)
 #       0.4 : make script python3 compatible
 #           : add /help text
 #
@@ -32,7 +36,7 @@
 # 2013-10-03: nils_2, (freenode.#weechat)
 #       0.1 : initial release
 #
-# requires: WeeChat version 0.3.2
+# requires: WeeChat version 0.4.2
 #
 # Development is currently hosted at
 # https://github.com/weechatter/weechat-scripts
@@ -42,12 +46,12 @@ try:
 
 except Exception:
     print("This script must be run under WeeChat.")
-    print("Get WeeChat now at: http://www.weechat.org/") 
+    print("Get WeeChat now at: http://www.weechat.org/")
     quit()
 
 SCRIPT_NAME     = "autosavekey"
 SCRIPT_AUTHOR   = "nils_2 <weechatter@arcor.de>"
-SCRIPT_VERSION  = "0.4"
+SCRIPT_VERSION  = "0.5"
 SCRIPT_LICENSE  = "GPL"
 SCRIPT_DESC     = "save channel key from protected channel(s) to autojoin option or secure data"
 
@@ -71,8 +75,6 @@ def irc_raw_in_324_cb(data, signal, signal_data):
     new_key = argv[3]
 
     autojoin_list = get_autojoin(server)
-    if not autojoin_list:
-        return weechat.WEECHAT_RC_OK
 
     # check autojoin for space
     if len(re.findall(r" ", autojoin_list)) > 1:
@@ -116,7 +118,6 @@ def irc_raw_in_324_cb(data, signal, signal_data):
     argv_channels.insert(0, channel)
     argv_keys.insert(0,new_key)
 
-
     # check weechat version and if secure option is on and secure data will be used for this key?
     if int(version) >= 0x00040200 and OPTIONS['secure'].lower() == 'on' and sec_data == 1:
         weechat.command('','%s/secure set %s %s' % (use_mute(),sec_data_name,new_key))
@@ -124,7 +125,10 @@ def irc_raw_in_324_cb(data, signal, signal_data):
         if sec_data == 1:
             weechat.prnt('', '%s%s: key for channel "%s.%s" not changed! option "plugins.var.python.%s.secure" is off and you are using secured data for key.' % (weechat.prefix('error'),SCRIPT_NAME,server,channel,SCRIPT_NAME) )
             return weechat.WEECHAT_RC_OK
-        new_joined_option = '%s %s' % (','.join(argv_channels),','.join(argv_keys))
+        if not autojoin_list:                       # autojoin option is empty!
+            new_joined_option = '%s %s' % (channel,new_key)
+        else:
+            new_joined_option = '%s %s' % (','.join(argv_channels),','.join(argv_keys))
         save_autojoin_option(server,new_joined_option)
     return weechat.WEECHAT_RC_OK
 
@@ -147,8 +151,6 @@ def irc_raw_in_mode_cb(data, signal, signal_data):
 
 def add_key_to_list(server,channel,new_key):
     autojoin_list = get_autojoin(server)
-    if not autojoin_list:
-        return weechat.WEECHAT_RC_OK
 
     # check autojoin for space
     if len(re.findall(r" ", autojoin_list)) == 0:
@@ -183,7 +185,10 @@ def add_key_to_list(server,channel,new_key):
                 weechat.prnt('', '%s%s: key for channel "%s.%s" not changed! option "plugins.var.python.%s.secure" is off and you are using secured data for key.' % (weechat.prefix('error'),SCRIPT_NAME,server,channel,SCRIPT_NAME) )
                 return weechat.WEECHAT_RC_OK
             argv_keys[channel_pos_in_list] = new_key
-            new_joined_option = '%s %s' % (','.join(argv_channels),','.join(argv_keys))
+            if not autojoin_list:                       # autojoin option is empty!
+                new_joined_option = '%s %s' % (channel,new_key)
+            else:
+                new_joined_option = '%s %s' % (','.join(argv_channels),','.join(argv_keys))
             save_autojoin_option(server,new_joined_option)
     return weechat.WEECHAT_RC_OK
 
@@ -221,12 +226,13 @@ def check_key_for_secure(argv_keys,position):
         sec_data = 1
     return sec_data
 
-def print_usage(data, buffer, args):
-    weechat.prnt(buffer, "%s\t%s: script already running..." % ( string_eval_expression(weechat.config_string(weechat.config_get("weechat.look.prefix_error"))), SCRIPT_NAME) )
+def cmd_autosavekey(data, buffer, args):
+    weechat.command('', '/help %s' % SCRIPT_NAME)
     return weechat.WEECHAT_RC_OK
+
 # ================================[ weechat options & description ]===============================
 def init_options():
-    for option,value in list(OPTIONS.items()):
+    for option,value in OPTIONS.items():
         if not weechat.config_is_set_plugin(option):
             weechat.config_set_plugin(option, value[0])
             OPTIONS[option] = value[0]
@@ -244,19 +250,19 @@ def toggle_refresh(pointer, name, value):
 if __name__ == "__main__":
     if weechat.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, '', ''):
         weechat.hook_command(SCRIPT_NAME,SCRIPT_DESC,
-                        '',
-                        'You have to edit options with: /set *autosavekey*\n'
-                        'I suggest using /fset plugin (or /iset script).\n',
-                        '',
-                        'print_usage',
-                        '')
+                             '',
+                             'You have to edit options with: /set *autosavekey*\n'
+                             'I suggest using /iset script or /fset plugin.\n',
+                             '',
+                             'cmd_autosavekey',
+                             '')
         version = weechat.info_get("version_number", "") or 0
 
-        if int(version) >= 0x00030200:
+        if int(version) >= 0x00040200:
             init_options()
             weechat.hook_config( 'plugins.var.python.' + SCRIPT_NAME + '.*', 'toggle_refresh', '' )
             weechat.hook_signal("*,irc_raw_in_mode","irc_raw_in_mode_cb","")
             weechat.hook_signal("*,irc_raw_in_324","irc_raw_in_324_cb","")
         else:
-            weechat.prnt("","%s%s %s" % (weechat.prefix("error"),SCRIPT_NAME,": needs version 0.3.2 or higher"))
+            weechat.prnt("","%s%s %s" % (weechat.prefix("error"),SCRIPT_NAME,": needs version 0.4.2 or higher"))
             weechat.command("","/wait 1ms /python unload %s" % SCRIPT_NAME)
