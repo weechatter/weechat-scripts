@@ -4,7 +4,7 @@
 #
 # -----------------------------------------------------------------------------
 # Copyright (c) 2009-2014 by rettub <rettub@gmx.net>
-# Copyright (c) 2011-2018 by nils_2 <weechatter@arcor.de>
+# Copyright (c) 2011-2025 by nils_2 <weechatter@arcor.de>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,6 +38,25 @@
 #
 # -----------------------------------------------------------------------------
 # History:
+# 2025-03-02: nils_2@libera.#weechat
+#     version 1.7:
+#     ADD: use of print_date_tags to set an tag for query_blocker messages. (idea PeGaSuS)
+# 2023-06-29: nils_2@libera.#weechat
+#     version 1.6:
+#     FIX: nick was not correctly parsed when message has tags.
+#
+# 2022-02-21: CrazyCat <crazycat@c-p-f.org>
+#     version 1.5:
+#     FIX: regression from https://github.com/weechat/scripts/issues/493
+#
+# 2022-02-18: nils_2@libera.#weechat:
+#     version 1.4:
+#     FIX: https://github.com/weechat/scripts/issues/493
+#
+# 2021-05-05: Sébastien Helleu <flashcode@flashtux.org>:
+#     version 1.3:
+#     FIX: add compatibility with XDG directories (WeeChat >= 3.2)
+#
 # 2018-07-30, usefulz & nils_2:
 #     version 1.2:
 #     FIX: undefine subroutine
@@ -113,7 +132,7 @@ use strict;
 
 my $SCRIPT      = 'query_blocker';
 my $AUTHOR      = 'rettub <rettub@gmx.net>';
-my $VERSION     = '1.2';
+my $VERSION     = '1.7';
 my $LICENSE     = 'GPL3';
 my $DESCRIPTION = 'Simple blocker for private message (i.e. spam)';
 my $COMMAND     = "query_blocker";             # new command name
@@ -133,6 +152,7 @@ my %help_desc = ( "block_queries"       => "to enable or disable $COMMAND (defau
                   "open_on_startup"     => "open $SCRIPT buffer on startup. option msgbuffer has to be set to 'buffer' (default: 'off')",
                   "temporary_mode"      => "if 'on' you have to manually add a nick to whitelist. otherwise a conversation will be temporary only and after closing query buffer the nick will be discard (default: 'off')",
                   "ignore_auto_message" => "path/file-name to store/read nicks to not send an auto message (default: qb-ignore_auto_message.txt)",
+                  "msg_tag"             => "set a tag for query_blocker messages to filter or trigger messages (default: '')",
 );
 
 my $CMD_HELP    = <<EO_HELP;
@@ -203,6 +223,7 @@ my %SETTINGS = (
     "open_on_startup"  => "off",
     "temporary_mode" => "off",
     "ignore_auto_message" => "qb-ignore_auto_message.txt",
+    "msg_tag"      => "",
 );
 
 my $Last_query_nick = undef;
@@ -343,13 +364,22 @@ sub print_info {
         $message = "";
     }
     unless ( exists $Blocked{$server.".".$nick} and lc(weechat::config_get_plugin('show_first_message_only') eq 'off') ) {
-        weechat::print($buf_pointer,"$prefix_network\t"
+    my $print_line = "$prefix_network\t"
                                     .irc_nick_find_color($nick).$nick
                                     .weechat::color('reset')
                                     ." tries to start a query on "
                                     .irc_nick_find_color($server).$server
                                     .weechat::color('reset')
-                                    .$message );
+                                    .$message;
+    weechat::print_date_tags($buf_pointer,0,weechat::config_get_plugin('msg_tag'),$print_line);
+
+#        weechat::print($buf_pointer,"$prefix_network\t"
+#                                    .irc_nick_find_color($nick).$nick
+#                                    .weechat::color('reset')
+#                                    ." tries to start a query on "
+#                                    .irc_nick_find_color($server).$server
+#                                    .weechat::color('reset')
+#                                    .$message );
         weechat::print($buf_pointer,"$prefix_network\t"
                                     ."to allow query: /$COMMAND add "
                                     .irc_nick_find_color($server).$server
@@ -364,10 +394,15 @@ sub print_info {
                                     .irc_nick_find_color($nick).$nick
                                     .weechat::color('reset')) unless (weechat::config_get_plugin('show_hint') eq 'off');
     }else{
-        weechat::print($buf_pointer,irc_nick_find_color($server).$server."."
+       my $print_line = irc_nick_find_color($server).$server."."
                                     .irc_nick_find_color($nick).$nick."\t"
                                     .weechat::color('reset')
-                                    .$orig_message );
+                                    .$orig_message;
+       weechat::print_date_tags($buf_pointer,0,weechat::config_get_plugin('msg_tag'),$print_line);
+#       weechat::print($buf_pointer,irc_nick_find_color($server).$server."."
+#                                    .irc_nick_find_color($nick).$nick."\t"
+#                                    .weechat::color('reset')
+#                                    .$orig_message );
     }
     return $buf_pointer;
 }
@@ -394,10 +429,15 @@ sub modifier_irc_in_privmsg {
     # by default, blocking is enabled for all server. except the one with a localvar
     return $arg if (weechat::buffer_get_string(weechat::buffer_search("irc", "server.".$server), 'localvar_query_blocker'));
 
+
     # check for query message
-    if ( $arg =~ m/:(.+?)!.+? PRIVMSG $my_nick :(.*)/i ) {
-        my $query_nick = $1;
-        my $query_msg  = $2;
+    if ( $arg =~ m/:(.+?)!.+? PRIVMSG (.+?) :(.*)/i ) {
+        my $hashtable = weechat::info_get_hashtable("irc_message_parse" => + { "message" => $arg });
+        my $query_nick = $hashtable->{nick};
+        my $my_nick_msg = $2;
+        my $query_msg  = $3;
+
+        return $arg if ($my_nick ne $my_nick_msg);
 
         # always allow own queries
         return $arg if ($query_nick eq $my_nick);
@@ -801,8 +841,10 @@ if ( weechat::register( $SCRIPT, $AUTHOR, $VERSION, $LICENSE, $DESCRIPTION, "", 
         weechat::command("","/wait 1ms /perl unload $SCRIPT");
   }
 
+    my $weechat_dir = weechat::info_get("weechat_config_dir", "");
+    $weechat_dir = weechat::info_get("weechat_dir", "") if (!$weechat_dir);
     if ( weechat::config_get_plugin("whitelist") eq '' ) {
-        weechat::config_set_plugin( "whitelist", weechat::info_get( "weechat_dir", "" ) . "/" . $SETTINGS{"whitelist"} );
+        weechat::config_set_plugin( "whitelist", $weechat_dir . "/" . $SETTINGS{"whitelist"} );
     }
     while ( my ( $option, $default_value ) = each(%SETTINGS) ) {
         weechat::config_set_plugin( $option, $default_value )
