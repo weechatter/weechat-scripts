@@ -798,9 +798,9 @@ sub query_blocker_buffer_open
 
     if ($query_blocker_buffer ne "")
     {
-        if lc(weechat::config_get_plugin("hotlist_show") eq "off"){
+        if (weechat::config_get_plugin("hotlist_show") eq "off"){
             weechat::buffer_set($query_blocker_buffer, "notify", "0");
-        }elsif lc(weechat::config_get_plugin("hotlist_show") eq "on"){
+        }elsif (weechat::config_get_plugin("hotlist_show") eq "on"){
             weechat::buffer_set($query_blocker_buffer, "notify", "3");
             weechat::buffer_set($query_blocker_buffer, "hotlist", "WEECHAT_HOTLIST_HIGHLIGHT");
         }
