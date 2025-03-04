@@ -40,7 +40,7 @@
 # History:
 # 2025-03-02: nils_2@libera.#weechat
 #     version 1.7:
-#     ADD: use of print_date_tags to set an tag for query_blocker messages. (idea PeGaSuS)
+#     ADD: use of print_date_tags to set an tag for query_blocker messages, new option msg_tag (idea PeGaSuS)
 # 2023-06-29: nils_2@libera.#weechat
 #     version 1.6:
 #     FIX: nick was not correctly parsed when message has tags.
@@ -802,6 +802,7 @@ sub query_blocker_buffer_open
             weechat::buffer_set($query_blocker_buffer, "notify", "0");
         }elsif (weechat::config_get_plugin("hotlist_show") eq "on"){
             weechat::buffer_set($query_blocker_buffer, "notify", "3");
+            weechat::buffer_set($query_blocker_buffer, "hotlist", "WEECHAT_HOTLIST_MESSAGE");
         }
         weechat::buffer_set($query_blocker_buffer, "title", $SCRIPT);
         # logger
